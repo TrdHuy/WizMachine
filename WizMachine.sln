@@ -5,6 +5,8 @@ VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WizMachine", "WizMachine\WizMachine.csproj", "{2E04A315-C531-423C-898E-3747BE7E5096}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WizMachineTest", "WizMachineTest\WizMachineTest.csproj", "{E687657E-4C98-4BD1-8A5E-758BDD244016}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{2E04A315-C531-423C-898E-3747BE7E5096}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2E04A315-C531-423C-898E-3747BE7E5096}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2E04A315-C531-423C-898E-3747BE7E5096}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E687657E-4C98-4BD1-8A5E-758BDD244016}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E687657E-4C98-4BD1-8A5E-758BDD244016}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E687657E-4C98-4BD1-8A5E-758BDD244016}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E687657E-4C98-4BD1-8A5E-758BDD244016}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
