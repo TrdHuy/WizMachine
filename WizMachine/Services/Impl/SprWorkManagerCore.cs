@@ -49,26 +49,32 @@ namespace WizMachine.Services.Impl
         #region standalone api
         private void ApplyPaletteToFrame(Palette newPalettData, FrameRGBA it)
         {
-            var dataSize = it.modifiedFrameRGBACache.modifiedFrameData.Length;
-            var newPixelData = new PaletteColor[dataSize];
-            for (int i = 0; i < dataSize; i++)
+            var dataSize = it.modifiedFrameRGBACache.modifiedBGRAData.Length;
+            var newPixelData = new byte[dataSize];
+            for (int i = 0; i < dataSize; i += 4)
             {
                 // Must keep old alpha, because palette only apply for rgb color
-                var oldAlpha = it.modifiedFrameRGBACache.modifiedFrameData[i].Alpha;
-                newPixelData[i] = FindClosetRGBColorInPalette(
-                    it.modifiedFrameRGBACache.modifiedFrameData[i], newPalettData);
-                newPixelData[i].Alpha = oldAlpha;
+                var oldAlpha = it.modifiedFrameRGBACache.modifiedBGRAData[i + 3];
+
+                var newColor = FindClosetRGBColorInPalette(B: it.modifiedFrameRGBACache.modifiedBGRAData[i],
+                    G: it.modifiedFrameRGBACache.modifiedBGRAData[i + 1],
+                    R: it.modifiedFrameRGBACache.modifiedBGRAData[i + 2],
+                    newPalettData);
+                newPixelData[i] = newColor.Blue;
+                newPixelData[i + 1] = newColor.Green;
+                newPixelData[i + 2] = newColor.Red;
+                newPixelData[i + 3] = oldAlpha;
             }
-            it.modifiedFrameRGBACache.modifiedFrameData = newPixelData;
+            it.modifiedFrameRGBACache.modifiedBGRAData = newPixelData;
         }
 
-        private PaletteColor FindClosetRGBColorInPalette(PaletteColor targetColor, Palette palette)
+        private PaletteColor FindClosetRGBColorInPalette(byte B, byte G, byte R, Palette palette)
         {
             var distance = double.MaxValue;
             var outColor = new PaletteColor();
             for (int i = 0; i < palette.Size; i++)
             {
-                var newDistance = ColorUtil.CalculateRGBEuclideanDistance(targetColor, palette.Data[i]);
+                var newDistance = ColorUtil.CalculateRGBEuclideanDistance(B, G, R, palette.Data[i]);
                 if (newDistance < distance)
                 {
                     distance = newDistance;
@@ -82,24 +88,24 @@ namespace WizMachine.Services.Impl
             return outColor;
         }
 
-        private byte FindPaletteIndex(PaletteColor targetColor, PaletteColor[] paletteData)
-        {
-            for (int i = 0; i < paletteData.Length; i++)
-            {
-                if (targetColor.Red == paletteData[i].Red &&
-                    targetColor.Green == paletteData[i].Green &&
-                    targetColor.Blue == paletteData[i].Blue)
-                {
-                    return (byte)i;
-                }
-            }
-
-            throw new Exception("Color not found in paletteD");
-        }
-
-        private byte[]? EncryptFrameData(PaletteColor[] pixelArray, PaletteColor[] paletteData
+        private byte[]? EncryptFrameData(byte[] pixelArray, PaletteColor[] paletteData
                    , ushort frameWidth, ushort frameHeight, ushort frameOffX, ushort frameOffY)
         {
+            byte FindPaletteIndex(byte B, byte G, byte R, PaletteColor[] paletteData)
+            {
+                for (int i = 0; i < paletteData.Length; i++)
+                {
+                    if (R == paletteData[i].Red &&
+                        G == paletteData[i].Green &&
+                        B == paletteData[i].Blue)
+                    {
+                        return (byte)i;
+                    }
+                }
+
+                throw new Exception("Color not found in paletteD");
+            }
+
             var encryptedFrameDataList = new List<byte>();
 
             var frameInfo = new FrameInfo();
@@ -112,15 +118,15 @@ namespace WizMachine.Services.Impl
             for (int i = 0; i < pixelArray.Length;)
             {
                 byte size = 0;
-                byte alpha = pixelArray[i].Alpha;
+                byte alpha = pixelArray[i + 3];
                 if (alpha == 0)
                 {
-                    while (i < pixelArray.Length && pixelArray[i].Alpha == 0 && size < 255)
+                    while (i < pixelArray.Length && pixelArray[i + 3] == 0 && size < 255)
                     {
-                        i++;
+                        i += 4;
                         size++;
 
-                        if (i % frameWidth == 0)
+                        if ((i / 4) % frameWidth == 0)
                         {
                             break;
                         }
@@ -131,14 +137,17 @@ namespace WizMachine.Services.Impl
                 else
                 {
                     List<byte> temp = new List<byte>();
-                    while (i < pixelArray.Length && pixelArray[i].Alpha == alpha && size < 255)
+                    while (i < pixelArray.Length && pixelArray[i + 3] == alpha && size < 255)
                     {
-                        byte index = FindPaletteIndex(pixelArray[i], paletteData);
+                        byte index = FindPaletteIndex(B: pixelArray[i],
+                            G: pixelArray[i + 1],
+                            R: pixelArray[i + 2],
+                            paletteData);
                         temp.Add(index);
-                        i++;
+                        i += 4;
                         size++;
 
-                        if (i % frameWidth == 0)
+                        if ((i / 4) % frameWidth == 0)
                         {
                             break;
                         }
@@ -278,6 +287,17 @@ namespace WizMachine.Services.Impl
             return true;
         }
 
+        void ISprWorkManagerCore.InitCacheAll(SprFileHead fileHead,
+           Palette palette,
+           int frameDataBeginPos,
+           FrameRGBA[] frameRGBA)
+        {
+            FileHead = fileHead;
+            PaletteData = palette;
+            FrameDataBegPos = frameDataBeginPos;
+            FrameData = frameRGBA;
+        }
+
         void ISprWorkManagerCore.InitFromFileHead(US_SprFileHead us_fileHead)
         {
             FileHead = new SprFileHead(us_fileHead.GetVersionInfo(),
@@ -327,7 +347,6 @@ namespace WizMachine.Services.Impl
                 FrameData[i].frameWidth = frameWidth;
                 FrameData[i].frameOffY = (short)frameOffY;
                 FrameData[i].frameOffX = (short)frameOffX;
-                FrameData[i].originDecodedFrameData = decodedFrameData;
                 FrameData[i].originDecodedBGRAData = decodedByteData;
 
                 FrameData[i].modifiedFrameRGBACache.Apply(it =>
@@ -390,7 +409,11 @@ namespace WizMachine.Services.Impl
                 var newFrameWidth = FrameData[i].modifiedFrameRGBACache.frameWidth;
                 var newFrameHeight = FrameData[i].modifiedFrameRGBACache.frameHeight;
 
-                PaletteColor getPaletteColorInRef(uint newX, uint newY, ushort refFrameHeight, ushort refFrameWidth, PaletteColor[] refFrameData)
+                PaletteColor getPaletteColorInRef(uint newX,
+                    uint newY,
+                    ushort refFrameHeight,
+                    ushort refFrameWidth,
+                    byte[] refFrameData)
                 {
                     if (newX >= refFrameWidth || newY >= refFrameHeight)
                     {
@@ -399,9 +422,12 @@ namespace WizMachine.Services.Impl
                             red: 0,
                             alpha: 0);
                     }
-                    return refFrameData[newY * refFrameWidth + newX];
+                    uint pixelIndex = (newY * refFrameWidth + newX) * 4;
+                    return new PaletteColor(blue: refFrameData[pixelIndex],
+                            green: refFrameData[pixelIndex + 1],
+                            red: refFrameData[pixelIndex + 2],
+                            alpha: refFrameData[pixelIndex + 3]);
                 }
-                var newDecodedFrameData = new PaletteColor[newFrameWidth * newFrameHeight];
                 var newDecodedBGRAData = new byte[newFrameWidth * newFrameHeight * 4];
                 for (ushort newY = 0; newY < newFrameHeight; newY++)
                 {
@@ -411,23 +437,20 @@ namespace WizMachine.Services.Impl
                                 newY,
                                 refFrameHeight: FrameData[i].frameHeight,
                                 refFrameWidth: FrameData[i].frameWidth,
-                                refFrameData: FrameData[i].originDecodedFrameData);
-                        newDecodedFrameData[newY * newFrameWidth + newX] = color;
-
+                                refFrameData: FrameData[i].modifiedFrameRGBACache.modifiedBGRAData);
                         newDecodedBGRAData[(newY * newFrameWidth + newX) * 4] = color.Blue;
                         newDecodedBGRAData[(newY * newFrameWidth + newX) * 4 + 1] = color.Green;
                         newDecodedBGRAData[(newY * newFrameWidth + newX) * 4 + 2] = color.Red;
                         newDecodedBGRAData[(newY * newFrameWidth + newX) * 4 + 3] = color.Alpha;
                     }
                 }
-                FrameData[i].modifiedFrameRGBACache.modifiedFrameData = newDecodedFrameData;
-                FrameData[i].modifiedFrameRGBACache.modifiedFrameData = newDecodedFrameData;
+                FrameData[i].modifiedFrameRGBACache.modifiedBGRAData = newDecodedBGRAData;
             }
 
             if (isUseRecalculateData && recalculatedPaletteData != null)
             {
                 return FrameData?[i].Let(it =>
-                    EncryptFrameData(it.modifiedFrameRGBACache.modifiedFrameData
+                    EncryptFrameData(it.modifiedFrameRGBACache.modifiedBGRAData
                        , recalculatedPaletteData?.Data!
                        , it.modifiedFrameRGBACache.frameWidth
                        , it.modifiedFrameRGBACache.frameHeight
@@ -435,12 +458,12 @@ namespace WizMachine.Services.Impl
                        , (ushort)it.modifiedFrameRGBACache.frameOffY));
             }
             return FrameData?[i].Let(it => (isModifiedData && it.modifiedFrameRGBACache != null) ?
-                EncryptFrameData(it.modifiedFrameRGBACache.modifiedFrameData
+                EncryptFrameData(it.modifiedFrameRGBACache.modifiedBGRAData
                     , PaletteData.modifiedPalette.Data, it.modifiedFrameRGBACache.frameWidth
                     , it.modifiedFrameRGBACache.frameHeight
                     , (ushort)it.modifiedFrameRGBACache.frameOffX
                     , (ushort)it.modifiedFrameRGBACache.frameOffY) :
-                EncryptFrameData(it.originDecodedFrameData
+                EncryptFrameData(it.originDecodedBGRAData
                     , PaletteData.Data
                     , it.frameWidth
                     , it.frameHeight
@@ -448,7 +471,12 @@ namespace WizMachine.Services.Impl
                     , (ushort)it.frameOffY));
         }
 
-        byte[]? ISprWorkManagerCore.EncryptFrameData(PaletteColor[] pixelArray, PaletteColor[] paletteData, ushort frameWidth, ushort frameHeight, ushort frameOffX, ushort frameOffY)
+        byte[]? ISprWorkManagerCore.EncryptFrameData(byte[] pixelArray,
+            PaletteColor[] paletteData,
+            ushort frameWidth,
+            ushort frameHeight,
+            ushort frameOffX,
+            ushort frameOffY)
         {
             return EncryptFrameData(pixelArray,
                 paletteData,
@@ -496,7 +524,7 @@ namespace WizMachine.Services.Impl
             // kể cả frame ban đầu và frame được insert mới
             var countableSource = FrameData
                 .Select(it => it.modifiedFrameRGBACache.RgbCountableSource
-                    ?? BitmapUtil.CountColors(it.modifiedFrameRGBACache.modifiedFrameData,
+                    ?? BitmapUtil.CountBGRAColors(it.modifiedFrameRGBACache.modifiedBGRAData,
                         out _,
                         out _,
                         out _,
@@ -655,7 +683,7 @@ namespace WizMachine.Services.Impl
 
             //TODO: remove me
 #if DEBUG
-            var encryptData2 = EncryptFrameData(decData, PaletteData.Data, frameWidth, frameHeight, frameOffX, frameOffY) ?? throw new Exception("Failed to decrypt SPR");
+            var encryptData2 = EncryptFrameData(bgraDecodedBytes, PaletteData.Data, frameWidth, frameHeight, frameOffX, frameOffY) ?? throw new Exception("Failed to decrypt SPR");
             if (!BitmapUtil.AreByteArraysEqual(encryptData2, encryptedData))
             {
                 throw new Exception("Failed to decrypted");

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "WizMachineTest": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

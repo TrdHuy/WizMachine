@@ -3,24 +3,64 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WizMachine", "WizMachine\WizMachine.csproj", "{2E04A315-C531-423C-898E-3747BE7E5096}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WizMachine", "WizMachine\WizMachine.csproj", "{2E04A315-C531-423C-898E-3747BE7E5096}"
+	ProjectSection(ProjectDependencies) = postProject
+		{50F41768-BD9E-43B0-B963-31900FC6CD88} = {50F41768-BD9E-43B0-B963-31900FC6CD88}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WizMachineTest", "WizMachineTest\WizMachineTest.csproj", "{E687657E-4C98-4BD1-8A5E-758BDD244016}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WizMachineTest", "WizMachineTest\WizMachineTest.csproj", "{E687657E-4C98-4BD1-8A5E-758BDD244016}"
+	ProjectSection(ProjectDependencies) = postProject
+		{50F41768-BD9E-43B0-B963-31900FC6CD88} = {50F41768-BD9E-43B0-B963-31900FC6CD88}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "engine", "engine\engine.vcxproj", "{50F41768-BD9E-43B0-B963-31900FC6CD88}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{2E04A315-C531-423C-898E-3747BE7E5096}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2E04A315-C531-423C-898E-3747BE7E5096}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E04A315-C531-423C-898E-3747BE7E5096}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2E04A315-C531-423C-898E-3747BE7E5096}.Debug|x64.Build.0 = Debug|Any CPU
+		{2E04A315-C531-423C-898E-3747BE7E5096}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2E04A315-C531-423C-898E-3747BE7E5096}.Debug|x86.Build.0 = Debug|Any CPU
 		{2E04A315-C531-423C-898E-3747BE7E5096}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2E04A315-C531-423C-898E-3747BE7E5096}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E04A315-C531-423C-898E-3747BE7E5096}.Release|x64.ActiveCfg = Release|Any CPU
+		{2E04A315-C531-423C-898E-3747BE7E5096}.Release|x64.Build.0 = Release|Any CPU
+		{2E04A315-C531-423C-898E-3747BE7E5096}.Release|x86.ActiveCfg = Release|Any CPU
+		{2E04A315-C531-423C-898E-3747BE7E5096}.Release|x86.Build.0 = Release|Any CPU
 		{E687657E-4C98-4BD1-8A5E-758BDD244016}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E687657E-4C98-4BD1-8A5E-758BDD244016}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E687657E-4C98-4BD1-8A5E-758BDD244016}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E687657E-4C98-4BD1-8A5E-758BDD244016}.Debug|x64.Build.0 = Debug|Any CPU
+		{E687657E-4C98-4BD1-8A5E-758BDD244016}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E687657E-4C98-4BD1-8A5E-758BDD244016}.Debug|x86.Build.0 = Debug|Any CPU
 		{E687657E-4C98-4BD1-8A5E-758BDD244016}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E687657E-4C98-4BD1-8A5E-758BDD244016}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E687657E-4C98-4BD1-8A5E-758BDD244016}.Release|x64.ActiveCfg = Release|Any CPU
+		{E687657E-4C98-4BD1-8A5E-758BDD244016}.Release|x64.Build.0 = Release|Any CPU
+		{E687657E-4C98-4BD1-8A5E-758BDD244016}.Release|x86.ActiveCfg = Release|Any CPU
+		{E687657E-4C98-4BD1-8A5E-758BDD244016}.Release|x86.Build.0 = Release|Any CPU
+		{50F41768-BD9E-43B0-B963-31900FC6CD88}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{50F41768-BD9E-43B0-B963-31900FC6CD88}.Debug|Any CPU.Build.0 = Debug|x64
+		{50F41768-BD9E-43B0-B963-31900FC6CD88}.Debug|x64.ActiveCfg = Debug|x64
+		{50F41768-BD9E-43B0-B963-31900FC6CD88}.Debug|x64.Build.0 = Debug|x64
+		{50F41768-BD9E-43B0-B963-31900FC6CD88}.Debug|x86.ActiveCfg = Debug|Win32
+		{50F41768-BD9E-43B0-B963-31900FC6CD88}.Debug|x86.Build.0 = Debug|Win32
+		{50F41768-BD9E-43B0-B963-31900FC6CD88}.Release|Any CPU.ActiveCfg = Release|x64
+		{50F41768-BD9E-43B0-B963-31900FC6CD88}.Release|Any CPU.Build.0 = Release|x64
+		{50F41768-BD9E-43B0-B963-31900FC6CD88}.Release|x64.ActiveCfg = Release|x64
+		{50F41768-BD9E-43B0-B963-31900FC6CD88}.Release|x64.Build.0 = Release|x64
+		{50F41768-BD9E-43B0-B963-31900FC6CD88}.Release|x86.ActiveCfg = Release|Win32
+		{50F41768-BD9E-43B0-B963-31900FC6CD88}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

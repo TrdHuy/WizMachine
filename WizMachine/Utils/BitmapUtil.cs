@@ -191,6 +191,48 @@ namespace WizMachine.Utils
             return combinedColorList;
         }
 
+        public static Dictionary<Color, long> CountBGRAColors(byte[] pixelArray,
+            out long argbCount,
+            out long rgbCount,
+            out Dictionary<Color, long> argbSrc,
+            out Dictionary<Color, long> rgbSrc)
+        {
+            Dictionary<Color, long> aRGBColorSet = new Dictionary<Color, long>();
+            Dictionary<Color, long> rGBColorSet = new Dictionary<Color, long>();
+
+            for (int i = 0; i < pixelArray.Length; i += 4)
+            {
+                byte blue = pixelArray[i];
+                byte green = pixelArray[i + 1];
+                byte red = pixelArray[i + 2];
+                byte alpha = pixelArray[i + 3];
+
+                Color colorARGB = Color.FromArgb(alpha, red, green, blue);
+                if (!aRGBColorSet.ContainsKey(colorARGB))
+                {
+                    aRGBColorSet[colorARGB] = 1;
+                }
+                else
+                {
+                    aRGBColorSet[colorARGB]++;
+                }
+
+                Color colorRGB = Color.FromRgb(red, green, blue);
+                if (!rGBColorSet.ContainsKey(colorRGB))
+                {
+                    rGBColorSet[colorRGB] = 1;
+                }
+                else
+                {
+                    rGBColorSet[colorRGB]++;
+                }
+            }
+            argbCount = aRGBColorSet.Count;
+            rgbCount = rGBColorSet.Count;
+            argbSrc = aRGBColorSet;
+            rgbSrc = rGBColorSet;
+            return argbSrc;
+        }
 
         public static Dictionary<Color, long> CountColors(PaletteColor[] pixelArray,
             out long argbCount,
@@ -278,6 +320,16 @@ namespace WizMachine.Utils
             rgbCount = rGBColorSet.Count;
             argbSrc = aRGBColorSet;
             rgbSrc = rGBColorSet;
+        }
+
+        public static byte[] ConvertBitmapSourceToByteArray(BitmapSource bmp)
+        {
+            int width = bmp.PixelWidth;
+            int height = bmp.PixelHeight;
+            int stride = (width * bmp.Format.BitsPerPixel + 7) / 8;
+            byte[] pixelData = new byte[stride * height];
+            bmp.CopyPixels(pixelData, stride, 0);
+            return pixelData;
         }
 
         #region ConvertBitmapSourceToPaletteColorArray

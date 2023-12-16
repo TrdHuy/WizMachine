@@ -6,6 +6,14 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>wengine</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DllPathFile>$(SolutionDir)bin\cpp_output_path.txt</DllPathFile>
   </PropertyGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+	<ReadLinesFromFile File="$(DllPathFile)">
+		<Output TaskParameter="Lines" PropertyName="DllPathLines" />
+	</ReadLinesFromFile>
+    <Exec Command="xcopy /E /Y &quot;$(DllPathLines)\*&quot; &quot;$(OutDir)&quot;" />
+  </Target>
 
 </Project>
