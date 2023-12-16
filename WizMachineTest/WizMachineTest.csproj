@@ -15,9 +15,13 @@
 	</PropertyGroup>
 
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+		<Exec Command="echo DllPathFile=$(DllPathFile)" />
+
 		<ReadLinesFromFile File="$(DllPathFile)">
 			<Output TaskParameter="Lines" PropertyName="DllPathLines" />
 		</ReadLinesFromFile>
+		<Exec Command="echo DllPathLines=$(DllPathLines)" />
+
 		<Exec Command="xcopy /E /Y &quot;$(DllPathLines)*&quot; &quot;$(OutDir)&quot;" />
 	</Target>
 
