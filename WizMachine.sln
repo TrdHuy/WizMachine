@@ -4,9 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WizMachine", "WizMachine\WizMachine.csproj", "{2E04A315-C531-423C-898E-3747BE7E5096}"
-	ProjectSection(ProjectDependencies) = postProject
-		{50F41768-BD9E-43B0-B963-31900FC6CD88} = {50F41768-BD9E-43B0-B963-31900FC6CD88}
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WizMachineTest", "WizMachineTest\WizMachineTest.csproj", "{E687657E-4C98-4BD1-8A5E-758BDD244016}"
 	ProjectSection(ProjectDependencies) = postProject

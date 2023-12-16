@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectFullPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))</ProjectFullPath>
+    <WizSolutionDirectory>$([System.IO.Path]::GetFullPath('$(ProjectFullPath)\..'))</WizSolutionDirectory>
+    <EngineProjectDir>$(WizSolutionDirectory)\engine</EngineProjectDir>
+    <DllPathDir>$(WizSolutionDirectory)\bin</DllPathDir>
+    <DllPathFile>$(WizSolutionDirectory)\bin\cpp_output_path.txt</DllPathFile>
+  </PropertyGroup>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -119,7 +126,9 @@
       <EnableUAC>false</EnableUAC>
     </Link>
     <PostBuildEvent>
-      <Command>echo $(OutDir) &gt; "$(SolutionDir)bin\cpp_output_path.txt"</Command>
+      <Command>rmdir /s /q $(DllPathDir)
+mkdir $(DllPathDir)
+echo $(OutDir) &gt; "$(DllPathFile)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -140,6 +149,11 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PostBuildEvent>
+      <Command>rmdir /s /q $(DllPathDir)
+mkdir $(DllPathDir)
+echo $(OutDir) &gt; "$(DllPathFile)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="calc.h" />

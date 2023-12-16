@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0-windows</TargetFramework>
@@ -7,8 +7,10 @@
 
 		<IsPackable>false</IsPackable>
 		<IsTestProject>true</IsTestProject>
-		<DllPathFile>$(SolutionDir)bin\cpp_output_path.txt</DllPathFile>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<ProjectFullPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))</ProjectFullPath>
+		<SolutionDirectory>$([System.IO.Path]::GetFullPath('$(ProjectFullPath)\..'))</SolutionDirectory>
+		<DllPathFile>$(SolutionDirectory)\bin\cpp_output_path.txt</DllPathFile>
 
 	</PropertyGroup>
 
@@ -16,7 +18,7 @@
 		<ReadLinesFromFile File="$(DllPathFile)">
 			<Output TaskParameter="Lines" PropertyName="DllPathLines" />
 		</ReadLinesFromFile>
-		<Exec Command="xcopy /E /Y &quot;$(DllPathLines)\*&quot; &quot;$(OutDir)&quot;" />
+		<Exec Command="xcopy /E /Y &quot;$(DllPathLines)*&quot; &quot;$(OutDir)&quot;" />
 	</Target>
 
 	<ItemGroup>

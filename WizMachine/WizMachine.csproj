@@ -1,19 +1,28 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <UseWPF>true</UseWPF>
-    <AssemblyName>wengine</AssemblyName>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DllPathFile>$(SolutionDir)bin\cpp_output_path.txt</DllPathFile>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+		<AssemblyName>wengine</AssemblyName>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<ProjectFullPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))</ProjectFullPath>
+		<SolutionDirectory>$([System.IO.Path]::GetFullPath('$(ProjectFullPath)\..'))</SolutionDirectory>
+		<EngineProjectDir>$(SolutionDirectory)\engine</EngineProjectDir>
+		<DllPathFile>$(SolutionDirectory)\bin\cpp_output_path.txt</DllPathFile>
+		
+	</PropertyGroup>
 
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-	<ReadLinesFromFile File="$(DllPathFile)">
-		<Output TaskParameter="Lines" PropertyName="DllPathLines" />
-	</ReadLinesFromFile>
-    <Exec Command="xcopy /E /Y &quot;$(DllPathLines)\*&quot; &quot;$(OutDir)&quot;" />
-  </Target>
+
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(DoPreBuild)'!='false'">
+		<Exec Command="echo EngineProjectDir=$(EngineProjectDir)" />
+		<Exec Command="msbuild /t:Clean /p:Configuration=$(Configuration) /p:Platform=$(Platform) /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj" />
+		<Exec Command="msbuild /t:Rebuild /p:Configuration=$(Configuration) /p:Platform=$(Platform) /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj" />
+
+		<ReadLinesFromFile File="$(DllPathFile)">
+			<Output TaskParameter="Lines" PropertyName="DllPathLines" />
+		</ReadLinesFromFile>
+		<Exec Command="xcopy /E /Y &quot;$(DllPathLines)*&quot; &quot;$(OutDir)&quot;" />
+	</Target>
 
 </Project>
