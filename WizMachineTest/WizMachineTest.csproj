@@ -14,7 +14,7 @@
 
 	</PropertyGroup>
 
-	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+	<Target Name="PostBuild" BeforeTargets="PostBuildEvent">
 		<Exec Command="echo DllPathFile=$(DllPathFile)" />
 
 		<ReadLinesFromFile File="$(DllPathFile)">
