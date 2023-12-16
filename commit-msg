@@ -1,0 +1,30 @@
+#!/bin/sh
+
+if command -v gh &> /dev/null; then
+  echo "GitHub CLI (gh) đã được cài đặt."
+else
+  echo "Vui lòng cài đặt GitHub CLI (gh) trước khi sử dụng script này. https://cli.github.com/"
+  # Thêm mã cài đặt GitHub CLI tại đây nếu cần thiết
+  exit 1
+fi
+
+#commit_message_file=$1
+commit_message="[#1] fix bug"
+
+# Kiểm tra format
+if [[ ! $commit_message =~ \[#[0-9]+\] ]]; then
+	echo "Commit message must follow this pattern '[#issue_number] message'. Eg: '[#123] Fix a bug'."
+	exit 1
+fi 
+
+issue_number=$(echo "$commit_message" | grep -oE '\[#([0-9]+)\]' | sed 's/\[#\([0-9]\+\)\]/\1/')
+
+result=$(gh issue view $issue_number --json url 2>&1)
+# Kiểm tra issue có tồn tại trên github qua api
+
+if [[ $result == *"\"url\":\"https://github.com"*"issues"* ]]; then
+	exit 0
+else
+	echo "Issue #$issue_number not exist on GitHub. https://api.github.com/repos/TrdHuy/WizMachine"
+	exit 1
+fi
