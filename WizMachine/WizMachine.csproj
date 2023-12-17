@@ -16,8 +16,8 @@
 
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(DoPreBuild)'!='false'">
 		<Exec Command="echo EngineProjectDir=$(EngineProjectDir)" />
-		<Exec Command="msbuild /t:Clean /p:Configuration=$(Configuration) /p:Platform=x64 /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj" />
-		<Exec Command="msbuild /t:Rebuild /p:Configuration=$(Configuration) /p:Platform=x64 /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj" />
+		<Exec Command="msbuild /v:Detailed /t:Clean /p:Configuration=$(Configuration) /p:Platform=x64 /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj" />
+		<Exec Command="msbuild /v:Detailed /t:Rebuild /p:Configuration=$(Configuration) /p:Platform=x64 /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj" />
 
 		<ReadLinesFromFile File="$(DllPathFile)">
 			<Output TaskParameter="Lines" PropertyName="DllPathLines" />
