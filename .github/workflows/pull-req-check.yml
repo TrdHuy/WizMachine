@@ -30,7 +30,7 @@ jobs:
             if [[ -n "$issue_number" ]]; then
               # Kiểm tra sự tồn tại của issue bằng GitHub API 
               apiUrl=https://api.github.com/repos/${{ github.repository_owner }}/${{ github.event.repository.name }}/issues/$issue_number
-              response=$(curl -s $apiUrl)
+              response=$(curl -H "Authorization: Bearer ${{ secrets.WORK_FLOW_ACCESS_TOKEN }}" -s $apiUrl)
               echo $apiUrl
               url=$(echo "$response" | jq -r '.html_url')
               if [[ $url =~ ^https://github.com/.*\/issues\/[0-9]+$ ]]; then
