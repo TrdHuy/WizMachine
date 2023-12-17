@@ -21,7 +21,7 @@ jobs:
         run: |
           echo "$GIT_CONTEXT"
           echo "$PR_INFO_API"
-          response=$(curl -H "Authorization: Bearer ${{ github.event.pull_request._links.self.href.token }}" -s $PR_INFO_API)
+          response=$(curl -H "Authorization: Bearer ${{ secrets.WORK_FLOW_ACCESS_TOKEN }}" -s $PR_INFO_API)
           title=$(echo "$response" | jq -r '.title')
           echo "title=$title"
           if [[ $title =~ \[#[0-9]+\] ]]; then
