@@ -4,5 +4,5 @@
 
 #### 👉 Clone with hook
 ``` cmd
-where gh >nul 2>nul && gh --version && git clone "https://github.com/TrdHuy/WizMachine.git" && cd "WizMachine" && curl -s https://raw.githubusercontent.com/TrdHuy/WizMachine/document/commit-msg > .git\hooks\commit-msg || echo GitHub CLI (gh) chưa được cài đặt. Vui lòng cài đặt trước khi sử dụng script. 
+where gh >nul 2>nul && gh --version && git clone "https://github.com/TrdHuy/WizMachine.git" && cd "WizMachine" && powershell -command "$response = gh api repos/TrdHuy/WizMachine/contents/commit-msg?ref=document | ConvertFrom-Json; $decodedContent = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($response.content)); Write-Host $decodedContent" > .git\hooks\commit-msg || echo GitHub CLI (gh) was not installed.
 ```
