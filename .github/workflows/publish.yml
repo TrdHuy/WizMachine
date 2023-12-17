@@ -37,6 +37,6 @@ jobs:
     - uses: csexton/release-asset-action@v2
       with:
         github-token: ${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
-        pattern: WizMachine/${{ env.PUBLISH_DIR }}/wengine_v*.zip
+        pattern: WizMachine/wengine_v*.zip
         release-url: ${{ steps.create_release.outputs.upload_url }}
     ################### END CORE REGION #######################
