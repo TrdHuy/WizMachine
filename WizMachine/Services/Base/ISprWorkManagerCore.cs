@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using WizMachine.Data;
+using WizMachine.Services.Utils;
 using WizMachine.Utils;
 
 namespace WizMachine.Services.Base
@@ -30,6 +31,25 @@ namespace WizMachine.Services.Base
         /// Palette của spr đang được load trong work manager hiện tại
         /// </summary>
         Palette PaletteData { get; }
+
+        /// <summary>
+        /// Khởi tạo work manager từ file SPR
+        /// </summary>
+        bool InitWorkManagerFromSprFile(string sprFilePath)
+        {
+            return NativeAPIAdapter.LoadSPRFile(sprFilePath,
+                out SprFileHead sprFileHead,
+                out Palette palette,
+                out int frameDataBeginPos,
+                out FrameRGBA[] frameRGBA).Also(success =>
+                {
+                    if (success)
+                    {
+                        InitCache();
+                        InitCacheAll(sprFileHead, palette, frameDataBeginPos, frameRGBA);
+                    }
+                });
+        }
 
         /// <summary>
         /// Khởi tạo work manager từ file stream của file SPR
@@ -106,8 +126,6 @@ namespace WizMachine.Services.Base
                     byte[][] allFramesData = new byte[FileHead.modifiedSprFileHeadCache.FrameCounts][];
                     for (int i = 0; i < FileHead.modifiedSprFileHeadCache.FrameCounts; i++)
                     {
-                        // TODO: cần kiểm tra có frame nào đã thay đổi kích thước hoặc offset hay
-                        // không
                         allFramesData[i] = GetByteArrayFromEncryptedFrameData(i,
                             isModifiedData,
                             isRecalculatePaletteColorSuccess,
@@ -133,7 +151,7 @@ namespace WizMachine.Services.Base
         #region public standalone API
         public void SaveBitmapSourceToSprFile(BitmapSource bitmapSource, string filePath)
         {
-            var palettePixelArray = BitmapUtil.ConvertBitmapSourceToPaletteColorArray(bitmapSource);
+            var pixelArray = BitmapUtil.ConvertBitmapSourceToByteArray(bitmapSource);
             BitmapUtil.CountColors(
                  bitmapSource
                  , out long argbCount
@@ -155,7 +173,7 @@ namespace WizMachine.Services.Base
             var paletteColorArray = rgbSrc.Select(it =>
                 new PaletteColor(it.B, it.G, it.R, it.A)).ToArray();
 
-            var encryptedFrameData = EncryptFrameData(palettePixelArray,
+            var encryptedFrameData = EncryptFrameData(pixelArray,
                 paletteColorArray,
                 frameWidth: (ushort)bitmapSource.PixelWidth,
                 frameHeight: (ushort)bitmapSource.PixelHeight,
@@ -195,11 +213,12 @@ namespace WizMachine.Services.Base
         protected byte[]? GetByteArrayFromPaletteData(bool isModifiedData);
 
         protected void InitCache();
+        protected void InitCacheAll(SprFileHead fileHead, Palette palette, int frameDataBeginPos, FrameRGBA[] frameRGBA);
         protected void InitFromFileHead(US_SprFileHead fileHead);
         protected void InitPaletteDataFromFileStream(FileStream fs, US_SprFileHead fileHead);
         protected void InitFrameData(FileStream fs);
 
-        protected byte[]? EncryptFrameData(PaletteColor[] pixelArray, PaletteColor[] paletteData
+        protected byte[]? EncryptFrameData(byte[] pixelArray, PaletteColor[] paletteData
                    , ushort frameWidth, ushort frameHeight, ushort frameOffX, ushort frameOffY);
 
         protected byte[]? EncryptedSprFile(List<byte[]> encryptedFrameData,

@@ -14,6 +14,14 @@ namespace WizMachine.Utils
             return Math.Sqrt(deltaRed * deltaRed + deltaGreen * deltaGreen + deltaBlue * deltaBlue);
         }
 
+        public static double CalculateRGBEuclideanDistance(byte B, byte G, byte R, PaletteColor otherColor)
+        {
+            int deltaRed = R - otherColor.Red;
+            int deltaGreen = G - otherColor.Green;
+            int deltaBlue = B - otherColor.Blue;
+            return Math.Sqrt(deltaRed * deltaRed + deltaGreen * deltaGreen + deltaBlue * deltaBlue);
+        }
+
         public static double CalculateRGBEuclideanDistance(PaletteColor thisColor, PaletteColor otherColor)
         {
             int deltaRed = thisColor.Red - otherColor.Red;

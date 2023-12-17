@@ -6,7 +6,6 @@ using System.Windows.Media;
 
 namespace WizMachine.Data
 {
-
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public unsafe struct US_SprFileHead
     {
@@ -488,7 +487,6 @@ namespace WizMachine.Data
         public short frameOffY { get; set; }
         public bool isInsertedFrame { get; set; }
         public byte[] originDecodedBGRAData { get; set; }
-        public PaletteColor[] originDecodedFrameData { get; set; }
         public FrameRGBACache modifiedFrameRGBACache
         {
             get
@@ -496,10 +494,6 @@ namespace WizMachine.Data
                 if (_modifiedFrameRGBACache == null)
                 {
                     _modifiedFrameRGBACache = new FrameRGBACache(this);
-
-                    var modifiedData = new PaletteColor[originDecodedFrameData.Length];
-                    Array.Copy(originDecodedFrameData, modifiedData, originDecodedFrameData.Length);
-                    _modifiedFrameRGBACache.modifiedFrameData = modifiedData;
 
                     var modifiedBGRAData = new byte[originDecodedBGRAData.Length];
                     Array.Copy(originDecodedBGRAData, modifiedBGRAData, originDecodedBGRAData.Length);
@@ -577,18 +571,6 @@ namespace WizMachine.Data
                 set
                 {
                     frameRGBA.frameOffY = value;
-                }
-            }
-
-            public PaletteColor[] modifiedFrameData
-            {
-                get
-                {
-                    return frameRGBA.originDecodedFrameData;
-                }
-                set
-                {
-                    frameRGBA.originDecodedFrameData = value;
                 }
             }
 
