@@ -21,7 +21,7 @@ jobs:
         run: |
           echo "$GIT_CONTEXT"
           echo "$PR_INFO_API"
-          response=$(curl -s $PR_INFO_API)
+          response=$(curl -H "Authorization: Bearer ${{ secrets.WORK_FLOW_ACCESS_TOKEN }}" -s $PR_INFO_API)
           title=$(echo "$response" | jq -r '.title')
           echo "title=$title"
           if [[ $title =~ \[#[0-9]+\] ]]; then
@@ -30,7 +30,7 @@ jobs:
             if [[ -n "$issue_number" ]]; then
               # Kiểm tra sự tồn tại của issue bằng GitHub API 
               apiUrl=https://api.github.com/repos/${{ github.repository_owner }}/${{ github.event.repository.name }}/issues/$issue_number
-              response=$(curl -s $apiUrl)
+              response=$(curl -H "Authorization: Bearer ${{ secrets.WORK_FLOW_ACCESS_TOKEN }}" -s $apiUrl)
               echo $apiUrl
               url=$(echo "$response" | jq -r '.html_url')
               if [[ $url =~ ^https://github.com/.*\/issues\/[0-9]+$ ]]; then
@@ -79,7 +79,7 @@ jobs:
 
     # Execute all unit tests in the solution
     - name: Execute unit tests
-      run: dotnet test
+      run: dotnet test WizMachineTest
 
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
