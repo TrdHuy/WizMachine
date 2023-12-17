@@ -1,0 +1,42 @@
+on:      
+  push:
+    tags:
+      - 'wengine/v*'
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+     VERSION_UP_ISSUE_ID: 2
+     BUILD_HEAVY_PUBLISH: false
+     PROJEFCT_PATH: WizMachine\WizMachine.csproj
+     PUBLISH_DIR: light_publish
+
+    steps:
+    ################### CORE REGION #######################
+    - name: Checkout repo
+      uses: actions/checkout@v3
+      with: 
+        fetch-depth: 0
+      
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+    - run: dotnet restore ${{ env.PROJEFCT_PATH }}
+    - name: Light publish
+      run: msbuild ${{ env.PROJEFCT_PATH }} /t:Publish /p:Configuration=Release /p:PublishDir=${{ env.PUBLISH_DIR }} /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
+    - uses: actions/create-release@v1
+      id: create_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
+    - uses: csexton/release-asset-action@v2
+      with:
+        github-token: ${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
+        pattern: WizMachine/${{ env.PUBLISH_DIR }}/wengine_v*.zip
+        release-url: ${{ steps.create_release.outputs.upload_url }}
+    ################### END CORE REGION #######################
