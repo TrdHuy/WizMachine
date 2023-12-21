@@ -13,17 +13,20 @@
 		<AssemblyVersion>0.0.0.1</AssemblyVersion>
 		<FileVersion>0.0.0.1</FileVersion>
 		<Version>0.0.0.1</Version>
-		
+
 	</PropertyGroup>
 
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(DoPreBuild)'!='false'">
 		<Exec Command="echo EngineProjectDir=$(EngineProjectDir)" />
 		<Exec Command="msbuild /v:Detailed /t:Clean /p:Configuration=$(Configuration) /p:Platform=x64 /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj" />
 		<Exec Command="msbuild /v:Detailed /t:Rebuild /p:Configuration=$(Configuration) /p:Platform=x64 /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj" />
-
 		<ReadLinesFromFile File="$(DllPathFile)">
 			<Output TaskParameter="Lines" PropertyName="DllPathLines" />
 		</ReadLinesFromFile>
+	</Target>
+	<Target Name="CopyDllToOutput" AfterTargets="PreBuild" Condition="'$(DoPreBuild)'!='false'">
+		<Exec Command="echo DllPathFile=$(DllPathFile)" />
+		<Exec Command="echo DllPathLines=$(DllPathLines)" />
 		<Exec Command="xcopy /E /Y &quot;$(DllPathLines)*&quot; &quot;$(OutDir)&quot;" />
 	</Target>
 
@@ -32,7 +35,7 @@
 		<PropertyGroup>
 			<PublishZipDir>$([System.IO.Path]::GetFullPath('$(PublishDir)\..'))</PublishZipDir>
 		</PropertyGroup>
-		
+
 		<ItemGroup>
 			<OldPublishFile Include="$(PublishZipDir)\$(AssemblyName)_v$(Version).zip" />
 			<PdbFilesToDelete Include="$(PublishDir)\*.pdb" />
@@ -51,5 +54,5 @@
 		<Exec Command="echo PublishZipDir=$(PublishZipDir)" />
 
 	</Target>
-	
+
 </Project>
