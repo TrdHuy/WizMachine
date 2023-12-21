@@ -188,14 +188,16 @@ namespace WizMachine.Services.Utils
             FreeArrData(nativeData.ColorMap);
             nativeData.ColorMap = IntPtr.Zero;
 
-            return new FrameRGBA
+            var frameData = new FrameRGBA
             {
                 frameHeight = nativeData.FrameInfo.Height,
                 frameWidth = nativeData.FrameInfo.Width,
                 frameOffX = (short)nativeData.FrameInfo.OffX,
                 frameOffY = (short)nativeData.FrameInfo.OffY,
                 originDecodedBGRAData = frameRawData,
-            }.Also(it => it.modifiedFrameRGBACache.PaletteIndexToPixelIndexMap = colorDics);
+            };
+            frameData.modifiedFrameRGBACache.PaletteIndexToPixelIndexMap = colorDics;
+            return frameData;
         }
     }
 }
