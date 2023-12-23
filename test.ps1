@@ -10,7 +10,10 @@ $OWNER=$env:REPO_OWNER
 $REPO=$env:REPO_NAME
 $BRANCH=$env:TARGET_RELEASED_BRANCH
 
-
+$VERSION_UP_ID = $env:VERSION_UP_ID ?? { throw "VERSION_UP_ID is null or not defined." }
+$PROJECT_PATH = $env:PROJECT_PATH ?? { throw "PROJECT_PATH is null or not defined." }
+$PUBLISH_DIR = $env:PUBLISH_DIR ?? { throw "PUBLISH_DIR is null or not defined." }
+$NUSPEC_FILE_PATH = $env:NUSPEC_FILE_PATH ?? { throw "NUSPEC_FILE_PATH is null or not defined." }
 
 if (-not $TOKEN) {
     throw "GITHUB_TOKEN must not be null "
