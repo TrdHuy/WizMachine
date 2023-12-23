@@ -92,11 +92,8 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 	# Thử ghi XML vào tệp tin với StreamWriter và mã hóa UTF-8
 	try {
 	    $stream = New-Object System.IO.StreamWriter($filePath, $false, [System.Text.Encoding]::UTF8)
-	    Write-Host "huy.td1 _1"
 	    $xmlWriter = [System.Xml.XmlWriter]::Create($stream, $settings)
-	    Write-Host "huy.td1 _2"
 	    $xmlDocument.Save($xmlWriter)
-	    Write-Host "huy.td1 _3"
 	} finally {
 	    if ($xmlWriter) {
 		$xmlWriter.Close()
@@ -105,9 +102,9 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 		$stream.Close()
 	    }
 	}
- 	exit 
-	# msbuild /t:Restore
-	 #msbuild $PROJECT_PATH /t:Publish /p:Configuration=Release /p:PublishDir=$PUBLISH_DIR /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
+	exit 1
+ 	#msbuild /t:Restore
+	#msbuild $PROJECT_PATH /t:Publish /p:Configuration=Release /p:PublishDir=$PUBLISH_DIR /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
     } else {
 	Write-Host "Latest version has been released!"
 	exit 
