@@ -46,9 +46,9 @@ function Extract-InfoFromMessage ($message) {
         $issueId = $matches[1]
         $version = $matches[2]
 		
-		if($issueId -ne $VERSION_UP_ID){
-			throw "Need to create version up CL first!" 
-		}
+	if($issueId -ne $VERSION_UP_ID){
+		throw "Need to create version up CL first!" 
+	}
         return @{
             IssueId = $issueId
             Version = $version
@@ -80,12 +80,7 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 	$xmlDocument.PreserveWhitespace = $true
 	$xmlDocument.LoadXml($xmlString)
 	
-	# Truy cập các phần tử XML và lưu giá trị vào biến
-	$element1 = $xmlDocument.package.metadata.version = "0.0.0.6"
-	#$element2 = $xmlDocument.root.element2
-	#$xmlDocument.root.element1 = "Value1234"
-	#$newXmlString = $xmlDocument.OuterXml
-	# In giá trị từ các biến
+	$element1 = $xmlDocument.package.metadata.version = $lastCommitOnBranchVersion.ToString()
 	Write-Host "Value of element1: $element1"
 	$newXmlString = $xmlDocument.OuterXml
 	Write-Host "New: $newXmlString"
