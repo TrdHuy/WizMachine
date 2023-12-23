@@ -14,6 +14,8 @@ jobs:
      GITHUB_TOKEN: ${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
      PUBLISH_DIR: light_publish
      NUSPEC_FILE_PATH: WizMachine\WizMachine_RELEASE.nuspec
+     NUGET_PUBLISH_DIR: nuget_publish
+     NUSPEC_FILE_NAME: WizMachine_RELEASE.nuspec
      REPO_OWNER: TrdHuy
      REPO_NAME: WizMachine
      TARGET_RELEASED_BRANCH: dev
