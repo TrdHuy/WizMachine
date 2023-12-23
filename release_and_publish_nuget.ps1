@@ -165,7 +165,9 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
  		#msbuild /t:Restore
 		#msbuild $PROJECT_PATH /t:Publish /p:Configuration=Release /p:PublishDir=$PUBLISH_DIR /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
 		try {
-			dotnet nuget remove source "github"
+			if ($ISLOCAL -eq $true) {
+				dotnet nuget remove source "github"
+			}
 			dotnet nuget add source "https://nuget.pkg.github.com/TrdHuy/index.json" --name "github" --username "trdtranduchuy@gmail.com" --password $TOKEN
 		} finally{}
 		#dotnet pack --configuration Release $PROJECT_PATH -p:NuspecFile=$NUSPEC_FILE_NAME --no-build -o $NUGET_PUBLISH_DIR
