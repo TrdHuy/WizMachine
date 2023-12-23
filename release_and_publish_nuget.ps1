@@ -141,7 +141,7 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 		Write-Host "New: $newXmlString"
 		$nupkgFileName= ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString() + ".nupkg"
 		$scriptPath = Split-Path $MyInvocation.InvocationName
-		$nupkgFilePath = $scriptPath + "\" + $NUGET_PUBLISH_DIR + "\" + $nupkgFileName
+		$nupkgFilePath = "WizMachine\" + $scriptPath + "\" + $NUGET_PUBLISH_DIR + "\" + $nupkgFileName
 		Write-Host "nupkgFileName: $nupkgFileName"
 		Write-Host "nupkgFilePath: $nupkgFilePath"
 		
@@ -162,16 +162,18 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 				$stream.Close()
 			}
 		}
- 		#msbuild /t:Restore
-		#msbuild $PROJECT_PATH /t:Publish /p:Configuration=Release /p:PublishDir=$PUBLISH_DIR /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
+ 		msbuild /t:Restore
+		msbuild $PROJECT_PATH /t:Publish /p:Configuration=Release /p:PublishDir=$PUBLISH_DIR /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
 		try {
 			if ($ISLOCAL -eq $true) {
 				$cache = dotnet nuget remove source "github"
+				Write-Host cache=$cache
 			}
 			$cache = dotnet nuget add source "https://nuget.pkg.github.com/TrdHuy/index.json" --name "github" --username "trdtranduchuy@gmail.com" --password $TOKEN
+			Write-Host cache=$cache
 		} finally{}
-		#dotnet pack --configuration Release $PROJECT_PATH -p:NuspecFile=$NUSPEC_FILE_NAME --no-build -o $NUGET_PUBLISH_DIR
-		
+		dotnet pack --configuration Release $PROJECT_PATH -p:NuspecFile=$NUSPEC_FILE_NAME --no-build -o $NUGET_PUBLISH_DIR
+		dotnet nuget push $nupkgFilePath --api-key $TOKEN --source "github"
 		return 1
     } else {
 		Write-Host "Latest version has been released!"
