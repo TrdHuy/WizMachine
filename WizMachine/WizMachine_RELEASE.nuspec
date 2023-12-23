@@ -15,7 +15,7 @@
 		[#10] Khi đổi màu trên palette editor, màu không được apply lại trên bitmap viewer
 	</releaseNotes>
 	<readme>docs\README.md</readme>
-
+	<repository type="git" url="https://github.com/TrdHuy/PublicNugetRepo.git" />
   </metadata>
   <files>
     <file src="bin\Release\net6.0-windows\*.dll" target="lib\net6.0-windows7.0" />

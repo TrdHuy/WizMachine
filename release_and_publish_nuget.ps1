@@ -13,7 +13,9 @@ $BRANCH=$env:TARGET_RELEASED_BRANCH
 $VERSION_UP_ID = $env:VERSION_UP_ID
 $PROJECT_PATH = $env:PROJECT_PATH
 $PUBLISH_DIR = $env:PUBLISH_DIR
+$NUGET_PUBLISH_DIR = $env:NUGET_PUBLISH_DIR
 $NUSPEC_FILE_PATH = $env:NUSPEC_FILE_PATH
+$NUSPEC_FILE_NAME = $env:NUSPEC_FILE_NAME
 
 if ($ISLOCAL -eq $true) {
 	Write-Host "Assign local variable"
@@ -32,8 +34,10 @@ if ($ISLOCAL -eq $true) {
 
 	$VERSION_UP_ID = $localXmlDoc.configuration.VERSION_UP_ID
 	$PROJECT_PATH = $localXmlDoc.configuration.PROJECT_PATH
-	$PUBLISH_DIR =$localXmlDoc.configuration.PUBLISH_DIR
+	$PUBLISH_DIR = $localXmlDoc.configuration.PUBLISH_DIR
+	$NUGET_PUBLISH_DIR = $localXmlDoc.configuration.NUGET_PUBLISH_DIR
 	$NUSPEC_FILE_PATH = $localXmlDoc.configuration.NUSPEC_FILE_PATH
+	$NUSPEC_FILE_NAME = $localXmlDoc.configuration.NUSPEC_FILE_NAME
 }
 
 if (-not $TOKEN) {
@@ -61,6 +65,12 @@ if (-not $PUBLISH_DIR) {
 if (-not $NUSPEC_FILE_PATH) {
     throw "NUSPEC_FILE_PATH must not be null "
 }
+if (-not $NUGET_PUBLISH_DIR) {
+    throw "NUGET_PUBLISH_DIR must not be null "
+}
+if (-not $NUSPEC_FILE_NAME) {
+    throw "NUSPEC_FILE_NAME must not be null "
+}
 Write-Host ================================
 Write-Host OWNER=$OWNER 
 Write-Host REPO=$REPO 
@@ -69,6 +79,7 @@ Write-Host VERSION_UP_ID=$VERSION_UP_ID
 Write-Host PROJECT_PATH=$PROJECT_PATH 
 Write-Host PUBLISH_DIR=$PUBLISH_DIR 
 Write-Host NUSPEC_FILE_PATH=$NUSPEC_FILE_PATH 
+Write-Host NUGET_PUBLISH_DIR=$NUGET_PUBLISH_DIR
 Write-Host ================================`n`n`n
 
 #Lấy commit cuối cùng của bản latest release
@@ -112,6 +123,7 @@ $lastCommitOnBranchInfo = Extract-InfoFromMessage $lastCommitOnBranchMes
 Write-Host lastReleasedInfo.IssueId=($lastReleasedInfo.IssueId)
 Write-Host lastCommitOnBranchInfo=$lastCommitOnBranchInfo
 
+$nupkgFileName=""
 # So sánh các phiên bản và hiển thị kết quả
 if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
     $lastReleasedVersion = [version]$lastReleasedInfo.Version
@@ -127,7 +139,12 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 		$xmlDocument.package.metadata.version = $lastCommitOnBranchVersion.ToString()
 		$newXmlString = $xmlDocument.OuterXml
 		Write-Host "New: $newXmlString"
-	
+		$nupkgFileName= ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString() + ".nupkg"
+		$scriptPath = Split-Path $MyInvocation.InvocationName
+		$nupkgFilePath = $scriptPath + "\" + $NUGET_PUBLISH_DIR + "\" + $nupkgFileName
+		Write-Host "nupkgFileName: $nupkgFileName"
+		Write-Host "nupkgFilePath: $nupkgFilePath"
+		
 		$settings = New-Object System.Xml.XmlWriterSettings
 		$settings.Encoding = [System.Text.Encoding]::UTF8
 		$settings.Indent = $true
@@ -139,15 +156,19 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 			$xmlDocument.Save($xmlWriter)
 		} finally {
 			if ($xmlWriter) {
-			$xmlWriter.Close()
+				$xmlWriter.Close()
 			}
 			if ($stream) {
-			$stream.Close()
+				$stream.Close()
 			}
 		}
-		# return 1 if successfully create new publish
  		#msbuild /t:Restore
 		#msbuild $PROJECT_PATH /t:Publish /p:Configuration=Release /p:PublishDir=$PUBLISH_DIR /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
+		try {
+			dotnet nuget remove source "github"
+			dotnet nuget add source "https://nuget.pkg.github.com/TrdHuy/index.json" --name "github" --username "trdtranduchuy@gmail.com" --password $TOKEN
+		} finally{}
+		#dotnet pack --configuration Release $PROJECT_PATH -p:NuspecFile=$NUSPEC_FILE_NAME --no-build -o $NUGET_PUBLISH_DIR
 		
 		return 1
     } else {
