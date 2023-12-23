@@ -1,18 +1,20 @@
-﻿
+
 $TOKEN=$env:GITHUB_TOKEN
-$OWNER="TrdHuy"
-$REPO="WizMachine"
-$BRANCH = "dev"
+$OWNER=$env:REPO_OWNER
+$REPO=$env:REPO_NAME
+$BRANCH=$env:TARGET_RELEASED_BRANCH
 if (-not $TOKEN) {
-    # Gán giá trị mặc định nếu $TOKEN rỗng
-    $TOKEN = "hello"
+    throw "GITHUB_TOKEN must not be null "
 }
-$Test_prop = $env:Test_prop
-if (-not $Test_prop) {
-    # Gán giá trị mặc định nếu $TOKEN rỗng
-    $Test_prop = "123456"
+if (-not $OWNER) {
+    throw "REPO_OWNER must not be null "
 }
-Write-Host Test_prop=$Test_prop
+if (-not $REPO) {
+    throw "REPO_NAME must not be null "
+}
+if (-not $BRANCH) {
+    throw "TARGET_RELEASED_BRANCH must not be null "
+}
 
 #Lấy commit cuối cùng của bản latest release
 $result = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/releases/latest" -Headers @{ Authorization = "token $TOKEN" }
