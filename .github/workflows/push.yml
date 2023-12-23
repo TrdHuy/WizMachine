@@ -8,10 +8,12 @@ jobs:
     runs-on: windows-latest
     env:
      ISLOCAL: false
-     VERSION_UP_ISSUE_ID: 2
+     VERSION_UP_ID: 2
      BUILD_HEAVY_PUBLISH: false
      PROJEFCT_PATH: WizMachine\WizMachine.csproj
      GITHUB_TOKEN: ${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
+     PUBLISH_DIR: light_publish
+     NUSPEC_FILE_PATH: WizMachine\WizMachine_RELEASE.nuspec
      REPO_OWNER: TrdHuy
      REPO_NAME: WizMachine
      TARGET_RELEASED_BRANCH: dev

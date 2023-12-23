@@ -26,9 +26,9 @@ if ($ISLOCAL -eq $true) {
 	$localXmlDoc.LoadXml($localXmlString)
 
 	$TOKEN=$localXmlDoc.configuration.GITHUB_TOKEN
-	$OWNER=$localXmlDoc.configuration.OWNER
-	$REPO=$localXmlDoc.configuration.REPO
-	$BRANCH=$localXmlDoc.configuration.BRANCH
+	$OWNER=$localXmlDoc.configuration.REPO_OWNER
+	$REPO=$localXmlDoc.configuration.REPO_NAME
+	$BRANCH=$localXmlDoc.configuration.TARGET_RELEASED_BRANCH
 
 	$VERSION_UP_ID = $localXmlDoc.configuration.VERSION_UP_ID
 	$PROJECT_PATH = $localXmlDoc.configuration.PROJECT_PATH

@@ -30,9 +30,9 @@ dotnet nuget push <pathToNupkg>" --api-key <TOKEN> --source "github"
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
 	<GITHUB_TOKEN>[Your github token PAT]</GITHUB_TOKEN>
-	<OWNER>TrdHuy</OWNER>
-	<REPO>WizMachine</REPO>
-	<BRANCH>dev</BRANCH>
+	<REPO_OWNER>TrdHuy</REPO_OWNER>
+	<REPO_NAME>WizMachine</REPO_NAME>
+	<TARGET_RELEASED_BRANCH>dev</TARGET_RELEASED_BRANCH>
 	<VERSION_UP_ID>2</VERSION_UP_ID>
 	<PROJECT_PATH>WizMachine/WizMachine.csproj</PROJECT_PATH>
 	<PUBLISH_DIR>light_publish</PUBLISH_DIR>
