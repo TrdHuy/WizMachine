@@ -69,7 +69,8 @@ Write-Host lastCommitOnBranchInfo=$lastCommitOnBranchInfo
 if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
     $lastReleasedVersion = [version]$lastReleasedInfo.Version
     $lastCommitOnBranchVersion = [version]$lastCommitOnBranchInfo.Version
-
+	$lastReleasedVersion
+ 	$lastCommitOnBranchVersion
     if ($lastReleasedVersion -gt $lastCommitOnBranchVersion) {
         #Thực hiện build và package
 		 msbuild $PROJECT_PATH /t:Publish /p:Configuration=Release /p:PublishDir=$PUBLISH_DIR /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
