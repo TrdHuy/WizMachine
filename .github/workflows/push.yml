@@ -10,8 +10,10 @@ jobs:
      VERSION_UP_ISSUE_ID: 2
      BUILD_HEAVY_PUBLISH: false
      PROJEFCT_PATH: WizMachine\WizMachine.csproj
-     TEST_PROP: test_prop
      GITHUB_TOKEN: ${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
+     REPO_OWNER: TrdHuy
+     REPO_NAME: WizMachine
+     TARGET_RELEASED_BRANCH: dev
      # GIT_CONTEXT: ${{ toJson(github) }}
      
     steps:
