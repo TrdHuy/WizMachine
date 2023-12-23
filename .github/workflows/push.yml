@@ -28,4 +28,11 @@ jobs:
       shell: pwsh
       run: |
         .\test.ps1
+    - name: Set outputs
+      id: vars
+      shell: pwsh
+      run: echo "::set-output name=production::123098"
+    - name: Check outputs
+      shell: pwsh
+      run: echo huy.td1____${{ steps.vars.outputs.production }}
 
