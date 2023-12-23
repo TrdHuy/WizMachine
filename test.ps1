@@ -105,8 +105,9 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 		$stream.Close()
 	    }
 	}
-	 msbuild /t:Restore
-	 msbuild $PROJECT_PATH /t:Publish /p:Configuration=Release /p:PublishDir=$PUBLISH_DIR /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
+ 	exit 
+	# msbuild /t:Restore
+	 #msbuild $PROJECT_PATH /t:Publish /p:Configuration=Release /p:PublishDir=$PUBLISH_DIR /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
     } else {
 	Write-Host "Latest version has been released!"
 	exit 
