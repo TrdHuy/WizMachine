@@ -141,7 +141,7 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 		Write-Host "New: $newXmlString"
 		$nupkgFileName= ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString() + ".nupkg"
 		$scriptPath = Split-Path $MyInvocation.InvocationName
-		$nupkgFilePath = "WizMachine\" + $scriptPath + "\" + $NUGET_PUBLISH_DIR + "\" + $nupkgFileName
+		$nupkgFilePath = "WizMachine" + "\" + $NUGET_PUBLISH_DIR + "\" + $nupkgFileName
 		Write-Host "nupkgFileName: $nupkgFileName"
 		Write-Host "nupkgFilePath: $nupkgFilePath"
 		
