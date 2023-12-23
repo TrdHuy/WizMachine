@@ -11,7 +11,7 @@ jobs:
      VERSION_UP_ID: 2
      BUILD_HEAVY_PUBLISH: false
      PROJECT_PATH: WizMachine\WizMachine.csproj
-     GITHUB_TOKEN: ${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
+     GITHUB_TOKEN: ${{ secrets.WORK_FLOW_ACCESS_TOKEN_CLASSIC }}
      PUBLISH_DIR: light_publish
      NUSPEC_FILE_PATH: WizMachine\WizMachine_RELEASE.nuspec
      NUGET_PUBLISH_DIR: nuget_publish
