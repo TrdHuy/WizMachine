@@ -29,3 +29,93 @@ $lastCommitOnBranchSha = $lastCommitOnBranchRes.sha
 $lastCommitOnBranchMes = $lastCommitOnBranchRes.commit.message
 $lastCommitOnBranchMes
 # Hiển thị commit message
+
+
+
+$VERSION_UP_ID = 2
+$PROJECT_PATH = "WizMachine/WizMachine.csproj"
+$PUBLISH_DIR = "light_publish"
+
+# Hàm để trích xuất thông tin từ chuỗi thông điệp
+function Extract-InfoFromMessage ($message) {
+    $regex = '\[#(\d+)\] Version up: (\d+\.\d+\.\d+\.\d+)'
+    $match = $message -match $regex
+
+    if ($match) {
+        $issueId = $matches[1]
+        $version = $matches[2]
+		
+		if($issueId -ne $VERSION_UP_ID){
+			throw "Need to create version up CL first!" 
+		}
+        return @{
+            IssueId = $issueId
+            Version = $version
+        }
+    } else {
+        Write-Host "Không thể trích xuất thông tin từ chuỗi thông điệp."
+		throw "Need to create version up CL first!" 
+        return $null
+    }
+}
+
+# Trích xuất thông tin từ các chuỗi
+$lastReleasedInfo = Extract-InfoFromMessage $lastReleasedCommitMes
+$lastCommitOnBranchInfo = Extract-InfoFromMessage $lastCommitOnBranchMes
+Write-Host lastReleasedInfo.IssueId=($lastReleasedInfo.IssueId)
+Write-Host lastCommitOnBranchInfo=$lastCommitOnBranchInfo
+
+# So sánh các phiên bản và hiển thị kết quả
+if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
+    $lastReleasedVersion = [version]$lastReleasedInfo.Version
+    $lastCommitOnBranchVersion = [version]$lastCommitOnBranchInfo.Version
+
+    if ($lastReleasedVersion -gt $lastCommitOnBranchVersion) {
+        #Thực hiện build và package
+		 msbuild $PROJECT_PATH /t:Publish /p:Configuration=Release /p:PublishDir=$PUBLISH_DIR /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
+    } else {
+		Write-Host "Latest version has been released!"
+		exit 
+    }
+}
+
+
+# Chuỗi XML
+$filePath = "WizMachine\WizMachine_RELEASE.nuspec"
+
+$xmlString = Get-Content -Raw -Path $filePath
+
+# Tạo đối tượng XmlDocument và load chuỗi XML vào nó
+$xmlDocument = New-Object System.Xml.XmlDocument
+$xmlDocument.PreserveWhitespace = $true
+$xmlDocument.LoadXml($xmlString)
+
+# Truy cập các phần tử XML và lưu giá trị vào biến
+$element1 = $xmlDocument.package.metadata.version = "0.0.0.6"
+#$element2 = $xmlDocument.root.element2
+#$xmlDocument.root.element1 = "Value1234"
+#$newXmlString = $xmlDocument.OuterXml
+# In giá trị từ các biến
+Write-Host "Value of element1: $element1"
+$newXmlString = $xmlDocument.OuterXml
+Write-Host "New: $newXmlString"
+
+$settings = New-Object System.Xml.XmlWriterSettings
+$settings.Encoding = [System.Text.Encoding]::UTF8
+$settings.Indent = $true
+
+# Thử ghi XML vào tệp tin với StreamWriter và mã hóa UTF-8
+try {
+    $stream = New-Object System.IO.StreamWriter($filePath, $false, [System.Text.Encoding]::UTF8)
+    $xmlWriter = [System.Xml.XmlWriter]::Create($stream, $settings)
+    $xmlDocument.Save($xmlWriter)
+} finally {
+    if ($xmlWriter) {
+        $xmlWriter.Close()
+    }
+    if ($stream) {
+        $stream.Close()
+    }
+}
+
+
