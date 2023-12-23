@@ -45,7 +45,9 @@
     <Delete Files="@(PdbFilesToDelete)" />
     <Delete Files="@(ExpFilesToDelete)" />
     <Delete Files="@(LibFilesToDelete)" />
-    <ZipDirectory SourceDirectory="$(PublishDir)" DestinationFile="$(PublishZipDir)\$(AssemblyName)_v$(Version).zip" />
+	  <Exec Command="echo $(PublishZipDir)\$(AssemblyName)_v$(Version).zip > ..\bin\publishedZipPath" />
+
+	  <ZipDirectory SourceDirectory="$(PublishDir)" DestinationFile="$(PublishZipDir)\$(AssemblyName)_v$(Version).zip" />
   </Target>
 	<Target Name="PackTaskDependencies" BeforeTargets="GenerateNuspec">
 		<Message Text="Start PackTaskDependencies:" Importance="high" />

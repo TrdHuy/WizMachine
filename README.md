@@ -40,6 +40,7 @@ dotnet nuget push <pathToNupkg>" --api-key <TOKEN> --source "github"
 	<NUSPEC_FILE_PATH>WizMachine/WizMachine_RELEASE.nuspec</NUSPEC_FILE_PATH>
 	<NUSPEC_FILE_NAME>WizMachine_RELEASE.nuspec</NUSPEC_FILE_NAME>
 	<PROJECT_NAME>WizMachine</PROJECT_NAME>
+	<PUBLISH_NAME_CONTAINER_FILE_PATH>bin/publishedZipPath</PUBLISH_NAME_CONTAINER_FILE_PATH>
 </configuration>
 ```
 

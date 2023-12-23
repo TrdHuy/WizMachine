@@ -14,6 +14,8 @@ $VERSION_UP_ID = $env:VERSION_UP_ID
 $PROJECT_NAME = $env:PROJECT_NAME
 $PROJECT_PATH = $env:PROJECT_PATH
 $PUBLISH_DIR = $env:PUBLISH_DIR
+$PUBLISH_NAME_CONTAINER_FILE_PATH = $env:PUBLISH_NAME_CONTAINER_FILE_PATH
+
 $NUGET_PUBLISH_DIR = $env:NUGET_PUBLISH_DIR
 $NUSPEC_FILE_PATH = $env:NUSPEC_FILE_PATH
 $NUSPEC_FILE_NAME = $env:NUSPEC_FILE_NAME
@@ -40,7 +42,7 @@ if ($ISLOCAL -eq $true) {
 	$NUSPEC_FILE_PATH = $localXmlDoc.configuration.NUSPEC_FILE_PATH
 	$NUSPEC_FILE_NAME = $localXmlDoc.configuration.NUSPEC_FILE_NAME
 	$PROJECT_NAME = $localXmlDoc.configuration.PROJECT_NAME
-
+	$PUBLISH_NAME_CONTAINER_FILE_PATH = $localXmlDoc.configuration.PUBLISH_NAME_CONTAINER_FILE_PATH
 }
 
 if (-not $TOKEN) {
@@ -74,6 +76,10 @@ if (-not $NUGET_PUBLISH_DIR) {
 if (-not $NUSPEC_FILE_NAME) {
     throw "NUSPEC_FILE_NAME must not be null "
 }
+if (-not $PUBLISH_NAME_CONTAINER_FILE_PATH) {
+    throw "PUBLISH_NAME_CONTAINER_FILE_PATH must not be null "
+}
+
 Write-Host ================================
 Write-Host OWNER=$OWNER 
 Write-Host REPO=$REPO 
@@ -119,6 +125,39 @@ function Extract-InfoFromMessage ($message) {
 		throw "Need to create version up CL first!" 
         return $null
     }
+}
+
+function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $AssetName) {
+	$uri = "https://api.github.com/repos/$OWNER/$REPO/releases"
+	$headers = @{
+		"Authorization" = "token $TOKEN"
+		"Accept" = "application/vnd.github.v3+json"
+	}
+
+	$body = @{
+		tag_name = $TagName
+		name = $ReleaseName
+		body = $ReleaseBody
+		draft = $false
+		prerelease = $false
+	} | ConvertTo-Json
+
+	$response = Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body
+
+	# In ra thông tin release được tạo mới
+	Write-Host "Release created. ID: $($response.id), Name: $($response.name)"
+	$RELEASE_ID=$response.id
+
+
+	# Tải lên asset vào release
+	# Tải lên asset vào release
+	$url = "https://uploads.github.com/repos/$OWNER/$REPO/releases/$RELEASE_ID/assets?name=$AssetName"
+	$headers = @{
+		Authorization = "token $TOKEN"
+		Accept = "application/vnd.github.v3+json"
+	}
+
+	Invoke-RestMethod -Uri $url -Method Post -Headers $headers -InFile $AssetPath -ContentType "application/zip"
 }
 
 # Trích xuất thông tin từ các chuỗi
@@ -180,6 +219,22 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 		$cache = dotnet pack --configuration Release $PROJECT_PATH -p:NuspecFile=$NUSPEC_FILE_NAME --no-build -o $NUGET_PUBLISH_DIR
 		Write-Host cache=$cache
 		dotnet nuget push $nupkgFilePath --api-key $TOKEN --source "github"
+
+
+		#============= Create new release=============
+		$assetFilePath = Get-Content -Raw -Path $PUBLISH_NAME_CONTAINER_FILE_PATH
+		$assetFilePath=$assetFilePath.Trim()
+		$assetName = Split-Path $assetFilePath -Leaf
+		$tagName = ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString()
+		Write-Host assetFilePath=$assetFilePath
+		Write-Host assetName=$assetName
+		Write-Host tagName=$tagName
+
+		#TODO: CREATE release note
+		$releaseBody =  "Update new version"
+		Create-NewRelease $tagName $tagName $releaseBody $assetFilePath $assetName
+		#============= Create new release=============
+		
 		return 1
     } else {
 		Write-Host "Latest version has been released!"

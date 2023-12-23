@@ -13,6 +13,7 @@ jobs:
      PROJECT_PATH: WizMachine\WizMachine.csproj
      GITHUB_TOKEN: ${{ secrets.WORK_FLOW_ACCESS_TOKEN_CLASSIC }}
      PUBLISH_DIR: light_publish
+     PUBLISH_NAME_CONTAINER_FILE_PATH: bin\publishedZipPath
      NUSPEC_FILE_PATH: WizMachine\WizMachine_RELEASE.nuspec
      NUGET_PUBLISH_DIR: nuget_publish
      NUSPEC_FILE_NAME: WizMachine_RELEASE.nuspec
