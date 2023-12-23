@@ -27,7 +27,8 @@ jobs:
     - name: Check Commit Message by github script
       shell: pwsh
       run: |
-        .\test.ps1
+        $result = & .\test.ps1
+        echo result=$result
     - name: Set outputs
       id: vars
       shell: pwsh

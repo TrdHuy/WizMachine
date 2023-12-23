@@ -45,14 +45,13 @@ function Extract-InfoFromMessage ($message) {
     if ($match) {
         $issueId = $matches[1]
         $version = $matches[2]
-		
-	if($issueId -ne $VERSION_UP_ID){
-		throw "Need to create version up CL first!" 
-	}
-        return @{
-            IssueId = $issueId
-            Version = $version
-        }
+		if($issueId -ne $VERSION_UP_ID) {
+			throw "Need to create version up CL first!" 
+		}
+		return @{
+			IssueId = $issueId
+			Version = $version
+		}
     } else {
         Write-Host "Không thể trích xuất thông tin từ chuỗi thông điệp."
 		throw "Need to create version up CL first!" 
@@ -73,41 +72,41 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 	$lastReleasedVersion
  	$lastCommitOnBranchVersion
     if ($lastCommitOnBranchVersion -gt $lastReleasedVersion) {
-	$xmlString = Get-Content -Raw -Path $filePath
+		$xmlString = Get-Content -Raw -Path $filePath
 	
-	# Tạo đối tượng XmlDocument và load chuỗi XML vào nó
-	$xmlDocument = New-Object System.Xml.XmlDocument
-	$xmlDocument.PreserveWhitespace = $true
-	$xmlDocument.LoadXml($xmlString)
+		# Tạo đối tượng XmlDocument và load chuỗi XML vào nó
+		$xmlDocument = New-Object System.Xml.XmlDocument
+		$xmlDocument.PreserveWhitespace = $true
+		$xmlDocument.LoadXml($xmlString)
 	
-	$element1 = $xmlDocument.package.metadata.version = $lastCommitOnBranchVersion.ToString()
-	Write-Host "Value of element1: $element1"
-	$newXmlString = $xmlDocument.OuterXml
-	Write-Host "New: $newXmlString"
+		$element1 = $xmlDocument.package.metadata.version = $lastCommitOnBranchVersion.ToString()
+		Write-Host "Value of element1: $element1"
+		$newXmlString = $xmlDocument.OuterXml
+		Write-Host "New: $newXmlString"
 	
-	$settings = New-Object System.Xml.XmlWriterSettings
-	$settings.Encoding = [System.Text.Encoding]::UTF8
-	$settings.Indent = $true
+		$settings = New-Object System.Xml.XmlWriterSettings
+		$settings.Encoding = [System.Text.Encoding]::UTF8
+		$settings.Indent = $true
 	
-	# Thử ghi XML vào tệp tin với StreamWriter và mã hóa UTF-8
-	try {
-	    $stream = New-Object System.IO.StreamWriter($filePath, $false, [System.Text.Encoding]::UTF8)
-	    $xmlWriter = [System.Xml.XmlWriter]::Create($stream, $settings)
-	    $xmlDocument.Save($xmlWriter)
-	} finally {
-	    if ($xmlWriter) {
-		$xmlWriter.Close()
-	    }
-	    if ($stream) {
-		$stream.Close()
-	    }
-	}
-	exit 1
- 	#msbuild /t:Restore
-	#msbuild $PROJECT_PATH /t:Publish /p:Configuration=Release /p:PublishDir=$PUBLISH_DIR /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
+		# Thử ghi XML vào tệp tin với StreamWriter và mã hóa UTF-8
+		try {
+			$stream = New-Object System.IO.StreamWriter($filePath, $false, [System.Text.Encoding]::UTF8)
+			$xmlWriter = [System.Xml.XmlWriter]::Create($stream, $settings)
+			$xmlDocument.Save($xmlWriter)
+		} finally {
+			if ($xmlWriter) {
+			$xmlWriter.Close()
+			}
+			if ($stream) {
+			$stream.Close()
+			}
+		}
+		return 1
+ 		#msbuild /t:Restore
+		#msbuild $PROJECT_PATH /t:Publish /p:Configuration=Release /p:PublishDir=$PUBLISH_DIR /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
     } else {
-	Write-Host "Latest version has been released!"
-	exit 
-    }
+		Write-Host "Latest version has been released!"
+		return 2
+	}
 }
 
