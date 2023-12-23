@@ -1,8 +1,17 @@
 
+$psVersion = $PSVersionTable.PSVersion
+
+# In ra phiên bản PowerShell
+Write-Host "PowerShell Version: $($psVersion.Major).$($psVersion.Minor).$($psVersion.Build)"
+
+
 $TOKEN=$env:GITHUB_TOKEN
 $OWNER=$env:REPO_OWNER
 $REPO=$env:REPO_NAME
 $BRANCH=$env:TARGET_RELEASED_BRANCH
+
+
+
 if (-not $TOKEN) {
     throw "GITHUB_TOKEN must not be null "
 }
@@ -21,13 +30,14 @@ $result = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/rele
 $lastReleasedCommitSha = $result[0].target_commitish
 $commitInfoRes = Invoke-RestMethod -Uri "https://api.github.com/repos/TrdHuy/WizMachine/commits/$lastReleasedCommitSha" -Headers @{ Authorization = "token $TOKEN" }
 $lastReleasedCommitMes = $commitInfoRes.commit.message
-$lastReleasedCommitMes 
+Write-Host lastReleasedCommitMes=$lastReleasedCommitMes 
 #
 # Sử dụng GitHub API để lấy thông tin về commit cuối cùng trên nhánh
 $lastCommitOnBranchRes = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/commits/$BRANCH" -Headers @{ Authorization = "token $TOKEN" }
 $lastCommitOnBranchSha = $lastCommitOnBranchRes.sha
 $lastCommitOnBranchMes = $lastCommitOnBranchRes.commit.message
-$lastCommitOnBranchMes
+Write-Host lastCommitOnBranchMes=$$lastCommitOnBranchMes
+
 # Hiển thị commit message
 
 
@@ -35,7 +45,7 @@ $lastCommitOnBranchMes
 $VERSION_UP_ID = 2
 $PROJECT_PATH = "WizMachine/WizMachine.csproj"
 $PUBLISH_DIR = "light_publish"
-$filePath = "WizMachine\WizMachine_RELEASE.nuspec"
+$NUSPEC_FILE_PATH = "WizMachine\WizMachine_RELEASE.nuspec"
 
 # Hàm để trích xuất thông tin từ chuỗi thông điệp
 function Extract-InfoFromMessage ($message) {
@@ -69,10 +79,8 @@ Write-Host lastCommitOnBranchInfo=$lastCommitOnBranchInfo
 if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
     $lastReleasedVersion = [version]$lastReleasedInfo.Version
     $lastCommitOnBranchVersion = [version]$lastCommitOnBranchInfo.Version
-	$lastReleasedVersion
- 	$lastCommitOnBranchVersion
     if ($lastCommitOnBranchVersion -gt $lastReleasedVersion) {
-		$xmlString = Get-Content -Raw -Path $filePath
+		$xmlString = Get-Content -Raw -Path $NUSPEC_FILE_PATH
 	
 		# Tạo đối tượng XmlDocument và load chuỗi XML vào nó
 		$xmlDocument = New-Object System.Xml.XmlDocument
@@ -90,7 +98,7 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 	
 		# Thử ghi XML vào tệp tin với StreamWriter và mã hóa UTF-8
 		try {
-			$stream = New-Object System.IO.StreamWriter($filePath, $false, [System.Text.Encoding]::UTF8)
+			$stream = New-Object System.IO.StreamWriter($NUSPEC_FILE_PATH, $false, [System.Text.Encoding]::UTF8)
 			$xmlWriter = [System.Xml.XmlWriter]::Create($stream, $settings)
 			$xmlDocument.Save($xmlWriter)
 		} finally {
@@ -101,9 +109,11 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 			$stream.Close()
 			}
 		}
-		return 1
+		# return 1 if successfully create new publish
  		#msbuild /t:Restore
 		#msbuild $PROJECT_PATH /t:Publish /p:Configuration=Release /p:PublishDir=$PUBLISH_DIR /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
+		
+		return 1
     } else {
 		Write-Host "Latest version has been released!"
 		return 2
