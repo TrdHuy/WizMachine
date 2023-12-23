@@ -1,20 +1,41 @@
 
+$ISLOCAL=$env:ISLOCAL ?? $true
 $psVersion = $PSVersionTable.PSVersion
 
 # In ra phiên bản PowerShell
 Write-Host "PowerShell Version: $($psVersion.Major).$($psVersion.Minor).$($psVersion.Build)"
-
 
 $TOKEN=$env:GITHUB_TOKEN
 $OWNER=$env:REPO_OWNER
 $REPO=$env:REPO_NAME
 $BRANCH=$env:TARGET_RELEASED_BRANCH
 
-$VERSION_UP_ID = $env:VERSION_UP_ID ?? { throw "VERSION_UP_ID is null or not defined." }
-$PROJECT_PATH = $env:PROJECT_PATH ?? { throw "PROJECT_PATH is null or not defined." }
-$PUBLISH_DIR = $env:PUBLISH_DIR ?? { throw "PUBLISH_DIR is null or not defined." }
-$NUSPEC_FILE_PATH = $env:NUSPEC_FILE_PATH ?? { exit 1 }
-Write-Host NUSPEC_FILE_PATH=$NUSPEC_FILE_PATH
+$VERSION_UP_ID = $env:VERSION_UP_ID
+$PROJECT_PATH = $env:PROJECT_PATH
+$PUBLISH_DIR = $env:PUBLISH_DIR
+$NUSPEC_FILE_PATH = $env:NUSPEC_FILE_PATH
+
+if ($ISLOCAL -eq $true) {
+	Write-Host "Assign local variable"
+
+	$localXmlString = Get-Content -Raw -Path "local.config"
+	
+	# Tạo đối tượng XmlDocument và load chuỗi XML vào nó
+	$localXmlDoc = New-Object System.Xml.XmlDocument
+	$localXmlDoc.PreserveWhitespace = $true
+	$localXmlDoc.LoadXml($localXmlString)
+
+	$TOKEN=$localXmlDoc.configuration.GITHUB_TOKEN
+	$OWNER=$localXmlDoc.configuration.OWNER
+	$REPO=$localXmlDoc.configuration.REPO
+	$BRANCH=$localXmlDoc.configuration.BRANCH
+
+	$VERSION_UP_ID = $localXmlDoc.configuration.VERSION_UP_ID
+	$PROJECT_PATH = $localXmlDoc.configuration.PROJECT_PATH
+	$PUBLISH_DIR =$localXmlDoc.configuration.PUBLISH_DIR
+	$NUSPEC_FILE_PATH = $localXmlDoc.configuration.NUSPEC_FILE_PATH
+}
+
 if (-not $TOKEN) {
     throw "GITHUB_TOKEN must not be null "
 }
@@ -28,10 +49,32 @@ if (-not $BRANCH) {
     throw "TARGET_RELEASED_BRANCH must not be null "
 }
 
+if (-not $VERSION_UP_ID) {
+    throw "VERSION_UP_ID must not be null "
+}
+if (-not $PROJECT_PATH) {
+    throw "PROJECT_PATH must not be null "
+}
+if (-not $PUBLISH_DIR) {
+    throw "PUBLISH_DIR must not be null "
+}
+if (-not $NUSPEC_FILE_PATH) {
+    throw "NUSPEC_FILE_PATH must not be null "
+}
+Write-Host ================================
+Write-Host OWNER=$OWNER 
+Write-Host REPO=$REPO 
+Write-Host BRANCH=$BRANCH 
+Write-Host VERSION_UP_ID=$VERSION_UP_ID 
+Write-Host PROJECT_PATH=$PROJECT_PATH 
+Write-Host PUBLISH_DIR=$PUBLISH_DIR 
+Write-Host NUSPEC_FILE_PATH=$NUSPEC_FILE_PATH 
+Write-Host ================================`n`n`n
+
 #Lấy commit cuối cùng của bản latest release
 $result = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/releases/latest" -Headers @{ Authorization = "token $TOKEN" }
 $lastReleasedCommitSha = $result[0].target_commitish
-$commitInfoRes = Invoke-RestMethod -Uri "https://api.github.com/repos/TrdHuy/WizMachine/commits/$lastReleasedCommitSha" -Headers @{ Authorization = "token $TOKEN" }
+$commitInfoRes = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/commits/$lastReleasedCommitSha" -Headers @{ Authorization = "token $TOKEN" }
 $lastReleasedCommitMes = $commitInfoRes.commit.message
 Write-Host lastReleasedCommitMes=$lastReleasedCommitMes 
 #
@@ -39,16 +82,7 @@ Write-Host lastReleasedCommitMes=$lastReleasedCommitMes
 $lastCommitOnBranchRes = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/commits/$BRANCH" -Headers @{ Authorization = "token $TOKEN" }
 $lastCommitOnBranchSha = $lastCommitOnBranchRes.sha
 $lastCommitOnBranchMes = $lastCommitOnBranchRes.commit.message
-Write-Host lastCommitOnBranchMes=$$lastCommitOnBranchMes
-
-# Hiển thị commit message
-
-
-
-$VERSION_UP_ID = 2
-$PROJECT_PATH = "WizMachine/WizMachine.csproj"
-$PUBLISH_DIR = "light_publish"
-$NUSPEC_FILE_PATH = "WizMachine\WizMachine_RELEASE.nuspec"
+Write-Host lastCommitOnBranchMes=$lastCommitOnBranchMes
 
 # Hàm để trích xuất thông tin từ chuỗi thông điệp
 function Extract-InfoFromMessage ($message) {
@@ -90,8 +124,7 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 		$xmlDocument.PreserveWhitespace = $true
 		$xmlDocument.LoadXml($xmlString)
 	
-		$element1 = $xmlDocument.package.metadata.version = $lastCommitOnBranchVersion.ToString()
-		Write-Host "Value of element1: $element1"
+		$xmlDocument.package.metadata.version = $lastCommitOnBranchVersion.ToString()
 		$newXmlString = $xmlDocument.OuterXml
 		Write-Host "New: $newXmlString"
 	

@@ -7,6 +7,7 @@ jobs:
   build:
     runs-on: windows-latest
     env:
+     ISLOCAL: false
      VERSION_UP_ISSUE_ID: 2
      BUILD_HEAVY_PUBLISH: false
      PROJEFCT_PATH: WizMachine\WizMachine.csproj
@@ -27,7 +28,7 @@ jobs:
     - name: Check Commit Message by github script
       shell: pwsh
       run: |
-        $result = & .\test.ps1
+        $result = & .\release_and_publish_nuget.ps1
         echo result=$result
     - name: Set outputs
       id: vars

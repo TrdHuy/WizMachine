@@ -23,3 +23,36 @@ dotnet pack --configuration Release WizMachine\WizMachine.csproj -p:NuspecFile=W
 ``` cmd
 dotnet nuget push <pathToNupkg>" --api-key <TOKEN> --source "github"
 ```
+
+
+#### local.config
+``` xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+	<GITHUB_TOKEN>[Your github token PAT]</GITHUB_TOKEN>
+	<OWNER>TrdHuy</OWNER>
+	<REPO>WizMachine</REPO>
+	<BRANCH>dev</BRANCH>
+	<VERSION_UP_ID>2</VERSION_UP_ID>
+	<PROJECT_PATH>WizMachine/WizMachine.csproj</PROJECT_PATH>
+	<PUBLISH_DIR>light_publish</PUBLISH_DIR>
+	<NUSPEC_FILE_PATH>WizMachine\WizMachine_RELEASE.nuspec</NUSPEC_FILE_PATH>
+</configuration>
+```
+
+#### nuget.config
+``` xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <packageSources>
+        <clear />
+        <add key="github" value="https://nuget.pkg.github.com/TrdHuy/index.json" />
+    </packageSources>
+    <packageSourceCredentials>
+        <github>
+            <add key="Username" value="TrdHuy" />
+            <add key="ClearTextPassword" value="[Your github token PAT]" />
+        </github>
+    </packageSourceCredentials>
+</configuration>
+```

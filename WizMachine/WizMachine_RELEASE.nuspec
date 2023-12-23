@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>WizMachine</id>
-    <version>0.0.0.3</version>
+    <version>0.0.0.2</version>
     <authors>TrdHuy</authors>
     <owners>TrdHuy</owners>
 	<company>TrdHuy</company>
