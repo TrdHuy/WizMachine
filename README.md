@@ -34,6 +34,7 @@ dotnet nuget push <pathToNupkg>" --api-key <TOKEN> --source "github"
 	<REPO_NAME>WizMachine</REPO_NAME>
 	<TARGET_RELEASED_BRANCH>dev</TARGET_RELEASED_BRANCH>
 	<VERSION_UP_ID>2</VERSION_UP_ID>
+	<WORK_FLOW_ISSUE_ID>1</WORK_FLOW_ISSUE_ID>
 	<PROJECT_PATH>WizMachine/WizMachine.csproj</PROJECT_PATH>
 	<PUBLISH_DIR>light_publish</PUBLISH_DIR>
 	<NUGET_PUBLISH_DIR>nuget_publish</NUGET_PUBLISH_DIR>

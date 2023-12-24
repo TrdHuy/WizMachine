@@ -7,13 +7,9 @@
     <owners>TrdHuy</owners>
 	<company>TrdHuy</company>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>
-		Update and fix bugs:
-		[#10] Khi đổi màu trên palette editor, màu không được apply lại trên bitmap viewer
-	</description>
-    <releaseNotes>
-		[#10] Khi đổi màu trên palette editor, màu không được apply lại trên bitmap viewer
-	</releaseNotes>
+    <description>Update and fix minor bugs:
+[#10] Khi đổi màu trên palette editor, màu không được apply lại trên bitmap viewer</description>
+    <releaseNotes>[#10] Khi đổi màu trên palette editor, màu không được apply lại trên bitmap viewer</releaseNotes>
 	<readme>docs\README.md</readme>
 	<repository type="git" url="https://github.com/TrdHuy/PublicNugetRepo.git" />
   </metadata>
