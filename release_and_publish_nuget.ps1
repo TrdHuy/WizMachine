@@ -150,7 +150,7 @@ function Create-ReleaseNote ($baseSha, $headSha) {
 	$commits = $response.commits | ForEach-Object { 
 		$temp = Get-TitleAndIssueIdFromMessage $_.commit.message
 		if ($temp -and $temp.IssueId -ne $VERSION_UP_ID -and $temp.IssueId -ne $WORK_FLOW_ISSUE_ID) {
-			"[#" + $temp.IssueId + "] " + $temp.CommitTitle 
+			"[#" + $temp.IssueId + "] " + $temp.CommitTitle  + "`n"
 		} 
 	}
 	return $commits
