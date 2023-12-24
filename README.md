@@ -30,7 +30,11 @@ where gh >nul 2>nul && gh --version && git clone "https://github.com/TrdHuy/WizM
 > ``` cmd
 > dotnet nuget push <pathToNupkg>" --api-key <TOKEN> --source "github"
 > ```
-> 
+> ## 👉 Run auto publish WizMachine nuget package via GITHUB ACTION
+> * Make sure to install gh, then run this command in solution folder
+> ```cmd
+> gh workflow run ReleaseAndPublishNuget
+> ```
 > ## 👉 Run auto publish WizMachine nuget package on LOCAL
 >
 > * Create "local.config" file in Solution DIR
