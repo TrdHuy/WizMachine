@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0-windows</TargetFramework>
@@ -10,54 +10,51 @@
     <SolutionDirectory>$([System.IO.Path]::GetFullPath('$(ProjectFullPath)\..'))</SolutionDirectory>
     <EngineProjectDir>$(SolutionDirectory)\engine</EngineProjectDir>
     <DllPathFile>$(SolutionDirectory)\bin\cpp_output_path.txt</DllPathFile>
-    <AssemblyVersion>0.0.0.2</AssemblyVersion>
-    <FileVersion>0.0.0.2</FileVersion>
-    <Version>0.0.0.2</Version>
+    <AssemblyVersion>0.0.0.3</AssemblyVersion>
+    <FileVersion>0.0.0.3</FileVersion>
+    <Version>0.0.0.3</Version>
   </PropertyGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(DoPreBuild)'!='false'">
-    <Exec Command="echo EngineProjectDir=$(EngineProjectDir)" />
-	<Exec Command="echo OutDir=$(OutDir)" />
-    <Exec Command="msbuild /v:Detailed /t:Clean /p:Configuration=$(Configuration) /p:Platform=x64 /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj" />
-    <Exec Command="msbuild /v:Detailed /t:Rebuild /p:Configuration=$(Configuration) /p:Platform=x64 /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj" />
+    <Exec Command="echo EngineProjectDir=$(EngineProjectDir)"/>
+    <Exec Command="echo OutDir=$(OutDir)"/>
+    <Exec Command="msbuild /v:Detailed /t:Clean /p:Configuration=$(Configuration) /p:Platform=x64 /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj"/>
+    <Exec Command="msbuild /v:Detailed /t:Rebuild /p:Configuration=$(Configuration) /p:Platform=x64 /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj"/>
     <ReadLinesFromFile File="$(DllPathFile)">
-      <Output TaskParameter="Lines" PropertyName="DllPathLines" />
+      <Output TaskParameter="Lines" PropertyName="DllPathLines"/>
     </ReadLinesFromFile>
   </Target>
   <Target Name="CopyDllToOutput" AfterTargets="PreBuild" Condition="'$(DoPreBuild)'!='false'">
-    <Exec Command="echo DllPathFile=$(DllPathFile)" />
-    <Exec Command="echo DllPathLines=$(DllPathLines)" />
-    <Exec Command="xcopy /E /Y &quot;$(DllPathLines)*&quot; &quot;$(OutDir)&quot;" />
+    <Exec Command="echo DllPathFile=$(DllPathFile)"/>
+    <Exec Command="echo DllPathLines=$(DllPathLines)"/>
+    <Exec Command="xcopy /E /Y &quot;$(DllPathLines)*&quot; &quot;$(OutDir)&quot;"/>
   </Target>
   <Target Name="ExtractCppModuleToPublishFolder" AfterTargets="Publish">
-	<Message Text="___________PublishDir=$(PublishDir)" Importance="high" />
-    <Exec Command="xcopy /E /Y &quot;$(DllPathLines)*&quot; &quot;$(PublishDir)&quot;" />
-    <Exec Command="echo PublishZipDir=$(PublishZipDir)" />
+    <Message Text="___________PublishDir=$(PublishDir)" Importance="high"/>
+    <Exec Command="xcopy /E /Y &quot;$(DllPathLines)*&quot; &quot;$(PublishDir)&quot;"/>
+    <Exec Command="echo PublishZipDir=$(PublishZipDir)"/>
+    <Exec Command="echo $(PublishZipDir)\$(AssemblyName)_v$(Version).zip > ..\bin\publishedZipPath"/>
     <PropertyGroup>
       <PublishZipDir>$([System.IO.Path]::GetFullPath('$(PublishDir)\..'))</PublishZipDir>
     </PropertyGroup>
     <ItemGroup>
-      <OldPublishFile Include="$(PublishZipDir)\$(AssemblyName)_v$(Version).zip" />
-      <PdbFilesToDelete Include="$(PublishDir)\*.pdb" />
-      <ExpFilesToDelete Include="$(PublishDir)\*.exp" />
-      <LibFilesToDelete Include="$(PublishDir)\*.lib" />
+      <OldPublishFile Include="$(PublishZipDir)\$(AssemblyName)_v$(Version).zip"/>
+      <PdbFilesToDelete Include="$(PublishDir)\*.pdb"/>
+      <ExpFilesToDelete Include="$(PublishDir)\*.exp"/>
+      <LibFilesToDelete Include="$(PublishDir)\*.lib"/>
     </ItemGroup>
-    <Delete Files="@(OldPublishFile)" />
-    <Delete Files="@(PdbFilesToDelete)" />
-    <Delete Files="@(ExpFilesToDelete)" />
-    <Delete Files="@(LibFilesToDelete)" />
-	  <Exec Command="echo $(PublishZipDir)\$(AssemblyName)_v$(Version).zip > ..\bin\publishedZipPath" />
-
-	  <ZipDirectory SourceDirectory="$(PublishDir)" DestinationFile="$(PublishZipDir)\$(AssemblyName)_v$(Version).zip" />
+    <Delete Files="@(OldPublishFile)"/>
+    <Delete Files="@(PdbFilesToDelete)"/>
+    <Delete Files="@(ExpFilesToDelete)"/>
+    <Delete Files="@(LibFilesToDelete)"/>
+    <ZipDirectory SourceDirectory="$(PublishDir)" DestinationFile="$(PublishZipDir)\$(AssemblyName)_v$(Version).zip"/>
   </Target>
-	<Target Name="PackTaskDependencies" BeforeTargets="GenerateNuspec">
-		<Message Text="Start PackTaskDependencies:" Importance="high" />
-		<Message Text="___________PackageOutputPath=$(PackageOutputPath)" Importance="high" />
-		<Message Text="___________OutDir=$(OutDir)" Importance="high" />
-		<ItemGroup>
-			<ExpFilesToDelete Include="$(OutDir)\*.exp" />
-			<LibFilesToDelete Include="$(OutDir)\*.lib" />
-		</ItemGroup>
-		<!--<Delete Files="@(ExpFilesToDelete)" />
-		<Delete Files="@(LibFilesToDelete)" />-->
-	</Target>
+  <Target Name="PackTaskDependencies" BeforeTargets="GenerateNuspec">
+    <Message Text="Start PackTaskDependencies:" Importance="high"/>
+    <Message Text="___________PackageOutputPath=$(PackageOutputPath)" Importance="high"/>
+    <Message Text="___________OutDir=$(OutDir)" Importance="high"/>
+    <ItemGroup>
+      <ExpFilesToDelete Include="$(OutDir)\*.exp"/>
+      <LibFilesToDelete Include="$(OutDir)\*.lib"/>
+    </ItemGroup>
+  </Target>
 </Project>
