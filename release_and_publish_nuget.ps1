@@ -134,7 +134,7 @@ function Create-ReleaseNote ($baseSha, $headSha) {
 	# Gửi yêu cầu API
 	$headers = @{
 		Authorization = "token $TOKEN"
-		Accept        = "application/vnd.github+json"
+		Accept        = "application/vnd.github.v3+json"
 	}
 
 	$response = Invoke-RestMethod -Uri $compareUrl -Method Get -Headers $headers
@@ -197,30 +197,28 @@ function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $A
 	$uri = "https://api.github.com/repos/$OWNER/$REPO/releases"
 	$headers = @{
 		"Authorization" = "token $TOKEN"
-		"Accept" = "application/vnd.github.v3+json"
+		"Accept"        = "application/vnd.github.v3+json"
 	}
 
 	$body = @{
-		tag_name = $TagName
-		name = $ReleaseName
-		body = $ReleaseBody
-		draft = $false
-		prerelease = $false
+		tag_name         = $TagName
+		target_commitish = $BRANCH
+		name             = $ReleaseName
+		draft            = $false
+		prerelease       = $false
 	} | ConvertTo-Json
 
 	$response = Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body
 
 	# In ra thông tin release được tạo mới
 	Write-Host "Release created. ID: $($response.id), Name: $($response.name)"
-	$RELEASE_ID=$response.id
+	$RELEASE_ID = $response.id
 
-
-	# Tải lên asset vào release
 	# Tải lên asset vào release
 	$url = "https://uploads.github.com/repos/$OWNER/$REPO/releases/$RELEASE_ID/assets?name=$AssetName"
 	$headers = @{
 		Authorization = "token $TOKEN"
-		Accept = "application/vnd.github.v3+json"
+		Accept        = "application/vnd.github.v3+json"
 	}
 
 	Invoke-RestMethod -Uri $url -Method Post -Headers $headers -InFile $AssetPath -ContentType "application/zip"
