@@ -1,0 +1,48 @@
+name: ReleaseAndPublishNuget
+on:
+  workflow_dispatch:
+jobs:
+
+  ReleaseAndPublishNuget:
+    runs-on: windows-latest
+    env:
+     ISLOCAL: false
+     VERSION_UP_ID: 2
+     WORK_FLOW_ISSUE_ID: 1
+     BUILD_HEAVY_PUBLISH: false
+     PROJECT_PATH: WizMachine\WizMachine.csproj
+     GITHUB_TOKEN: ${{ secrets.WORK_FLOW_ACCESS_TOKEN_CLASSIC }}
+     PUBLISH_DIR: light_publish
+     PUBLISH_NAME_CONTAINER_FILE_PATH: bin\publishedZipPath
+     NUSPEC_FILE_PATH: WizMachine\WizMachine_RELEASE.nuspec
+     NUGET_PUBLISH_DIR: nuget_publish
+     NUSPEC_FILE_NAME: WizMachine_RELEASE.nuspec
+     REPO_OWNER: TrdHuy
+     REPO_NAME: WizMachine
+     TARGET_RELEASED_BRANCH: dev
+     
+    steps:
+    ################### CORE REGION #######################
+    - name: Checkout repo
+      uses: actions/checkout@v3
+      with: 
+        fetch-depth: 0
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+    - name: Build, create release, publish to nuget github
+      shell: pwsh
+      run: |
+        $result = & .\release_and_publish_nuget.ps1
+        echo result=$result
+    #- name: Set outputs
+    #  id: vars
+    #  shell: pwsh
+    #  run: echo "::set-output name=production::123098"
+    #- name: Check outputs
+    #  shell: pwsh
+    #  run: echo huy.td1____${{ steps.vars.outputs.production }}
+
