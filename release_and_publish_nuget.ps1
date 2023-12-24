@@ -134,7 +134,7 @@ function Create-ReleaseNote ($baseSha, $headSha) {
 	# Gửi yêu cầu API
 	$headers = @{
 		Authorization = "token $TOKEN"
-		Accept        = "application/vnd.github.v3+json"
+		Accept        = "application/vnd.github+json"
 	}
 
 	$response = Invoke-RestMethod -Uri $compareUrl -Method Get -Headers $headers
@@ -197,7 +197,7 @@ function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $A
 	$uri = "https://api.github.com/repos/$OWNER/$REPO/releases"
 	$headers = @{
 		"Authorization" = "token $TOKEN"
-		"Accept"        = "application/vnd.github.v3+json"
+		"Accept"        = "application/vnd.github+json"
 	}
 
 	$body = @{
@@ -209,6 +209,7 @@ function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $A
 		prerelease       = $false
 	} | ConvertTo-Json
 
+	Write-Host "Create release API url: " $uri
 	$response = Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body
 
 	# In ra thông tin release được tạo mới
@@ -219,9 +220,9 @@ function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $A
 	$url = "https://uploads.github.com/repos/$OWNER/$REPO/releases/$RELEASE_ID/assets?name=$AssetName"
 	$headers = @{
 		Authorization = "token $TOKEN"
-		Accept        = "application/vnd.github.v3+json"
+		Accept        = "application/vnd.github+json"
 	}
-
+	Write-Host "Upload asset API url: " $url
 	Invoke-RestMethod -Uri $url -Method Post -Headers $headers -InFile $AssetPath -ContentType "application/zip"
 }
 
