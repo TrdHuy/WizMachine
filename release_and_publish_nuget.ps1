@@ -150,7 +150,8 @@ function Create-ReleaseNote ($baseSha, $headSha) {
 	$commits = $response.commits | ForEach-Object { 
 		$temp = Get-TitleAndIssueIdFromMessage $_.commit.message
 		if ($temp -and $temp.IssueId -ne $VERSION_UP_ID -and $temp.IssueId -ne $WORK_FLOW_ISSUE_ID) {
-			"[#" + $temp.IssueId + "] " + $temp.CommitTitle  + "`n"
+			#TODO: dynamic this
+			"### :palm_tree: [#" + $temp.IssueId + "] " + $temp.CommitTitle  + "`n"
 		} 
 	}
 	return $commits
@@ -298,7 +299,7 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 		Write-Host assetFilePath=$assetFilePath
 		Write-Host assetName=$assetName
 		Write-Host tagName=$tagName
-		$releaseBody = $NUGET_PUBLISH_DESCRIPTION_TITLE + "`n" + $releaseNote
+		$releaseBody = "# " + $NUGET_PUBLISH_DESCRIPTION_TITLE + "`n" + $releaseNote
 		Create-NewRelease $tagName $tagName $releaseBody $assetFilePath $assetName
 		Write-Host "==========================================================`n`n`n"
 
