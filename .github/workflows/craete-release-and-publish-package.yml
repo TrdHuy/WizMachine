@@ -32,7 +32,7 @@ jobs:
         dotnet-version: 7.0.x
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
-    - name: Check Commit Message by github script
+    - name: Build, create release, publish to nuget github
       shell: pwsh
       run: |
         $result = & .\release_and_publish_nuget.ps1
