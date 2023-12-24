@@ -199,13 +199,12 @@ function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $A
 		"Authorization" = "token $TOKEN"
 		"Accept"        = "application/vnd.github.v3+json"
 	}
-	$ReleaseBody = "Update and fix minor bugs:[#10] Khi đổi màu trên palette edit".Trim()
+	
 	Write-Host ReleaseBody= $ReleaseBody
-
 	$body = "{`"tag_name`":`"$TagName`"," + 
 		"`"target_commitish`":`"$BRANCH`"," +
 		"`"name`":`"$ReleaseName`"," +
-		"`"body`":`"$ReleaseBody`"," +
+		"`"body`":`"$($ReleaseBody.ToString())`"," +
 		"`"draft`":false," +
 		"`"prerelease`":false," + 
 		"`"generate_release_notes`":false}"
