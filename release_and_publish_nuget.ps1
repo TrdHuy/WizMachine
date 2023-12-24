@@ -199,17 +199,16 @@ function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $A
 		"Authorization" = "token $TOKEN"
 		"Accept"        = "application/vnd.github.v3+json"
 	}
-	$ReleaseBody = "Update and fix minor bugs[#10] Hứa, màu không được apply lại trên bitmap viewer [#1] Fix lỗi build khi auto version bump"
 	Write-Host ReleaseBody= $ReleaseBody
 
-	$body = @{
-		tag_name         = $TagName
-		target_commitish = $BRANCH
-		name             = $ReleaseName
-		body             = "Update and fix minor bugs: `n[#10] Hứa"
-		draft            = $false
-		prerelease       = $false
-	} | ConvertTo-Json
+	$body = "{`"tag_name`":`"$TagName`"," + 
+		"`"target_commitish`":`"$BRANCH`"," +
+		"`"name`":`"$ReleaseName`"," +
+		"`"body`":`"$ReleaseBody`"," +
+		"`"draft`":false," +
+		"`"prerelease`":false," + 
+		"`"generate_release_notes`":false}"
+	
 	Write-Host body= $body
 
 	$response = Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body
