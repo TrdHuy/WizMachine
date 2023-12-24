@@ -286,6 +286,19 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 		msbuild /t:Restore
 		msbuild $PROJECT_PATH /t:Publish /p:Configuration=Release /p:PublishDir=$PUBLISH_DIR /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
 		Write-Host "==========================================================`n`n`n"
+
+		Write-Host "==================Start create new release : ================="
+		$assetFilePath = Get-Content -Raw -Path $PUBLISH_NAME_CONTAINER_FILE_PATH
+		$assetFilePath = $assetFilePath.Trim()
+		$assetName = Split-Path $assetFilePath -Leaf
+		$tagName = ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString()
+		Write-Host assetFilePath=$assetFilePath
+		Write-Host assetName=$assetName
+		Write-Host tagName=$tagName
+		$releaseBody = $NUGET_PUBLISH_DESCRIPTION_TITLE + "`n" + $releaseNote
+		Create-NewRelease $tagName $tagName $releaseBody $assetFilePath $assetName
+		Write-Host "==========================================================`n`n`n"
+
 		Write-Host "==================Start packing project: ================="
 		try {
 			if ($ISLOCAL -eq $true) {
@@ -303,18 +316,7 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 		Write-Host $cache
 		dotnet nuget push $nupkgFilePath --api-key $TOKEN --source "github"
 		Write-Host "==========================================================`n`n`n"
-
-		Write-Host "==================Start create new release : ================="
-		$assetFilePath = Get-Content -Raw -Path $PUBLISH_NAME_CONTAINER_FILE_PATH
-		$assetFilePath = $assetFilePath.Trim()
-		$assetName = Split-Path $assetFilePath -Leaf
-		$tagName = ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString()
-		Write-Host assetFilePath=$assetFilePath
-		Write-Host assetName=$assetName
-		Write-Host tagName=$tagName
-		$releaseBody = $NUGET_PUBLISH_DESCRIPTION_TITLE + "`n" + $releaseNote
-		Create-NewRelease $tagName $tagName $releaseBody $assetFilePath $assetName
-		Write-Host "==========================================================`n`n`n"
+		
 		
 		return "SUCCESS"
 	}
