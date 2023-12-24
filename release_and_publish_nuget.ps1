@@ -199,15 +199,16 @@ function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $A
 		"Authorization" = "token $TOKEN"
 		"Accept"        = "application/vnd.github.v3+json"
 	}
+	Write-Host ReleaseBody= $ReleaseBody
 
 	$body = @{
 		tag_name         = $TagName
 		target_commitish = $BRANCH
 		name             = $ReleaseName
-		body             = "Update minor and fix bug: `n[#12] Test hứa học"
+		body             = $ReleaseBody
 		draft            = $false
 		prerelease       = $false
-	} | ConvertTo-Json
+	} | ConvertTo-Json -EscapeHandling None
 
 	$response = Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body
 
