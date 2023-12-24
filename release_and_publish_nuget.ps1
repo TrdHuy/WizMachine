@@ -198,7 +198,7 @@ function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $A
 	$headers = @{
 		"Authorization" = "token $TOKEN"
 		"Accept"        = "application/vnd.github+json"
-	}
+	} | ConvertTo-Json
 
 	$body = @{
 		tag_name         = $TagName
@@ -207,7 +207,7 @@ function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $A
 		body             = $ReleaseBody
 		draft            = $false
 		prerelease       = $false
-	} | ConvertTo-Json -Depth 10
+	} | ConvertTo-Json
 
 	Write-Host "Create release API url: " $uri
 	$response = Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body
