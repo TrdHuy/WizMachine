@@ -199,15 +199,16 @@ function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $A
 		"Authorization" = "token $TOKEN"
 		"Accept"        = "application/vnd.github.v3+json"
 	}
-	
+
 	Write-Host ReleaseBody= $ReleaseBody
-	$body = "{`"tag_name`":`"$TagName`"," + 
-		"`"target_commitish`":`"$BRANCH`"," +
-		"`"name`":`"$ReleaseName`"," +
-		"`"body`":`"$($ReleaseBody.ToString())`"," +
-		"`"draft`":false," +
-		"`"prerelease`":false," + 
-		"`"generate_release_notes`":false}"
+	$body = @{
+          tag_name         = $TagName
+          target_commitish = $BRANCH
+          name             = $ReleaseName
+          body             = $ReleaseBody
+          draft            = $false
+          prerelease       = $false
+      } | ConvertTo-Json -EscapeHandling EscapeNonAscii
 	
 	Write-Host body= $body
 
