@@ -91,7 +91,7 @@ if (-not $NUGET_PUBLISH_DESCRIPTION_TITLE) {
 	$NUGET_PUBLISH_DESCRIPTION_TITLE = "Update and fix minor bugs:"	
 }
 
-$IS_FIRST_RELEASE = $($(Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/ArtWiz/releases" -Method Get -ErrorAction Stop -Headers @{ Authorization = "token $TOKEN" }).Count -eq 0)
+$IS_FIRST_RELEASE = $($(Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/releases" -Method Get -ErrorAction Stop -Headers @{ Authorization = "token $TOKEN" }).Count -eq 0)
 
 Write-Host ================================
 Write-Host OWNER=$OWNER 
