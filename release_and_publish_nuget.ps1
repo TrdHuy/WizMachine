@@ -207,7 +207,7 @@ function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $A
 		body             = $ReleaseBody
 		draft            = $false
 		prerelease       = $false
-	} | ConvertTo-Json
+	} | ConvertTo-Json -Depth 10
 
 	Write-Host "Create release API url: " $uri
 	$response = Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body
