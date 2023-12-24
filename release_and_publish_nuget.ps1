@@ -90,6 +90,9 @@ if (-not $PUBLISH_NAME_CONTAINER_FILE_PATH) {
 if (-not $NUGET_PUBLISH_DESCRIPTION_TITLE) {
 	$NUGET_PUBLISH_DESCRIPTION_TITLE = "Update and fix minor bugs:"	
 }
+
+$IS_FIRST_RELEASE = $($(Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/ArtWiz/releases" -Method Get -ErrorAction Stop -Headers @{ Authorization = "token $TOKEN" }).Count -eq 0)
+
 Write-Host ================================
 Write-Host OWNER=$OWNER 
 Write-Host REPO=$REPO 
@@ -102,6 +105,7 @@ Write-Host NUGET_PUBLISH_DIR=$NUGET_PUBLISH_DIR
 Write-Host PROJECT_NAME=$PROJECT_NAME
 Write-Host PUBLISH_NAME_CONTAINER_FILE_PATH=$PUBLISH_NAME_CONTAINER_FILE_PATH
 Write-Host NUGET_PUBLISH_DESCRIPTION_TITLE=$NUGET_PUBLISH_DESCRIPTION_TITLE
+Write-Host IS_FIRST_RELEASE=$IS_FIRST_RELEASE
 Write-Host ================================`n`n`n
 
 
@@ -150,27 +154,14 @@ function Create-ReleaseNote ($baseSha, $headSha) {
 	$commits = $response.commits | ForEach-Object { 
 		$temp = Get-TitleAndIssueIdFromMessage $_.commit.message
 		if ($temp -and $temp.IssueId -ne $VERSION_UP_ID -and $temp.IssueId -ne $WORK_FLOW_ISSUE_ID) {
-			#TODO: dynamic this
-			"### :palm_tree: [#" + $temp.IssueId + "] " + $temp.CommitTitle  + "`n"
+			#TODO: dynamic the icon this
+			"### :palm_tree: [#" + $temp.IssueId + "] " + $temp.CommitTitle + "`n"
 		} 
-	}
-	return $commits
+	} 
+	return ($commits -join "`n") + "`n`n" +
+	"**Full Changelog**: https://github.com/$OWNER/$REPO/compare/$baseSha...$headSha" 
 }
 
-#Lấy commit cuối cùng của bản latest release
-$result = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/releases/latest" -Headers @{ Authorization = "token $TOKEN" }
-$lastReleasedCommitSha = $result[0].target_commitish
-$commitInfoRes = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/commits/$lastReleasedCommitSha" -Headers @{ Authorization = "token $TOKEN" }
-$lastReleasedCommitMes = $commitInfoRes.commit.message
-Write-Host lastReleasedCommitMes=$lastReleasedCommitMes 
-Write-Host lastReleasedCommitSha=$lastReleasedCommitSha 
-
-# Sử dụng GitHub API để lấy thông tin về commit cuối cùng trên nhánh
-$lastCommitOnBranchRes = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/commits/$BRANCH" -Headers @{ Authorization = "token $TOKEN" }
-$lastCommitOnBranchSha = $lastCommitOnBranchRes.sha
-$lastCommitOnBranchMes = $lastCommitOnBranchRes.commit.message
-Write-Host lastCommitOnBranchMes=$lastCommitOnBranchMes
-Write-Host lastCommitOnBranchSha=$lastCommitOnBranchSha 
 
 function Extract-InfoFromMessage ($message) {
 	$regex = '\[#(\d+)\] Version up: (\d+\.\d+\.\d+\.\d+)'
@@ -203,13 +194,13 @@ function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $A
 
 	Write-Host ReleaseBody= $ReleaseBody
 	$body = @{
-          tag_name         = $TagName
-          target_commitish = $BRANCH
-          name             = $ReleaseName
-          body             = $ReleaseBody
-          draft            = $false
-          prerelease       = $false
-      } | ConvertTo-Json -EscapeHandling EscapeNonAscii
+		tag_name         = $TagName
+		target_commitish = $BRANCH
+		name             = $ReleaseName
+		body             = $ReleaseBody
+		draft            = $false
+		prerelease       = $false
+	} | ConvertTo-Json -EscapeHandling EscapeNonAscii
 	
 	Write-Host body= $body
 
@@ -229,104 +220,124 @@ function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $A
 	Invoke-RestMethod -Uri $url -Method Post -Headers $headers -InFile $AssetPath -ContentType "application/zip"
 }
 
-# Trích xuất thông tin từ các chuỗi
-$lastReleasedInfo = Extract-InfoFromMessage $lastReleasedCommitMes
-$lastCommitOnBranchInfo = Extract-InfoFromMessage $lastCommitOnBranchMes
-Write-Host lastReleasedInfo.IssueId=($lastReleasedInfo.IssueId)
-Write-Host lastCommitOnBranchInfo=$lastCommitOnBranchInfo
+# Sử dụng GitHub API để lấy thông tin về commit cuối cùng trên nhánh
+$lastCommitOnBranchRes = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/commits/$BRANCH" -Headers @{ Authorization = "token $TOKEN" }
+$lastCommitOnBranchSha = $lastCommitOnBranchRes.sha
+$lastCommitOnBranchMes = $lastCommitOnBranchRes.commit.message
+Write-Host lastCommitOnBranchMes=$lastCommitOnBranchMes
+Write-Host lastCommitOnBranchSha=$lastCommitOnBranchSha 
 
-$nupkgFileName = ""
-# So sánh các phiên bản và hiển thị kết quả
-if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
-	$lastReleasedVersion = [version]$lastReleasedInfo.Version
-	$lastCommitOnBranchVersion = [version]$lastCommitOnBranchInfo.Version
-	if ($lastCommitOnBranchVersion -gt $lastReleasedVersion) {
-
-		$releaseNote = Create-ReleaseNote $lastReleasedCommitSha $lastCommitOnBranchSha 
-		$xmlString = Get-Content -Raw -Path $NUSPEC_FILE_PATH
+#TODO: Implement first release
+if ($IS_FIRST_RELEASE -eq $true) {
 	
-		# Tạo đối tượng XmlDocument và load chuỗi XML vào nó
-		$xmlDocument = New-Object System.Xml.XmlDocument
-		$xmlDocument.PreserveWhitespace = $true
-		$xmlDocument.LoadXml($xmlString)
-	
-		$xmlDocument.package.metadata.version = $lastCommitOnBranchVersion.ToString()
-		$xmlDocument.package.metadata.releaseNotes = $releaseNote
-		$xmlDocument.package.metadata.description = $NUGET_PUBLISH_DESCRIPTION_TITLE + "`n" + $releaseNote
+}
+else {
+	#Lấy commit cuối cùng của bản latest release
+	$result = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/releases/latest" -Headers @{ Authorization = "token $TOKEN" }
+	$lastReleasedCommitSha = $result[0].target_commitish
+	$commitInfoRes = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/commits/$lastReleasedCommitSha" -Headers @{ Authorization = "token $TOKEN" }
+	$lastReleasedCommitMes = $commitInfoRes.commit.message
+	Write-Host lastReleasedCommitMes=$lastReleasedCommitMes 
+	Write-Host lastReleasedCommitSha=$lastReleasedCommitSha 
 
-		$nupkgFileName = ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString() + ".nupkg"
-		$scriptRoot = $PSScriptRoot
-		$nupkgFilePath = $scriptRoot + "\" + $NUGET_PUBLISH_DIR + "\" + $nupkgFileName
+	# Trích xuất thông tin từ các chuỗi
+	$lastReleasedInfo = Extract-InfoFromMessage $lastReleasedCommitMes
+	$lastCommitOnBranchInfo = Extract-InfoFromMessage $lastCommitOnBranchMes
+	Write-Host lastReleasedInfo.IssueId=($lastReleasedInfo.IssueId)
+	Write-Host lastCommitOnBranchInfo=$lastCommitOnBranchInfo
+
+	$nupkgFileName = ""
+	# So sánh các phiên bản và hiển thị kết quả
+	if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
+		$lastReleasedVersion = [version]$lastReleasedInfo.Version
+		$lastCommitOnBranchVersion = [version]$lastCommitOnBranchInfo.Version
+		if ($lastCommitOnBranchVersion -gt $lastReleasedVersion) {
+
+			$releaseNote = Create-ReleaseNote $lastReleasedCommitSha $lastCommitOnBranchSha 
+			$xmlString = Get-Content -Raw -Path $NUSPEC_FILE_PATH
+	
+			# Tạo đối tượng XmlDocument và load chuỗi XML vào nó
+			$xmlDocument = New-Object System.Xml.XmlDocument
+			$xmlDocument.PreserveWhitespace = $true
+			$xmlDocument.LoadXml($xmlString)
+	
+			$xmlDocument.package.metadata.version = $lastCommitOnBranchVersion.ToString()
+			$xmlDocument.package.metadata.releaseNotes = $releaseNote
+			$xmlDocument.package.metadata.description = $NUGET_PUBLISH_DESCRIPTION_TITLE + "`n" + $releaseNote
+
+			$nupkgFileName = ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString() + ".nupkg"
+			$scriptRoot = $PSScriptRoot
+			$nupkgFilePath = $scriptRoot + "\" + $NUGET_PUBLISH_DIR + "\" + $nupkgFileName
 		
-		Write-Host "scriptRoot: $scriptRoot"
-		Write-Host "nupkgFileName: $nupkgFileName"
-		Write-Host "nupkgFilePath: $nupkgFilePath"
+			Write-Host "scriptRoot: $scriptRoot"
+			Write-Host "nupkgFileName: $nupkgFileName"
+			Write-Host "nupkgFilePath: $nupkgFilePath"
 		
-		Write-Host "==================New .nuspec file content: ================="
-		Write-Host ($xmlDocument.OuterXml)
-		Write-Host "=============================================================`n`n`n"
+			Write-Host "==================New .nuspec file content: ================="
+			Write-Host ($xmlDocument.OuterXml)
+			Write-Host "=============================================================`n`n`n"
 
-		$settings = New-Object System.Xml.XmlWriterSettings
-		$settings.Encoding = [System.Text.Encoding]::UTF8
-		$settings.Indent = $true
+			$settings = New-Object System.Xml.XmlWriterSettings
+			$settings.Encoding = [System.Text.Encoding]::UTF8
+			$settings.Indent = $true
 	
-		# Thử ghi XML vào tệp tin với StreamWriter và mã hóa UTF-8
-		try {
-			$stream = New-Object System.IO.StreamWriter($NUSPEC_FILE_PATH, $false, [System.Text.Encoding]::UTF8)
-			$xmlWriter = [System.Xml.XmlWriter]::Create($stream, $settings)
-			$xmlDocument.Save($xmlWriter)
-		}
-		finally {
-			if ($xmlWriter) {
-				$xmlWriter.Close()
+			# Thử ghi XML vào tệp tin với StreamWriter và mã hóa UTF-8
+			try {
+				$stream = New-Object System.IO.StreamWriter($NUSPEC_FILE_PATH, $false, [System.Text.Encoding]::UTF8)
+				$xmlWriter = [System.Xml.XmlWriter]::Create($stream, $settings)
+				$xmlDocument.Save($xmlWriter)
 			}
-			if ($stream) {
-				$stream.Close()
+			finally {
+				if ($xmlWriter) {
+					$xmlWriter.Close()
+				}
+				if ($stream) {
+					$stream.Close()
+				}
 			}
-		}
 
-		Write-Host "`n`n`n"
-		Write-Host "==================Start publish project: ================="
-		msbuild /t:Restore
-		msbuild $PROJECT_PATH /t:Publish /p:Configuration=Release /p:PublishDir=$PUBLISH_DIR /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
-		Write-Host "==========================================================`n`n`n"
+			Write-Host "`n`n`n"
+			Write-Host "==================Start publish project: ================="
+			msbuild /t:Restore
+			msbuild $PROJECT_PATH /t:Publish /p:Configuration=Release /p:PublishDir=$PUBLISH_DIR /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
+			Write-Host "==========================================================`n`n`n"
 
-		Write-Host "==================Start create new release : ================="
-		$assetFilePath = Get-Content -Raw -Path $PUBLISH_NAME_CONTAINER_FILE_PATH
-		$assetFilePath = $assetFilePath.Trim()
-		$assetName = Split-Path $assetFilePath -Leaf
-		$tagName = ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString()
-		Write-Host assetFilePath=$assetFilePath
-		Write-Host assetName=$assetName
-		Write-Host tagName=$tagName
-		$releaseBody = "# " + $NUGET_PUBLISH_DESCRIPTION_TITLE + "`n" + $releaseNote
-		Create-NewRelease $tagName $tagName $releaseBody $assetFilePath $assetName
-		Write-Host "==========================================================`n`n`n"
+			Write-Host "==================Start create new release : ================="
+			$assetFilePath = Get-Content -Raw -Path $PUBLISH_NAME_CONTAINER_FILE_PATH
+			$assetFilePath = $assetFilePath.Trim()
+			$assetName = Split-Path $assetFilePath -Leaf
+			$tagName = ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString()
+			Write-Host assetFilePath=$assetFilePath
+			Write-Host assetName=$assetName
+			Write-Host tagName=$tagName
+			$releaseBody = "# " + $NUGET_PUBLISH_DESCRIPTION_TITLE + "`n" + $releaseNote
+			Create-NewRelease $tagName $tagName $releaseBody $assetFilePath $assetName
+			Write-Host "==========================================================`n`n`n"
 
-		Write-Host "==================Start packing project: ================="
-		try {
-			if ($ISLOCAL -eq $true) {
-				$cache = dotnet nuget remove source "github"
+			Write-Host "==================Start packing project: ================="
+			try {
+				if ($ISLOCAL -eq $true) {
+					$cache = dotnet nuget remove source "github"
+					Write-Host $cache
+				}
+				$cache = dotnet nuget add source "https://nuget.pkg.github.com/TrdHuy/index.json" --name "github" --username "trdtranduchuy@gmail.com" --password $TOKEN
 				Write-Host $cache
 			}
-			$cache = dotnet nuget add source "https://nuget.pkg.github.com/TrdHuy/index.json" --name "github" --username "trdtranduchuy@gmail.com" --password $TOKEN
+			catch {
+				Write-Host "An error occurred: $_.Exception.Message"
+			} 
+			finally {}
+			$cache = dotnet pack --configuration Release $PROJECT_PATH -p:NuspecFile=$NUSPEC_FILE_NAME --no-build -o $NUGET_PUBLISH_DIR
 			Write-Host $cache
+			dotnet nuget push $nupkgFilePath --api-key $TOKEN --source "github"
+			Write-Host "==========================================================`n`n`n"
+		
+		
+			return "SUCCESS"
 		}
-		catch {
-			Write-Host "An error occurred: $_.Exception.Message"
-		} 
-		finally {}
-		$cache = dotnet pack --configuration Release $PROJECT_PATH -p:NuspecFile=$NUSPEC_FILE_NAME --no-build -o $NUGET_PUBLISH_DIR
-		Write-Host $cache
-		dotnet nuget push $nupkgFilePath --api-key $TOKEN --source "github"
-		Write-Host "==========================================================`n`n`n"
-		
-		
-		return "SUCCESS"
-	}
-	else {
-		Write-Host "Latest version has been released!"
-		return "HAS_BEEN_RELEASED"
+		else {
+			Write-Host "Latest version has been released!"
+			return "HAS_BEEN_RELEASED"
+		}
 	}
 }
-

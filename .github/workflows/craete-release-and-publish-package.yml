@@ -1,8 +1,5 @@
 name: ReleaseAndPublishNuget
-on:      
-  push:
-    branches:
-      - '*'   
+on:
   workflow_dispatch:
 jobs:
 
@@ -11,6 +8,7 @@ jobs:
     env:
      ISLOCAL: false
      VERSION_UP_ID: 2
+     WORK_FLOW_ISSUE_ID: 1
      BUILD_HEAVY_PUBLISH: false
      PROJECT_PATH: WizMachine\WizMachine.csproj
      GITHUB_TOKEN: ${{ secrets.WORK_FLOW_ACCESS_TOKEN_CLASSIC }}
