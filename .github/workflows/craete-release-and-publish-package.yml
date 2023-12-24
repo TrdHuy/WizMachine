@@ -35,7 +35,7 @@ jobs:
     - name: Check Commit Message by github script
       shell: pwsh
       run: |
-        $result = & .\.github\workflows\release_and_publish_nuget.ps1
+        $result = & .\release_and_publish_nuget.ps1
         echo result=$result
     #- name: Set outputs
     #  id: vars
