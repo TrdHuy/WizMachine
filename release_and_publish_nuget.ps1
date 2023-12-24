@@ -204,6 +204,7 @@ function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $A
 		tag_name         = $TagName
 		target_commitish = $BRANCH
 		name             = $ReleaseName
+		body             = "Update minor and fix bug: `n[#12] Test hứa học"
 		draft            = $false
 		prerelease       = $false
 	} | ConvertTo-Json
