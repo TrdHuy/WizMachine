@@ -208,7 +208,7 @@ function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $A
 		body             = $ReleaseBody
 		draft            = $false
 		prerelease       = $false
-	} | ConvertTo-Json -EscapeHandling None
+	} | ConvertTo-Json
 
 	$response = Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body
 
