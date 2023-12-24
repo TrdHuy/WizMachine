@@ -9,6 +9,28 @@ where gh >nul 2>nul && gh --version && git clone "https://github.com/TrdHuy/WizM
 </br>
 </br>
 
+# 💩 To create a new version up automatically
+``` cmd
+gh workflow run AutoVersionBump -F vT="minor" -F force="true"
+```
+
+```
+In there:
+vT is Version up type
+vT="major"
+vT="minor"
+vT="patch"
+vT="build"
+
+force indicates that, you will version up even if previous commit is version up commit
+force="true"
+force="false"
+```
+---
+</br>
+</br>
+</br>
+
 # 💩 Publish to Nuget github source
 <details open>
 <summary>
