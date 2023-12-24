@@ -296,7 +296,7 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 		Write-Host assetFilePath=$assetFilePath
 		Write-Host assetName=$assetName
 		Write-Host tagName=$tagName
-		$releaseBody = $NUGET_PUBLISH_DESCRIPTION_TITLE + "`n" + $releaseNote
+		$releaseBody = $NUGET_PUBLISH_DESCRIPTION_TITLE + $releaseNote
 		Create-NewRelease $tagName $tagName $releaseBody $assetFilePath $assetName
 		Write-Host "==========================================================`n`n`n"
 
