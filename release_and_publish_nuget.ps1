@@ -199,6 +199,7 @@ function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $A
 		"Authorization" = "token $TOKEN"
 		"Accept"        = "application/vnd.github.v3+json"
 	}
+	$ReleaseBody "Update and fix minor bugs:[#10] Hứa, màu không được apply lại trên bitmap viewer [#1] Fix lỗi build khi auto version bump"
 	Write-Host ReleaseBody= $ReleaseBody
 
 	$body = @{
@@ -296,7 +297,7 @@ if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
 		Write-Host assetFilePath=$assetFilePath
 		Write-Host assetName=$assetName
 		Write-Host tagName=$tagName
-		$releaseBody = $NUGET_PUBLISH_DESCRIPTION_TITLE + $releaseNote
+		$releaseBody = $NUGET_PUBLISH_DESCRIPTION_TITLE + "`n" + $releaseNote
 		Create-NewRelease $tagName $tagName $releaseBody $assetFilePath $assetName
 		Write-Host "==========================================================`n`n`n"
 
