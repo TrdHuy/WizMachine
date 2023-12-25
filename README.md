@@ -57,6 +57,17 @@ force="false"
 > ```cmd
 > gh workflow run ReleaseAndPublishNuget
 > ```
+> * OR you can use github api via powershell
+> ```ps1
+> $payload = @{
+>     ref = "<YOUR TARGET BRANCH>"
+> } | ConvertTo-Json
+> Invoke-RestMethod -Uri "https://api.github.com/repos/TrdHuy/WizMachine/actions/workflows/80327278/dispatches" `
+>     -Headers @{ Authorization = "token <YOUR GITHUB TOKEN>" } `
+>     -Method Post `
+>     -Body $payload `
+>     -ContentType "application/json"
+> ```
 > ## 👉 Run auto publish WizMachine nuget package on LOCAL
 >
 > * Create "local.config" file in Solution DIR
