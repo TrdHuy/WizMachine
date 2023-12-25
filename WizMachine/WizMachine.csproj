@@ -6,7 +6,7 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>wengine</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <ProjectFullPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))</ProjectFullPath>
+	<ProjectFullPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))</ProjectFullPath>
     <SolutionDirectory>$([System.IO.Path]::GetFullPath('$(ProjectFullPath)\..'))</SolutionDirectory>
     <EngineProjectDir>$(SolutionDirectory)\engine</EngineProjectDir>
     <DllPathFile>$(SolutionDirectory)\bin\cpp_output_path.txt</DllPathFile>
@@ -14,6 +14,9 @@
     <FileVersion>0.0.0.4</FileVersion>
     <Version>0.0.0.4</Version>
   </PropertyGroup>
+  <ItemGroup>
+	<None Include="..\release_and_publish_nuget.ps1" />
+  </ItemGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(DoPreBuild)'!='false'">
     <Exec Command="echo EngineProjectDir=$(EngineProjectDir)"/>
     <Exec Command="echo OutDir=$(OutDir)"/>
@@ -29,13 +32,13 @@
     <Exec Command="xcopy /E /Y &quot;$(DllPathLines)*&quot; &quot;$(OutDir)&quot;"/>
   </Target>
   <Target Name="ExtractCppModuleToPublishFolder" AfterTargets="Publish">
-    <Message Text="___________PublishDir=$(PublishDir)" Importance="high"/>
+	<PropertyGroup>
+	  <PublishZipDir>$([System.IO.Path]::GetFullPath('$(PublishDir)\..'))</PublishZipDir>
+	</PropertyGroup>
+	<Message Text="___________PublishDir=$(PublishDir)" Importance="high"/>
     <Exec Command="xcopy /E /Y &quot;$(DllPathLines)*&quot; &quot;$(PublishDir)&quot;"/>
     <Exec Command="echo PublishZipDir=$(PublishZipDir)"/>
     <Exec Command="echo $(PublishZipDir)\$(AssemblyName)_v$(Version).zip > ..\bin\publishedZipPath"/>
-    <PropertyGroup>
-      <PublishZipDir>$([System.IO.Path]::GetFullPath('$(PublishDir)\..'))</PublishZipDir>
-    </PropertyGroup>
     <ItemGroup>
       <OldPublishFile Include="$(PublishZipDir)\$(AssemblyName)_v$(Version).zip"/>
       <PdbFilesToDelete Include="$(PublishDir)\*.pdb"/>
