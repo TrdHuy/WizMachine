@@ -234,7 +234,13 @@ if ($IS_FIRST_RELEASE -eq $true) {
 else {
 	#Lấy commit cuối cùng của bản latest release
 	$result = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/releases/latest" -Headers @{ Authorization = "token $TOKEN" }
-	$lastReleasedCommitSha = $result[0].target_commitish
+	$latestReleaseTagName = $result[0].tag_name
+
+	$tags = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/tags" -Method Get -Headers @{ "Authorization" = "token $TOKEN" }
+	# Lấy tag name của latest release từ danh sách các tags
+	$latestReleaseTagInfo = ($tags | Where-Object { $_.name -eq $latestReleaseTagName })
+
+	$lastReleasedCommitSha = $latestReleaseTagInfo.commit.sha
 	$commitInfoRes = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/commits/$lastReleasedCommitSha" -Headers @{ Authorization = "token $TOKEN" }
 	$lastReleasedCommitMes = $commitInfoRes.commit.message
 	Write-Host lastReleasedCommitMes=$lastReleasedCommitMes 
