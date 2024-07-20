@@ -100,11 +100,12 @@ jobs:
         reporttypes: 'HtmlInline;Cobertura'
         verbosity: 'Verbose'
     - name: Upload artifact
-      uses: actions/upload-artifact@v1.0.0
+      uses: actions/upload-artifact@v2
       if: env.ISSUE_NUMBER == env.VERSION_UP_ISSUE_ID || startsWith(github.ref, 'refs/heads/unittest_') || startsWith(github.ref, 'refs/heads/dev')
       with:
         name: CoverageReports-Release # Artifact name        
         path: CoverageReports # Directory containing files to upload
+        retention-days: 1
     ################### END UNITTEST REGION #######################
 
 
