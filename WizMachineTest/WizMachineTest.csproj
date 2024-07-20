@@ -11,7 +11,7 @@
 		<ProjectFullPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))</ProjectFullPath>
 		<SolutionDirectory>$([System.IO.Path]::GetFullPath('$(ProjectFullPath)\..'))</SolutionDirectory>
 		<DllPathFile>$(SolutionDirectory)\bin\cpp_output_path.txt</DllPathFile>
-
+		<Platforms>x64;x86</Platforms>
 	</PropertyGroup>
 
 	<Target Name="PostBuild" BeforeTargets="PostBuildEvent">
@@ -36,9 +36,16 @@
 		<None Remove="Resources\4.bin" />
 		<None Remove="Resources\5.bin" />
 		<None Remove="Resources\alpha.spr" />
+		<None Remove="Resources\dataForCompressTest\data\12345.spr" />
+		<None Remove="Resources\dataForCompressTest\data\test.txt" />
+		<None Remove="Resources\dataForCompressTest\data\test.xml" />
+		<None Remove="Resources\dataWithSpr.pak" />
+		<None Remove="Resources\dataWithSpr.pak.txt" />
 		<None Remove="Resources\test.bin" />
 		<None Remove="Resources\test.png" />
 		<None Remove="Resources\test.spr" />
+		<None Remove="Resources\testTxtFile.pak" />
+		<None Remove="Resources\testTxtFile.pak.txt" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -72,8 +79,29 @@
 		<Content Include="Resources\alpha.spr">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
+		<Content Include="Resources\dataForCompressTest\data\12345.spr">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Resources\dataForCompressTest\data\test.txt">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Resources\dataForCompressTest\data\test.xml">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Resources\dataWithSpr.pak">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Resources\dataWithSpr.pak.txt">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
 		<Content Include="Resources\test.bin">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Resources\testTxtFile.pak">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Resources\testTxtFile.pak.txt">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\test.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>

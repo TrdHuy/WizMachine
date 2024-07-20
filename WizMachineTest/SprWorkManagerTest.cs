@@ -4,6 +4,7 @@ using WizMachine;
 using WizMachine.Data;
 using WizMachine.Services.Base;
 using WizMachine.Services.Impl;
+using WizMachine.Services.Utils;
 using WizMachineTest.Utils;
 
 namespace SPRNetToolTest.Domain
@@ -58,6 +59,12 @@ namespace SPRNetToolTest.Domain
         private string _3binFilePath = "Resources\\3.bin";
         private string _4binFilePath = "Resources\\4.bin";
         private string _5binFilePath = "Resources\\5.bin";
+        private string _testTxtPakPath = "Resources\\testTxtFile.pak";
+        private string _testTxtPakTxtPath = "Resources\\testTxtFile.pak.txt";
+        private string _dataWithSprPakPath = "Resources\\dataWithSpr.pak";
+        private string _dataForCompressPakPath = "Resources\\dataForCompressTest.pak";
+        private string _daPakTxtPath = "Resources\\dataWithSpr.pak.txt";
+        private string _dataFolderForCompressPath = "Resources\\dataForCompressTest\\data";
         private ISprWorkManagerAdvance sprWorkManager;
         private SprWorkManagerTestObject sprWorkManagerTestObject;
 
@@ -194,6 +201,27 @@ namespace SPRNetToolTest.Domain
                 Assert.That(initResult);
                 Assert.That(sprWorkManager.FileHead.GlobalHeight * sprWorkManager.FileHead.GlobalWidth == 90000);
             }
+        }
+
+        [Test]
+        public void test_ExtractPakFile()
+        {
+            string exePath = Assembly.GetExecutingAssembly().Location;
+            string exeDirectory = Path.GetDirectoryName(exePath) ?? "";
+
+            var initResult = NativeAPIAdapter.ExtractPakFile(_dataWithSprPakPath,
+                _daPakTxtPath,
+                outputRootPath: exeDirectory);
+        }
+
+        [Test]
+        public void test_CompressPakFile()
+        {
+            string exePath = Assembly.GetExecutingAssembly().Location;
+            string exeDirectory = Path.GetDirectoryName(exePath) ?? "";
+
+            var initResult = NativeAPIAdapter.CompressFolderToPakFile(_dataFolderForCompressPath,
+                outputRootPath: exeDirectory);
         }
     }
 }

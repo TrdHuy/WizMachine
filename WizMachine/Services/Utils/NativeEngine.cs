@@ -52,22 +52,11 @@ namespace WizMachine.Services.Utils
         };
 
         [DllImport("engine.dll")]
-        public static extern void MyCppFunc(
-            string filePath,
-            [MarshalAs(UnmanagedType.LPArray,
-            ArraySubType = UnmanagedType.Struct,
-            SizeParamIndex = 2)] out NColor[] ros,
-            out int length);
-
-        [DllImport("engine.dll")]
         public static extern void ExportToSPRFile(string filePath,
             NSPRFileHead fileHead,
             NColor[] palette,
             int paletteSize,
             NFrameData[] frame);
-
-        [DllImport("engine.dll")]
-        public static extern IntPtr LoadSPRFile2(string filePath, out IntPtr colorPtr);
 
         [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void LoadSPRFile(string filePath,
@@ -85,16 +74,34 @@ namespace WizMachine.Services.Utils
         [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern void FreeArrData(IntPtr arrPtr);
 
-        [DllImport("engine.dll", CallingConvention = CallingConvention.StdCall)]
-        public static extern int Multiply(int a, int b);
 
-        [return: MarshalAs(UnmanagedType.BStr)]
         [DllImport("engine.dll", CallingConvention = CallingConvention.StdCall)]
-        public static extern string GetCalcOptions();
+        public static extern void ExtractPakFile(string pakFilePath,
+            string pakInfoPath,
+            string outputRootPath);
+
+        [DllImport("engine.dll", CallingConvention = CallingConvention.StdCall)]
+        public static extern void CompressFolderToPakFile(string pakFilePath,
+            string outputRootPath);
     }
 
     public static class NativeAPIAdapter
     {
+        public static bool ExtractPakFile(string pakFilePath,
+            string pakInfoPath,
+            string outputRootPath)
+        {
+            NativeEngine.ExtractPakFile(pakFilePath, pakInfoPath, outputRootPath);
+            return true;
+        }
+
+        public static bool CompressFolderToPakFile(string pakFilePath,
+           string outputRootPath)
+        {
+            NativeEngine.CompressFolderToPakFile(pakFilePath, outputRootPath);
+            return true;
+        }
+
         public static bool LoadSPRFile(string filePath,
             out SprFileHead sprFileHead,
             out Palette palette,
