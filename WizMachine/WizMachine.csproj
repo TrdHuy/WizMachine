@@ -10,6 +10,7 @@
 		<SolutionDirectory>$([System.IO.Path]::GetFullPath('$(ProjectFullPath)\..'))</SolutionDirectory>
 		<EngineProjectDir>$(SolutionDirectory)\engine</EngineProjectDir>
 		<DllPathFile>$(SolutionDirectory)\bin\cpp_output_path.txt</DllPathFile>
+		<CheckFilePlatformScriptPath>$(SolutionDirectory)\check_file_platform.ps1</CheckFilePlatformScriptPath>
 		<AssemblyVersion>0.0.0.7</AssemblyVersion>
 		<FileVersion>0.0.0.7</FileVersion>
 		<Version>0.0.0.7</Version>
@@ -17,21 +18,51 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<None Include="..\release_and_publish_nuget.ps1" />
+		<None Include="..\check_file_platform.ps1" />
+		<None Include="..\SignToolUtilForClient.ps1" />
 	</ItemGroup>
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(DoPreBuild)'!='false'">
 		<PropertyGroup>
+			<PlatformToUse Condition="'$(PlatformTarget)' == 'x86'">Win32</PlatformToUse>
+			<PlatformToUse Condition="'$(PlatformTarget)' == 'x64'">x64</PlatformToUse>
 		</PropertyGroup>
 		<Exec Command="echo EngineProjectDir=$(EngineProjectDir)" />
 		<Exec Command="echo OutDir=$(OutDir)" />
 		<Exec Command="echo Configuration=$(Configuration)" />
 		<Exec Command="echo Platforms=$(Platforms)" />
 		<Exec Command="echo PlatformTarget=$(PlatformTarget)" />
+		<Exec Command="echo PlatformToUse=$(PlatformToUse)" />
 
-		<!--<Exec Command="msbuild /v:Detailed /t:Clean /p:Configuration=$(Configuration) /p:Platform=x64 /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj"/>
-    <Exec Command="msbuild /v:Detailed /t:Build /p:Configuration=$(Configuration) /p:Platform=x64 /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj"/>-->
+		<Exec Command="msbuild /v:Detailed /t:Clean /p:Configuration=$(Configuration) /p:Platform=$(PlatformToUse) /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj"/>
+		<Exec Command="msbuild /v:Detailed /t:Build /p:Configuration=$(Configuration) /p:Platform=$(PlatformToUse) /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj"/>
 		<ReadLinesFromFile File="$(DllPathFile)">
 			<Output TaskParameter="Lines" PropertyName="DllPathLines" />
 		</ReadLinesFromFile>
+	</Target>
+	<Target Name="CheckDLLBinaryType" AfterTargets="PostBuildEvent">
+		<PropertyGroup>
+			<DLL1BinaryTypeFile>$(IntermediateOutputPath)DLL1BinaryType.txt</DLL1BinaryTypeFile>
+			<DLL2BinaryTypeFile>$(IntermediateOutputPath)DLL2BinaryType.txt</DLL2BinaryTypeFile>
+		</PropertyGroup>
+		<ReadLinesFromFile File="$(DLL1BinaryTypeFile)">
+			<Output TaskParameter="Lines" ItemName="DLL1BinaryType" />
+		</ReadLinesFromFile>
+		<ReadLinesFromFile File="$(DLL2BinaryTypeFile)">
+			<Output TaskParameter="Lines" ItemName="DLL2BinaryType" />
+		</ReadLinesFromFile>
+		<Exec Command="echo Executing CheckDLLBinaryType"/>
+		<Exec Command="echo DLL2BinaryTypeFile $(DLL2BinaryTypeFile)"/>
+		<Exec Command="powershell -ExecutionPolicy Bypass -File $(CheckFilePlatformScriptPath) -dllPath $(TargetDir)engine.dll > $(DLL1BinaryTypeFile)"/>
+		<Exec Command="powershell -ExecutionPolicy Bypass -File $(CheckFilePlatformScriptPath) -dllPath $(TargetDir)wengine.dll > $(DLL2BinaryTypeFile)"/>
+			  
+		<Error Condition="'$(DLL1BinaryType.Trim())' != '$(DLL2BinaryType.Trim())'" Text="The DLLs have different binary types. DLL1: $(DLL1BinaryType), DLL2: $(DLL2BinaryType)" />
+		<Message Condition="'$(DLL1BinaryType.Trim())' == '$(DLL2BinaryType.Trim())'" Text="All DLLs are good." />
+	</Target>
+	<Target Name="SignTheApplication" AfterTargets="CheckDLLBinaryType">
+		<Exec Command="echo Executing signing task"/>
+		<Exec Command="echo SolutionDirectory: $(SolutionDirectory)"/>
+		<Exec Command="echo TargetDir: $(TargetDir)"/>
+		<Exec Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)engine.dll,$(TargetDir)wengine.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)'"/>
 	</Target>
 	<Target Name="CopyDllToOutput" AfterTargets="PreBuild" Condition="'$(DoPreBuild)'!='false'">
 		<Exec Command="echo DllPathFile=$(DllPathFile)" />
