@@ -80,14 +80,14 @@ jobs:
 
     # Execute all unit tests in the solution
     - name: Execute unit tests
-      run: dotnet test WizMachineTest --configuration ${{ matrix.configuration }} -p:Platform=${{ matrix.platform }} /p:GitToken=${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
+      run: dotnet test WizMachineTest --configuration ${{ matrix.configuration }} -p:Platform=${{ matrix.platformTarget }} /p:GitToken=${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
 
     # Restore the application to populate the obj folder with RuntimeIdentifiers
     - name: Restore the application
       run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration /p:PlatformTarget=$env:PlatformTarget
       env:
         Configuration: ${{ matrix.configuration }}
-        PlatformTarget: ${{ matrix.configuration }}
+        PlatformTarget: ${{ matrix.platformTarget }}
 
     # Decode the base 64 encoded pfx and save the Signing_Certificate
     - name: Decode the pfx
@@ -104,7 +104,7 @@ jobs:
         Appx_Bundle_Platforms: x86|x64
         Appx_Package_Build_Mode: StoreUpload
         Configuration: ${{ matrix.configuration }}
-        PlatformTarget: ${{ matrix.configuration }}
+        PlatformTarget: ${{ matrix.platformTarget }}
 
     # Remove the pfx
     - name: Remove the pfx
