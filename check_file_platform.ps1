@@ -2,8 +2,6 @@ param (
     [string]$dllPath
 )
 
-$dllPath = "C:\Users\Hp\Desktop\temp\_TrdBuildPlugin\engine.dll"
-
 function Get-PeHeaderType {
     param (
         [string]$Path
@@ -37,8 +35,8 @@ try {
     $machineType = Get-PeHeaderType -Path $dllPath
 
     switch ($machineType) {
-        0x014c { Write-Output "32-bit" }
-        0x8664 { Write-Output "64-bit" }
+        0x014c { Write-Output "x86" }
+        0x8664 { Write-Output "x64" }
         default { Write-Output "Unknown" }
     }
 }

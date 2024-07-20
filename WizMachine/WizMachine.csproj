@@ -22,8 +22,12 @@
 		<None Include="..\SignToolUtilForClient.ps1" />
 		<None Include="..\local.config" />
 	</ItemGroup>
+	<!--<ItemGroup>
+	  <ProjectReference Include="..\engine\engine.vcxproj" />
+	</ItemGroup>-->
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent" Condition="'$(DoPreBuild)'!='false'">
 		<PropertyGroup>
+			<PlatformTarget Condition="'$(PlatformTarget)' == ''">x64</PlatformTarget>
 			<PlatformToUse Condition="'$(PlatformTarget)' == 'x86'">Win32</PlatformToUse>
 			<PlatformToUse Condition="'$(PlatformTarget)' == 'x64'">x64</PlatformToUse>
 		</PropertyGroup>
@@ -34,36 +38,47 @@
 		<Exec Command="echo PlatformTarget=$(PlatformTarget)" />
 		<Exec Command="echo PlatformToUse=$(PlatformToUse)" />
 
-		<Exec Command="msbuild /v:Detailed /t:Clean /p:Configuration=$(Configuration) /p:Platform=$(PlatformToUse) /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj"/>
-		<Exec Command="msbuild /v:Detailed /t:Build /p:Configuration=$(Configuration) /p:Platform=$(PlatformToUse) /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj"/>
+		<Exec Command="msbuild /v:Detailed /t:Clean /p:Configuration=$(Configuration) /p:Platform=$(PlatformToUse) /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj" />
+		<Exec Command="msbuild /v:Detailed /t:Build /p:Configuration=$(Configuration) /p:Platform=$(PlatformToUse) /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj" />
 		<ReadLinesFromFile File="$(DllPathFile)">
 			<Output TaskParameter="Lines" PropertyName="DllPathLines" />
 		</ReadLinesFromFile>
 	</Target>
 	<Target Name="CheckDLLBinaryType" AfterTargets="PostBuildEvent">
 		<PropertyGroup>
-			<DLL1BinaryTypeFile>$(IntermediateOutputPath)DLL1BinaryType.txt</DLL1BinaryTypeFile>
-			<DLL2BinaryTypeFile>$(IntermediateOutputPath)DLL2BinaryType.txt</DLL2BinaryTypeFile>
+			<DLL1BinaryTypeFile>$(ProjectFullPath)\$(IntermediateOutputPath)DLL1BinaryType.txt</DLL1BinaryTypeFile>
+			<DLL2BinaryTypeFile>$(ProjectFullPath)\$(IntermediateOutputPath)DLL2BinaryType.txt</DLL2BinaryTypeFile>
 		</PropertyGroup>
+		
+		<Exec Command="echo Executing CheckDLLBinaryType" />
+		<Exec Command="echo CheckFilePlatformScriptPath $(CheckFilePlatformScriptPath)" />
+		<Exec Command="echo DLL1BinaryTypeFile $(DLL1BinaryTypeFile)" />
+		<Exec Command="echo DLL2BinaryTypeFile $(DLL2BinaryTypeFile)" />
+		<Exec Command="powershell -ExecutionPolicy Bypass -File $(CheckFilePlatformScriptPath) -dllPath $(TargetDir)engine.dll &gt; $(DLL1BinaryTypeFile)" />
+		<Exec Command="powershell -ExecutionPolicy Bypass -File $(CheckFilePlatformScriptPath) -dllPath $(TargetDir)wengine.dll &gt; $(DLL2BinaryTypeFile)" />
+
 		<ReadLinesFromFile File="$(DLL1BinaryTypeFile)">
-			<Output TaskParameter="Lines" ItemName="DLL1BinaryType" />
+			<Output TaskParameter="Lines" PropertyName="DLL1BinaryType" />
 		</ReadLinesFromFile>
 		<ReadLinesFromFile File="$(DLL2BinaryTypeFile)">
-			<Output TaskParameter="Lines" ItemName="DLL2BinaryType" />
+			<Output TaskParameter="Lines" PropertyName="DLL2BinaryType" />
 		</ReadLinesFromFile>
-		<Exec Command="echo Executing CheckDLLBinaryType"/>
-		<Exec Command="echo DLL2BinaryTypeFile $(DLL2BinaryTypeFile)"/>
-		<Exec Command="powershell -ExecutionPolicy Bypass -File $(CheckFilePlatformScriptPath) -dllPath $(TargetDir)engine.dll > $(DLL1BinaryTypeFile)"/>
-		<Exec Command="powershell -ExecutionPolicy Bypass -File $(CheckFilePlatformScriptPath) -dllPath $(TargetDir)wengine.dll > $(DLL2BinaryTypeFile)"/>
-			  
+		<Exec Command="echo DLL1BinaryType $(DLL1BinaryType)" />
+		<Exec Command="echo DLL2BinaryType $(DLL2BinaryType)" />
+
+		<Delete Files="$(DLL1BinaryTypeFile)" />
+		<Delete Files="$(DLL2BinaryTypeFile)" />
+		<Error Condition="'$(DLL1BinaryType.Trim())' != '$(PlatformTarget)'" Text="The DLL different platform target. DLL1: $(DLL1BinaryType), PlatformTarget=$(PlatformTarget)" />
+		<Error Condition="'$(DLL1BinaryType.Trim())' == ''" Text="The DLLs have different binary types. DLL1: $(DLL1BinaryType), DLL2: $(DLL2BinaryType)" />
+		<Error Condition="'$(DLL2BinaryType.Trim())' == ''" Text="The DLLs have different binary types. DLL1: $(DLL1BinaryType), DLL2: $(DLL2BinaryType)" />
 		<Error Condition="'$(DLL1BinaryType.Trim())' != '$(DLL2BinaryType.Trim())'" Text="The DLLs have different binary types. DLL1: $(DLL1BinaryType), DLL2: $(DLL2BinaryType)" />
-		<Message Condition="'$(DLL1BinaryType.Trim())' == '$(DLL2BinaryType.Trim())'" Text="All DLLs are good." />
+		<Message Condition="'$(DLL1BinaryType.Trim())' == '$(DLL2BinaryType.Trim())'" Text="All DLLs are good: platform is $(DLL1BinaryType)" />
 	</Target>
 	<Target Name="SignTheApplication" AfterTargets="CheckDLLBinaryType">
-		<Exec Command="echo Executing signing task"/>
-		<Exec Command="echo SolutionDirectory: $(SolutionDirectory)"/>
-		<Exec Command="echo TargetDir: $(TargetDir)"/>
-		<Exec Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)engine.dll,$(TargetDir)wengine.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)'"/>
+		<Exec Command="echo Executing signing task" />
+		<Exec Command="echo SolutionDirectory: $(SolutionDirectory)" />
+		<Exec Command="echo TargetDir: $(TargetDir)" />
+		<Exec Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)engine.dll,$(TargetDir)wengine.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)'" />
 	</Target>
 	<Target Name="CopyDllToOutput" AfterTargets="PreBuild" Condition="'$(DoPreBuild)'!='false'">
 		<Exec Command="echo DllPathFile=$(DllPathFile)" />
