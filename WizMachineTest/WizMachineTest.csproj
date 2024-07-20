@@ -36,6 +36,9 @@
 		<None Remove="Resources\4.bin" />
 		<None Remove="Resources\5.bin" />
 		<None Remove="Resources\alpha.spr" />
+		<None Remove="Resources\dataForCompressTest\data\12345.spr" />
+		<None Remove="Resources\dataForCompressTest\data\test.txt" />
+		<None Remove="Resources\dataForCompressTest\data\test.xml" />
 		<None Remove="Resources\dataWithSpr.pak" />
 		<None Remove="Resources\dataWithSpr.pak.txt" />
 		<None Remove="Resources\test.bin" />
@@ -74,6 +77,15 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\alpha.spr">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Resources\dataForCompressTest\data\12345.spr">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Resources\dataForCompressTest\data\test.txt">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Resources\dataForCompressTest\data\test.xml">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\dataWithSpr.pak">
