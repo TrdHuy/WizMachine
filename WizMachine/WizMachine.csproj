@@ -9,7 +9,6 @@
 		<ProjectFullPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))</ProjectFullPath>
 		<SolutionDirectory>$([System.IO.Path]::GetFullPath('$(ProjectFullPath)\..'))</SolutionDirectory>
 		<EngineProjectDir>$(SolutionDirectory)\engine</EngineProjectDir>
-		<DllPathFile>$(SolutionDirectory)\bin\cpp_output_path.txt</DllPathFile>
 		<CheckFilePlatformScriptPath>$(SolutionDirectory)\check_file_platform.ps1</CheckFilePlatformScriptPath>
 		<AssemblyVersion>0.0.0.7</AssemblyVersion>
 		<FileVersion>0.0.0.7</FileVersion>
@@ -31,6 +30,7 @@
 			<PlatformTarget Condition="'$(PlatformTarget)' == ''">x64</PlatformTarget>
 			<PlatformToUse Condition="'$(PlatformTarget)' == 'x86'">Win32</PlatformToUse>
 			<PlatformToUse Condition="'$(PlatformTarget)' == 'x64'">x64</PlatformToUse>
+			<DllPathFile>$(SolutionDirectory)\bin\$(Configuration)\$(PlatformToUse)\cpp_output_path.txt</DllPathFile>
 		</PropertyGroup>
 		<Exec Command="echo EngineProjectDir=$(EngineProjectDir)" />
 		<Exec Command="echo OutDir=$(OutDir)" />
