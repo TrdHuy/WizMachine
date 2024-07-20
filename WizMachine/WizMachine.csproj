@@ -27,8 +27,8 @@
 		<Exec Command="echo Platforms=$(Platforms)" />
 		<Exec Command="echo PlatformTarget=$(PlatformTarget)" />
 
-		<!--<Exec Command="msbuild /v:Detailed /t:Clean /p:Configuration=$(Configuration) /p:Platform=x64 /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj"/>
-    <Exec Command="msbuild /v:Detailed /t:Build /p:Configuration=$(Configuration) /p:Platform=x64 /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj"/>-->
+		<Exec Command="msbuild /v:Detailed /t:Clean /p:Configuration=$(Configuration) /p:Platform=x64 /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj"/>
+		<Exec Command="msbuild /v:Detailed /t:Build /p:Configuration=$(Configuration) /p:Platform=x64 /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj"/>
 		<ReadLinesFromFile File="$(DllPathFile)">
 			<Output TaskParameter="Lines" PropertyName="DllPathLines" />
 		</ReadLinesFromFile>
