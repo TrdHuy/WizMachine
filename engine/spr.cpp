@@ -1,5 +1,19 @@
-#include "pch.h"
-#include "calc.h"
+﻿#include "pch.h"
+#include "ucl/ucl.h"
+
+UCHAR FindPaletteIndex(UCHAR B, UCHAR G, UCHAR R, Color palette[], int paletteSize) {
+	for (int i = 0; i < paletteSize; i++)
+	{
+		if (R == palette[i].R &&
+			G == palette[i].G &&
+			B == palette[i].B)
+		{
+			return i;
+		}
+	}
+	throw std::exception("Color not found in palette!");
+}
+
 
 std::vector<UCHAR> EncryptFrameData(
 	Color palette[],
@@ -50,7 +64,7 @@ std::vector<UCHAR> EncryptFrameData(
 	return encryptedFrameData;
 }
 
-void ExportToSPRFile(const char* filePath,
+void ExportToSPRFileInternal(const char* filePath,
 	SPRFileHead fileHead,
 	Color palette[],
 	int paletteSize,
@@ -115,7 +129,7 @@ void ExportToSPRFile(const char* filePath,
 	}
 }
 
-void LoadSPRFile(const char* filePath,
+void LoadSPRFileInternal(const char* filePath,
 	SPRFileHead* fileHead,
 	Color** palette,
 	int* paletteLength,
@@ -223,3 +237,110 @@ void LoadSPRFile(const char* filePath,
 
 	file.close();
 }
+
+
+static void intToHexString(int value, char* output)
+{
+	const char* hexDigits = "0123456789abcdef";
+	for (int i = 7; i >= 0; --i)
+	{
+		output[i] = hexDigits[value & 0xF];
+		value >>= 4;
+	}
+	output[8] = '\0'; // Null-terminate the string
+}
+
+void TestAloneFile() {
+
+	// Mở file mới để viết, nếu file không tồn tại, nó sẽ được tạo
+	const char* fileName = "t\\example.txt";
+	IFile* file = g_OpenFile(fileName, true, true);
+
+	assert(file->isOpen());
+	if (file->isOpen()) {  // true cho writeSupport để có thể viết vào file
+		std::cout << "File opened successfully." << std::endl;
+
+		// Viết dữ liệu vào file
+		const char* data = "Hello, World!";
+		unsigned long bytesWritten = file->write(data, strlen(data));
+		if (bytesWritten > 0) {
+			std::cout << "Successfully wrote " << bytesWritten << " bytes to the file." << std::endl;
+		}
+		else {
+			std::cout << "Failed to write data to the file." << std::endl;
+		}
+
+		// Đóng file để lưu các thay đổi
+		file->close();
+	}
+
+	file = g_OpenFile(fileName, true, false);
+	assert(file->isOpen());
+	if (file->isOpen()) {  // false cho writeSupport vì chỉ đọc
+		// Đọc dữ liệu từ file
+		unsigned long fileSize = file->size();
+		char* buffer = new char[fileSize + 1];  // Cấp phát bộ đệm để đọc
+		unsigned long bytesRead = file->read(buffer, fileSize);
+		if (bytesRead > 0) {
+			buffer[bytesRead] = '\0';  // Đảm bảo chuỗi kết thúc bằng null
+			std::cout << "Read from file: " << buffer << std::endl;
+		}
+		else {
+			std::cout << "Failed to read data from the file." << std::endl;
+		}
+
+		// Dọn dẹp
+		delete[] buffer;
+		file->close();
+	}
+	else {
+		std::cout << "Failed to open file for reading." << std::endl;
+	}
+
+}
+
+
+
+void LoadPakFile(const char* pakFilePath, const char* pakInfoFilePath, const char* outputRootPath) {
+	/*std::ifstream file(filePath, std::ios::binary);
+	if (!file.is_open()) {
+		std::cerr << "Failed to open file." << std::endl;
+		return;
+	}
+	int hash = g_FileNameHash(filePath);
+	char hashHexString[9];
+	intToHexString(hash, hashHexString);
+	file.close();*/
+
+	/*PakInfo pakInfo;
+	int p = ParsePakInfoFile(pakInfoFilePath, pakInfo);
+	std::unique_ptr<PakHeader> header;
+	int res = LoadPakInternal(pakFilePath, outputRootPath, pakInfo, header);*/
+
+	//TestAloneFile();
+
+
+	//char* message = get_message();  // Gọi hàm assembly để lấy thông điệp
+	//std::cout << message << std::endl;  // In thông điệp nhận được
+
+	const char* fileName = "t\\example.txt";
+	IFile* file = g_OpenFile(fileName, true, false);
+
+	if (file->isOpen()) {
+		void* pSrcBuffer = file->getBuffer();
+		unsigned long nSrcSize = file->size();
+
+#ifdef x32
+		int uCRC = Misc_CRC32(0, pSrcBuffer, nSrcSize);
+		int size = 0;
+#endif
+
+#ifdef x64
+		int uCRC = compute_crc32(0, pSrcBuffer, nSrcSize);
+		int c = 100;
+#endif
+
+
+	}
+}
+

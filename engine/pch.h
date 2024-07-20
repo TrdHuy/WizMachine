@@ -9,5 +9,12 @@
 
 // add headers that you want to pre-compile here
 #include "framework.h"
+#include "dllmain.h"
+#include "spr.h"
+#include "file.h"
+#include "crc32.h"
+#include "pak.h"
+#include "pakpart.h"
+#include "utils.h"
 
 #endif //PCH_H

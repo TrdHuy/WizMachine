@@ -1,0 +1,5 @@
+TotalFile:3	PakTime:2023-8-4 21:33:58	PakTimeSave:64cd0c56	CRC:d0ff4262
+Index	ID	Time	FileName	Size	InPakSize	ComprFlag	CRC
+0	45b1c85b	2023-8-2 20:55:1	\test\tes2.txt	14	14	0	81f7aae
+1	4a6a1335	2023-8-2 19:41:8	\test\tes1.txt	10	10	0	c8765d54
+2	7dadb342	2023-8-2 19:39:9	\test\t1\t2\t3\test.txt	4	4	0	9be3e0a3
