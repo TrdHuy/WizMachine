@@ -10,11 +10,16 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<ProjectFullPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))</ProjectFullPath>
 		<SolutionDirectory>$([System.IO.Path]::GetFullPath('$(ProjectFullPath)\..'))</SolutionDirectory>
-		<DllPathFile>$(SolutionDirectory)\bin\cpp_output_path.txt</DllPathFile>
 		<Platforms>x64;x86</Platforms>
 	</PropertyGroup>
 
 	<Target Name="PostBuild" BeforeTargets="PostBuildEvent">
+		<PropertyGroup>
+			<PlatformTarget Condition="'$(Platform)' == ''">x64</PlatformTarget>
+			<PlatformToUse Condition="'$(Platform)' == 'x86'">Win32</PlatformToUse>
+			<PlatformToUse Condition="'$(Platform)' == 'x64'">x64</PlatformToUse>
+			<DllPathFile>$(SolutionDirectory)\bin\$(Configuration)\$(PlatformToUse)\cpp_output_path.txt</DllPathFile>
+		</PropertyGroup>
 		<Exec Command="echo DllPathFile=$(DllPathFile)" />
 
 		<ReadLinesFromFile File="$(DllPathFile)">

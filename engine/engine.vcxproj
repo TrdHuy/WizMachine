@@ -4,8 +4,8 @@
     <ProjectFullPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))</ProjectFullPath>
     <WizSolutionDirectory>$([System.IO.Path]::GetFullPath('$(ProjectFullPath)\..'))</WizSolutionDirectory>
     <EngineProjectDir>$(WizSolutionDirectory)\engine</EngineProjectDir>
-    <DllPathDir>$(WizSolutionDirectory)\bin</DllPathDir>
-    <DllPathFile>$(WizSolutionDirectory)\bin\cpp_output_path.txt</DllPathFile>
+    <DllPathDir>$(WizSolutionDirectory)\bin\$(Configuration)\$(Platform)</DllPathDir>
+    <DllPathFile>$(DllPathDir)\cpp_output_path.txt</DllPathFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(EngineProjectDir)\bin\publish\$(Platform)\$(Configuration)\</OutDir>
@@ -136,6 +136,11 @@ echo $(OutDir) &gt; "$(DllPathFile)"</Command>
       <AdditionalLibraryDirectories>$(EngineProjectDir)\lib\ucl1.0.3_win32\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);ucl.lib</AdditionalDependencies>
     </Link>
+	<PostBuildEvent>
+      <Command>rmdir /s /q $(DllPathDir)
+mkdir $(DllPathDir) 
+echo $(OutDir) &gt; "$(DllPathFile)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
