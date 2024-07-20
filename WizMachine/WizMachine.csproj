@@ -21,6 +21,7 @@
 		<None Include="..\check_file_platform.ps1" />
 		<None Include="..\SignToolUtilForClient.ps1" />
 		<None Include="..\local.config" />
+		<None Include="..\.github\**" />
 	</ItemGroup>
 	<!--<ItemGroup>
 	  <ProjectReference Include="..\engine\engine.vcxproj" />
