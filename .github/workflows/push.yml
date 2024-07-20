@@ -176,29 +176,29 @@ jobs:
 
     - name: Light publish
       if: env.ISSUE_NUMBER == env.VERSION_UP_ISSUE_ID
-      run: msbuild ${{ env.PROJEFCT_PATH }} /t:Publish /p:Configuration=Release /p:PublishDir=..\light_publish /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false /p:GitToken=${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
+      run: msbuild ${{ env.PROJEFCT_PATH }} /t:Publish /p:Configuration=Release /p:PlatformTarget=${{ matrix.platform }} /p:PublishDir=..\light_publish${{ matrix.platform }} /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false /p:GitToken=${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
     - name: Zip light release
       if: env.ISSUE_NUMBER == env.VERSION_UP_ISSUE_ID
-      run: Compress-Archive -Path 'light_publish' -DestinationPath 'light_publish.zip'
+      run: Compress-Archive -Path 'light_publish${{ matrix.platform }}' -DestinationPath 'light_publish${{ matrix.platform }}.zip'
     - name: Upload light_publish artifacts
       if: env.ISSUE_NUMBER == env.VERSION_UP_ISSUE_ID
       uses: actions/upload-artifact@v3
       with:
-        name: light_publish.zip
-        path: light_publish.zip
+        name: light_publish${{ matrix.platform }}.zip
+        path: light_publish${{ matrix.platform }}.zip
         retention-days: 1
 
     - name: Heavy publish
       if: env.ISSUE_NUMBER == env.VERSION_UP_ISSUE_ID && env.BUILD_HEAVY_PUBLISH == 'true'
-      run: msbuild ${{ env.PROJEFCT_PATH }} /t:Publish /p:Configuration=Release /p:PublishSingleFile=true /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishDir=..\heavy_publish /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false /p:GitToken=${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
+      run: msbuild ${{ env.PROJEFCT_PATH }} /t:Publish /p:Configuration=Release /p:PlatformTarget=${{ matrix.platform }} /p:PublishSingleFile=true /p:RuntimeIdentifier=win-x64 /p:SelfContained=true /p:PublishDir=..\heavy_publish${{ matrix.platform }} /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false /p:GitToken=${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
     - name: Zip heavy release
       if: env.ISSUE_NUMBER == env.VERSION_UP_ISSUE_ID && env.BUILD_HEAVY_PUBLISH == 'true'
-      run: Compress-Archive -Path 'heavy_publish' -DestinationPath 'heavy_publish.zip'
+      run: Compress-Archive -Path 'heavy_publish${{ matrix.platform }}' -DestinationPath 'heavy_publish.zip${{ matrix.platform }}'
     - name: Upload heavy_publish artifacts
       if: env.ISSUE_NUMBER == env.VERSION_UP_ISSUE_ID && env.BUILD_HEAVY_PUBLISH == 'true'
       uses: actions/upload-artifact@v3
       with:
-        name: heavy_publish.zip
-        path: heavy_publish.zip
+        name: heavy_publish${{ matrix.platform }}.zip
+        path: heavy_publish${{ matrix.platform }}.zip
         retention-days: 1
     ################### END BUILD ARTIFACT #######################
