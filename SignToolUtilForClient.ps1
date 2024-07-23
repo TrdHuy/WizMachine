@@ -36,7 +36,13 @@ if (-not $_TOKEN) {
 }
 
 if (-not $_TOKEN) {
-     throw "GITHUB_TOKEN must not be null "
+     throw "======= FATAL =====> GITHUB_TOKEN must not be null."
+}
+
+if (-Not (Get-Command signtool -ErrorAction SilentlyContinue)) {
+    throw "======= FATAL =====> signtool is not available.`
+Please make sure it is installed and added to your system's PATH.`
+The location of the usual signtool is: 'C:\Program Files (x86)\Windows Kits\10\bin\'"
 }
 
 $headers = @{
