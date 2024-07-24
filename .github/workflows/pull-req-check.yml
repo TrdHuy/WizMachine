@@ -78,11 +78,11 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
 
-    - name: Set up PowerShell
-      uses: microsoft/powershell@v1.0.0
+
     - name: Check Signature with PowerShell
       shell: pwsh
       run: |
+        Import-Module Microsoft.PowerShell.Security
         $filePath = "${{ github.workspace }}\path\to\your\file.exe"
         $signature = Get-AuthenticodeSignature -FilePath $filePath
         if ($signature.Status -eq 'Valid') {
