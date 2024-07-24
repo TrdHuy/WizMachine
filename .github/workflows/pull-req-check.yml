@@ -83,13 +83,7 @@ jobs:
       shell: pwsh
       run: |
         Import-Module Microsoft.PowerShell.Security
-        $filePath = "${{ github.workspace }}\path\to\your\file.exe"
-        $signature = Get-AuthenticodeSignature -FilePath $filePath
-        if ($signature.Status -eq 'Valid') {
-          Write-Output "The file is signed."
-        } else {
-          Write-Output "The file is not signed."
-        }
+        
     # Execute all unit tests in the solution
     - name: Execute unit tests
       run: dotnet test WizMachineTest --configuration ${{ matrix.configuration }} -p:Platform=${{ matrix.platformTarget }} /p:GitToken=${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
