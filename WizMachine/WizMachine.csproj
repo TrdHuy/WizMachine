@@ -39,8 +39,8 @@
 		<Exec Command="echo PlatformTarget=$(PlatformTarget)" />
 		<Exec Command="echo PlatformToUse=$(PlatformToUse)" />
 
-		<Exec Command="msbuild /v:Detailed /t:Clean /p:Configuration=$(Configuration) /p:Platform=$(PlatformToUse) /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj" />
-		<Exec Command="msbuild /v:Detailed /t:Build /p:Configuration=$(Configuration) /p:Platform=$(PlatformToUse) /p:DoPreBuild=false $(EngineProjectDir)\engine.vcxproj" />
+		<Exec Command="msbuild /v:Detailed /t:Clean /p:Configuration=$(Configuration) /p:Platform=$(PlatformToUse) /p:DoPreBuild=false /p:prvtoken=$(GitToken) $(EngineProjectDir)\engine.vcxproj" />
+		<Exec Command="msbuild /v:Detailed /t:Build /p:Configuration=$(Configuration) /p:Platform=$(PlatformToUse) /p:DoPreBuild=false /p:prvtoken=$(GitToken) $(EngineProjectDir)\engine.vcxproj" />
 		<ReadLinesFromFile File="$(DllPathFile)">
 			<Output TaskParameter="Lines" PropertyName="DllPathLines" />
 		</ReadLinesFromFile>
@@ -79,7 +79,7 @@
 		<Exec Command="echo Executing signing task" />
 		<Exec Command="echo SolutionDirectory: $(SolutionDirectory)" />
 		<Exec Command="echo TargetDir: $(TargetDir)" />
-		<Exec Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)engine.dll,$(TargetDir)wengine.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)'" />
+		<Exec Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)wengine.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)'" />
 	</Target>
 	<Target Name="CopyDllToOutput" AfterTargets="PreBuild" Condition="'$(DoPreBuild)'!='false'">
 		<Exec Command="echo DllPathFile=$(DllPathFile)" />

@@ -48,4 +48,11 @@ std::time_t GetTimeFromMillisecond(unsigned long long millisec);
 void GetLTimeFromSecond(tm* pFormatTime, unsigned int seconds);
 void GetLTimeFromMillisecond(tm* pFormatTime, unsigned long long millisec);
 
+inline char* Wchar_t2CharPtr(wchar_t* str) {
+	const size_t length = wcslen(str);
+	char* charString = new char[length + 1]; // +1 for null terminator
+	size_t numConverted = 0;
+	wcstombs_s(&numConverted, charString, length + 1, str, length + 1);
+	return charString;
+}
 #endif

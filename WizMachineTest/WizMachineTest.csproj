@@ -13,20 +13,25 @@
 		<Platforms>x64;x86</Platforms>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<PlatformTarget Condition="'$(Platform)' == ''">x64</PlatformTarget>
+		<PlatformToUse Condition="'$(Platform)' == 'x86'">Win32</PlatformToUse>
+		<PlatformToUse Condition="'$(Platform)' == 'x64'">x64</PlatformToUse>
+		<DllPathFile>$(SolutionDirectory)\bin\$(Configuration)\$(PlatformToUse)\cpp_output_path.txt</DllPathFile>
+		<FileToSign Condition="'$(Platform)' == 'x64'">
+			$(TargetDir)testhost.exe,$(TargetDir)WizMachineTest.dll
+		</FileToSign>
+		<FileToSign Condition="'$(Platform)' == 'x86'">
+			$(TargetDir)testhost.x86.exe,$(TargetDir)WizMachineTest.dll
+		</FileToSign>
+	</PropertyGroup>
 	<Target Name="PostBuild" BeforeTargets="PostBuildEvent">
-		<PropertyGroup>
-			<PlatformTarget Condition="'$(Platform)' == ''">x64</PlatformTarget>
-			<PlatformToUse Condition="'$(Platform)' == 'x86'">Win32</PlatformToUse>
-			<PlatformToUse Condition="'$(Platform)' == 'x64'">x64</PlatformToUse>
-			<DllPathFile>$(SolutionDirectory)\bin\$(Configuration)\$(PlatformToUse)\cpp_output_path.txt</DllPathFile>
-		</PropertyGroup>
 		<Exec Command="echo DllPathFile=$(DllPathFile)" />
 
 		<ReadLinesFromFile File="$(DllPathFile)">
 			<Output TaskParameter="Lines" PropertyName="DllPathLines" />
 		</ReadLinesFromFile>
 		<Exec Command="echo DllPathLines=$(DllPathLines)" />
-
 		<Exec Command="xcopy /E /Y &quot;$(DllPathLines)*&quot; &quot;$(OutDir)&quot;" />
 	</Target>
 
@@ -82,31 +87,31 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\alpha.spr">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\dataForCompressTest\data\12345.spr">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\dataForCompressTest\data\test.txt">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\dataForCompressTest\data\test.xml">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\dataWithSpr.pak">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\dataWithSpr.pak.txt">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\test.bin">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\testTxtFile.pak">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\testTxtFile.pak.txt">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\test.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -127,5 +132,11 @@
 	<ItemGroup>
 		<ProjectReference Include="..\WizMachine\WizMachine.csproj" />
 	</ItemGroup>
-
+	<Target Name="SignTheApplication" AfterTargets="PostBuildEvent">
+		<Exec Command="echo Executing signing task" />
+		<Exec Command="echo SolutionDirectory: $(SolutionDirectory)" />
+		<Exec Command="echo TargetDir: $(TargetDir)" />
+		<Exec Condition="'$(Platform)' == 'x64'" Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)testhost.exe,$(TargetDir)WizMachineTest.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)'" />
+		<Exec Condition="'$(Platform)' == 'x86'" Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)testhost.x86.exe,$(TargetDir)WizMachineTest.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)'" />
+	</Target>
 </Project>

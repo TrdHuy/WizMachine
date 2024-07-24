@@ -1,7 +1,9 @@
 using System;
 using System.IO;
+using System.Reflection;
 using WizMachine.Services.Base;
 using WizMachine.Services.Impl;
+using WizMachine.Utils;
 
 namespace WizMachine
 {
@@ -15,6 +17,19 @@ namespace WizMachine
             if (_engineInstance == null) throw new Exception("Engine was not inited yet");
 
             return _engineInstance.sprWorkManagerAdvanceInstance;
+        }
+
+        public static bool ForceCheckCallingSignature()
+        {
+            try
+            {
+                var calling = Assembly.GetCallingAssembly().Location;
+                CertManagerUtil.ForceCheckCert(calling);
+                return true;
+            }
+            catch (Exception ex) {
+                return false;
+            }
         }
 
         public static void Init(StreamWriter logWriter)
