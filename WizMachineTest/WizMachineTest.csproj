@@ -4,13 +4,14 @@
 		<TargetFramework>net6.0-windows</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-
 		<IsPackable>false</IsPackable>
 		<IsTestProject>true</IsTestProject>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<ProjectFullPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))</ProjectFullPath>
 		<SolutionDirectory>$([System.IO.Path]::GetFullPath('$(ProjectFullPath)\..'))</SolutionDirectory>
 		<Platforms>x64;x86</Platforms>
+		<GetSignToolPath>$(SolutionDirectory)\GetSignToolPath.ps1</GetSignToolPath>
+		<SignToolPathResuleCachePath>$(SolutionDirectory)\bin\signtoolpath.txt</SignToolPathResuleCachePath>
 		<BuildTag>WIZMACHINE_TEST_BUILD_TAG</BuildTag>
 	</PropertyGroup>
 
@@ -137,7 +138,7 @@
 		<Exec Command="echo $(BuildTag): SignTheApplication: Executing signing task" />
 		<Exec Command="echo $(BuildTag): SignTheApplication: SolutionDirectory: $(SolutionDirectory)" />
 		<Exec Command="echo $(BuildTag): SignTheApplication: TargetDir: $(TargetDir)" />
-		<Exec Condition="'$(Platform)' == 'x64'" Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)testhost.exe,$(TargetDir)WizMachineTest.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)'" />
-		<Exec Condition="'$(Platform)' == 'x86'" Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)testhost.x86.exe,$(TargetDir)WizMachineTest.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)'" />
+		<Exec Condition="'$(Platform)' == 'x64'" Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)testhost.exe,$(TargetDir)WizMachineTest.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)' -signToolCachePath '$(SignToolPathResuleCachePath)'" />
+		<Exec Condition="'$(Platform)' == 'x86'" Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)testhost.x86.exe,$(TargetDir)WizMachineTest.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)' -signToolCachePath '$(SignToolPathResuleCachePath)'" />
 	</Target>
 </Project>

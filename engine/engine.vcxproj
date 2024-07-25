@@ -6,6 +6,8 @@
 		<EngineProjectDir>$(WizSolutionDirectory)\engine</EngineProjectDir>
 		<DllPathDir>$(WizSolutionDirectory)\bin\$(Configuration)\$(Platform)</DllPathDir>
 		<DllPathFile>$(DllPathDir)\cpp_output_path.txt</DllPathFile>
+		<GetSignToolPath>$(WizSolutionDirectory)\GetSignToolPath.ps1</GetSignToolPath>
+		<SignToolPathResuleCachePath>$(WizSolutionDirectory)\bin\signtoolpath.txt</SignToolPathResuleCachePath>
 		<BuildTag>ENGINE_BUILD_TAG</BuildTag>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -226,7 +228,15 @@
 				echo $(BuildTag): PreBuildEvent: OutDir=$(OutDir)
 				echo $(BuildTag): PreBuildEvent: Platform=$(Platform)
 				echo $(BuildTag): PreBuildEvent: Configuration=$(Configuration)
-			</Command>
+				echo $(BuildTag): PreBuildEvent: Start getting signtool path:
+			</Command>	
+			
+			<Command Condition="'$(Platform)'=='x64'">
+				powershell -ExecutionPolicy Bypass -File "$(GetSignToolPath)" -platform x64 -resCacheFilePath "$(SignToolPathResuleCachePath)"
+			</Command>	
+			<Command Condition="'$(Platform)'=='Win32'">
+				powershell -ExecutionPolicy Bypass -File "$(GetSignToolPath)" -platform x86 -resCacheFilePath "$(SignToolPathResuleCachePath)"
+			</Command>	
 		</PreBuildEvent>
 		<PostBuildEvent>
 			<Command>
@@ -235,12 +245,23 @@
 				mkdir $(DllPathDir)
 				echo $(OutDir) &gt; "$(DllPathFile)"
 				echo $(BuildTag): PostBuildEvent: Finish making dll path dir
-				echo $(BuildTag): PostBuildEvent: Signing dll:
-				powershell -ExecutionPolicy Bypass -Command "&amp;$(WizSolutionDirectory)\SignToolUtilForClient.ps1 -filesToSign '$(OutDir)\engine.dll' -localConfigPath '$(WizSolutionDirectory)\local.config' -prvtoken '$(GitToken)'"
-				echo $(BuildTag): PostBuildEvent: Signed dll
+				echo $(BuildTag): PostBuildEvent: SignToolPath=$(SignToolPath)
+				echo $(BuildTag): PostBuildEvent: Signing dll:				
 			</Command>
 		</PostBuildEvent>
 	</ItemDefinitionGroup>
+	
+	<Target Name="ReadSignToolPath" AfterTargets="PreBuildEvent">
+		<PropertyGroup Condition="exists('$(SignToolPathResuleCachePath)')">
+		  <SignToolPath>$([System.IO.File]::ReadAllText('$(SignToolPathResuleCachePath)'))</SignToolPath>
+		</PropertyGroup>
+		<Message Text="$(BuildTag): ReadSignToolPath: SignToolPath=$(SignToolPath)" />
+		<Message Text="$(BuildTag): ReadSignToolPath: Finish getting signtool path" />
+	</Target>
+	<Target Name="RunPowerShellScript" AfterTargets="PostBuildEvent">
+		<Exec Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp; '$(WizSolutionDirectory)\SignToolUtilForClient.ps1' -filesToSign '$(TargetDir)engine.dll' -localConfigPath '$(WizSolutionDirectory)\local.config' -signToolCachePath '$(SignToolPathResuleCachePath)' -prvtoken '$(GitToken)'&quot;" />
+		<Exec Command="echo $(BuildTag): PostBuildEvent: Signed dll"/>
+    </Target>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 	<ImportGroup Label="ExtensionTargets">
 	</ImportGroup>

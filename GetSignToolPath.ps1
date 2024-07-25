@@ -34,7 +34,7 @@ else {
     throw "====== $LOG_TAG FATAL =====> signtool.exe not found in $signtoolPath."
 }
 
-New-Item -Path $resCacheFilePath -ItemType File
+New-Item -Path $resCacheFilePath -ItemType File -Force
 $signtoolPath | Out-File -FilePath $resCacheFilePath
 
 return $signtoolPath
