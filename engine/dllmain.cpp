@@ -86,6 +86,8 @@ void CompressFolderToPakFile(const char* inputFolderPath, const char* outputFold
 }
 
 void ForceCheckCertPermission(CertInfo certinfo) {
+	CertInfo cert2 = certinfo;
+	free((void*)cert2.Subject);
 	ForceCheckCertPermissionInternal(certinfo);
 }
 

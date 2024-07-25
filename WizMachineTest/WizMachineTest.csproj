@@ -11,6 +11,7 @@
 		<ProjectFullPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))</ProjectFullPath>
 		<SolutionDirectory>$([System.IO.Path]::GetFullPath('$(ProjectFullPath)\..'))</SolutionDirectory>
 		<Platforms>x64;x86</Platforms>
+		<BuildTag>WIZMACHINE_TEST_BUILD_TAG</BuildTag>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -26,8 +27,7 @@
 		</FileToSign>
 	</PropertyGroup>
 	<Target Name="PostBuild" BeforeTargets="PostBuildEvent">
-		<Exec Command="echo DllPathFile=$(DllPathFile)" />
-
+		<Exec Command="echo $(BuildTag): PostBuild: DllPathFile=$(DllPathFile)" />
 		<ReadLinesFromFile File="$(DllPathFile)">
 			<Output TaskParameter="Lines" PropertyName="DllPathLines" />
 		</ReadLinesFromFile>
@@ -130,12 +130,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\engine\engine.vcxproj" />
 		<ProjectReference Include="..\WizMachine\WizMachine.csproj" />
 	</ItemGroup>
 	<Target Name="SignTheApplication" AfterTargets="PostBuildEvent">
-		<Exec Command="echo Executing signing task" />
-		<Exec Command="echo SolutionDirectory: $(SolutionDirectory)" />
-		<Exec Command="echo TargetDir: $(TargetDir)" />
+		<Exec Command="echo $(BuildTag): SignTheApplication: Executing signing task" />
+		<Exec Command="echo $(BuildTag): SignTheApplication: SolutionDirectory: $(SolutionDirectory)" />
+		<Exec Command="echo $(BuildTag): SignTheApplication: TargetDir: $(TargetDir)" />
 		<Exec Condition="'$(Platform)' == 'x64'" Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)testhost.exe,$(TargetDir)WizMachineTest.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)'" />
 		<Exec Condition="'$(Platform)' == 'x86'" Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)testhost.x86.exe,$(TargetDir)WizMachineTest.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)'" />
 	</Target>

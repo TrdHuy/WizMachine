@@ -6,6 +6,7 @@
 		<EngineProjectDir>$(WizSolutionDirectory)\engine</EngineProjectDir>
 		<DllPathDir>$(WizSolutionDirectory)\bin\$(Configuration)\$(Platform)</DllPathDir>
 		<DllPathFile>$(DllPathDir)\cpp_output_path.txt</DllPathFile>
+		<BuildTag>ENGINE_BUILD_TAG</BuildTag>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 		<OutDir>$(EngineProjectDir)\bin\publish\$(Platform)\$(Configuration)\</OutDir>
@@ -217,16 +218,26 @@
 
 
 	<ItemDefinitionGroup>
+		<PreBuildEvent>
+			<Command>
+				echo $(BuildTag): PreBuildEvent: ProjectFullPath=$(ProjectFullPath)				
+				echo $(BuildTag): PreBuildEvent: DllPathDir=$(DllPathDir)
+				echo $(BuildTag): PreBuildEvent: DllPathFile=$(DllPathFile)
+				echo $(BuildTag): PreBuildEvent: OutDir=$(OutDir)
+				echo $(BuildTag): PreBuildEvent: Platform=$(Platform)
+				echo $(BuildTag): PreBuildEvent: Configuration=$(Configuration)
+			</Command>
+		</PreBuildEvent>
 		<PostBuildEvent>
 			<Command>
-				echo ENGINE_BUILD_TARGET: Making dll path dir:
+				echo $(BuildTag): PostBuildEvent: Making dll path dir:
 				rmdir /s /q $(DllPathDir)
 				mkdir $(DllPathDir)
 				echo $(OutDir) &gt; "$(DllPathFile)"
-				echo ENGINE_BUILD_TARGET: Finish making dll path dir
-				echo ENGINE_BUILD_TARGET: Signing dll:
+				echo $(BuildTag): PostBuildEvent: Finish making dll path dir
+				echo $(BuildTag): PostBuildEvent: Signing dll:
 				powershell -ExecutionPolicy Bypass -Command "&amp;$(WizSolutionDirectory)\SignToolUtilForClient.ps1 -filesToSign '$(OutDir)\engine.dll' -localConfigPath '$(WizSolutionDirectory)\local.config' -prvtoken '$(GitToken)'"
-				echo ENGINE_BUILD_TARGET: Signed dll:
+				echo $(BuildTag): PostBuildEvent: Signed dll
 			</Command>
 		</PostBuildEvent>
 	</ItemDefinitionGroup>

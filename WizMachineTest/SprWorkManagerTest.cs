@@ -229,7 +229,7 @@ namespace SPRNetToolTest.Domain
         public void test_CertUtil()
         {
             EngineKeeper.ForceCheckCallingSignature();
-            int a = 3;
+            int a = 1;
             EngineKeeper.ForceCheckCallingSignature();
 
         }
