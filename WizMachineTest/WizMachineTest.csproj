@@ -7,6 +7,7 @@
 		<IsPackable>false</IsPackable>
 		<IsTestProject>true</IsTestProject>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<IsFromDotnet>false</IsFromDotnet>
 		<ProjectFullPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))</ProjectFullPath>
 		<SolutionDirectory>$([System.IO.Path]::GetFullPath('$(ProjectFullPath)\..'))</SolutionDirectory>
 		<Platforms>x64;x86</Platforms>
@@ -131,8 +132,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\engine\engine.vcxproj" />
 		<ProjectReference Include="..\WizMachine\WizMachine.csproj" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(IsFromDotnet)' == 'false'">
+		<ProjectReference Include="..\engine\engine.vcxproj" />
 	</ItemGroup>
 	<Target Name="SignTheApplication" AfterTargets="PostBuildEvent">
 		<Exec Command="echo $(BuildTag): SignTheApplication: Executing signing task" />
@@ -140,5 +143,9 @@
 		<Exec Command="echo $(BuildTag): SignTheApplication: TargetDir: $(TargetDir)" />
 		<Exec Condition="'$(Platform)' == 'x64'" Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)testhost.exe,$(TargetDir)WizMachineTest.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)' -signToolCachePath '$(SignToolPathResuleCachePath)'" />
 		<Exec Condition="'$(Platform)' == 'x86'" Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)testhost.x86.exe,$(TargetDir)WizMachineTest.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)' -signToolCachePath '$(SignToolPathResuleCachePath)'" />
+	</Target>
+
+	<Target Name="RunTests" DependsOnTargets="Build">
+		<Exec Command="dotnet test --configuration $(Configuration) --framework $(TargetFramework) --runtime win-x64 --logger trx --results-directory $(OutputPath) /p:Platform=$(Platform) /p:GitToken=$(GitToken)" />
 	</Target>
 </Project>

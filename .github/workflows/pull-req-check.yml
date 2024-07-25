@@ -94,4 +94,4 @@ jobs:
         
      #Execute all unit tests in the solution
     - name: Execute unit tests
-      run: dotnet test WizMachineTest --configuration ${{ matrix.configuration }} -p:Platform=${{ matrix.platformTarget }} /p:GitToken=${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
+      run: dotnet test WizMachineTest --configuration ${{ matrix.configuration }} -p:Platform=${{ matrix.platformTarget }} /p:GitToken=${{ secrets.WORK_FLOW_ACCESS_TOKEN }} /p:IsFromDotnet=true
