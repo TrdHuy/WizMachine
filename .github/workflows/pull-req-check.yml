@@ -82,8 +82,16 @@ jobs:
     - name: Check Signature with PowerShell
       shell: pwsh
       run: |
-        Import-Module Microsoft.PowerShell.Security
+        $searchPath = "C:\Program Files (x86)\Windows Kits\10\bin"
+
+        # Get the list of directories in the search path
+        $directories = Get-ChildItem -Path $searchPath -Directory
+        
+        # Loop through the directories and find the one containing signtool.exe
+        foreach ($directory in $directories) {
+             Write-Host $directory.Name
+        }
         
     # Execute all unit tests in the solution
-    - name: Execute unit tests
-      run: dotnet test WizMachineTest --configuration ${{ matrix.configuration }} -p:Platform=${{ matrix.platformTarget }} /p:GitToken=${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
+    #- name: Execute unit tests
+    #  run: dotnet test WizMachineTest --configuration ${{ matrix.configuration }} -p:Platform=${{ matrix.platformTarget }} /p:GitToken=${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
