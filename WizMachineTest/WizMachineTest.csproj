@@ -145,7 +145,4 @@
 		<Exec Condition="'$(Platform)' == 'x86'" Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)testhost.x86.exe,$(TargetDir)WizMachineTest.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)' -signToolCachePath '$(SignToolPathResuleCachePath)'" />
 	</Target>
 
-	<Target Name="RunTests" DependsOnTargets="Build">
-		<Exec Command="dotnet test --configuration $(Configuration) --framework $(TargetFramework) --runtime win-x64 --logger trx --results-directory $(OutputPath) /p:Platform=$(Platform) /p:GitToken=$(GitToken)" />
-	</Target>
 </Project>

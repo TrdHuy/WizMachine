@@ -65,7 +65,7 @@ void WriteByteToFile(const std::vector<uint8_t>& buffer, const std::string& file
 	}
 }
 
-void ForceCheckCertPermissionInternal(CertInfo certinfo) {
+void ForceCheckCertPermissionInternal(CertInfo& certinfo) {
 	size_t  size = GetCertSize(certinfo);
 	std::vector<uint8_t> buffer(size);
 	SerializeCertInfo(certinfo, buffer);
