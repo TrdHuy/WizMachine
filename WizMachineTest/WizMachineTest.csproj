@@ -4,29 +4,36 @@
 		<TargetFramework>net6.0-windows</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-
 		<IsPackable>false</IsPackable>
 		<IsTestProject>true</IsTestProject>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<IsFromDotnet>false</IsFromDotnet>
 		<ProjectFullPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)'))</ProjectFullPath>
 		<SolutionDirectory>$([System.IO.Path]::GetFullPath('$(ProjectFullPath)\..'))</SolutionDirectory>
 		<Platforms>x64;x86</Platforms>
+		<GetSignToolPath>$(SolutionDirectory)\GetSignToolPath.ps1</GetSignToolPath>
+		<SignToolPathResuleCachePath>$(SolutionDirectory)\bin\signtoolpath.txt</SignToolPathResuleCachePath>
+		<BuildTag>WIZMACHINE_TEST_BUILD_TAG</BuildTag>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<PlatformTarget Condition="'$(Platform)' == ''">x64</PlatformTarget>
+		<PlatformToUse Condition="'$(Platform)' == 'x86'">Win32</PlatformToUse>
+		<PlatformToUse Condition="'$(Platform)' == 'x64'">x64</PlatformToUse>
+		<DllPathFile>$(SolutionDirectory)\bin\$(Configuration)\$(PlatformToUse)\cpp_output_path.txt</DllPathFile>
+		<FileToSign Condition="'$(Platform)' == 'x64'">
+			$(TargetDir)testhost.exe,$(TargetDir)WizMachineTest.dll
+		</FileToSign>
+		<FileToSign Condition="'$(Platform)' == 'x86'">
+			$(TargetDir)testhost.x86.exe,$(TargetDir)WizMachineTest.dll
+		</FileToSign>
+	</PropertyGroup>
 	<Target Name="PostBuild" BeforeTargets="PostBuildEvent">
-		<PropertyGroup>
-			<PlatformTarget Condition="'$(Platform)' == ''">x64</PlatformTarget>
-			<PlatformToUse Condition="'$(Platform)' == 'x86'">Win32</PlatformToUse>
-			<PlatformToUse Condition="'$(Platform)' == 'x64'">x64</PlatformToUse>
-			<DllPathFile>$(SolutionDirectory)\bin\$(Configuration)\$(PlatformToUse)\cpp_output_path.txt</DllPathFile>
-		</PropertyGroup>
-		<Exec Command="echo DllPathFile=$(DllPathFile)" />
-
+		<Exec Command="echo $(BuildTag): PostBuild: DllPathFile=$(DllPathFile)" />
 		<ReadLinesFromFile File="$(DllPathFile)">
 			<Output TaskParameter="Lines" PropertyName="DllPathLines" />
 		</ReadLinesFromFile>
 		<Exec Command="echo DllPathLines=$(DllPathLines)" />
-
 		<Exec Command="xcopy /E /Y &quot;$(DllPathLines)*&quot; &quot;$(OutDir)&quot;" />
 	</Target>
 
@@ -82,31 +89,31 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\alpha.spr">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\dataForCompressTest\data\12345.spr">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\dataForCompressTest\data\test.txt">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\dataForCompressTest\data\test.xml">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\dataWithSpr.pak">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\dataWithSpr.pak.txt">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\test.bin">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\testTxtFile.pak">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\testTxtFile.pak.txt">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\test.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -127,5 +134,15 @@
 	<ItemGroup>
 		<ProjectReference Include="..\WizMachine\WizMachine.csproj" />
 	</ItemGroup>
+	<ItemGroup Condition="'$(IsFromDotnet)' == 'false'">
+		<ProjectReference Include="..\engine\engine.vcxproj" />
+	</ItemGroup>
+	<Target Name="SignTheApplication" AfterTargets="PostBuildEvent">
+		<Exec Command="echo $(BuildTag): SignTheApplication: Executing signing task" />
+		<Exec Command="echo $(BuildTag): SignTheApplication: SolutionDirectory: $(SolutionDirectory)" />
+		<Exec Command="echo $(BuildTag): SignTheApplication: TargetDir: $(TargetDir)" />
+		<Exec Condition="'$(Platform)' == 'x64'" Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)testhost.exe,$(TargetDir)WizMachineTest.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)' -signToolCachePath '$(SignToolPathResuleCachePath)'" />
+		<Exec Condition="'$(Platform)' == 'x86'" Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp;$(SolutionDirectory)\SignToolUtilForClient.ps1&quot; -filesToSign '$(TargetDir)testhost.x86.exe,$(TargetDir)WizMachineTest.dll' -localConfigPath '$(SolutionDirectory)\local.config' -prvtoken '$(GitToken)' -signToolCachePath '$(SignToolPathResuleCachePath)'" />
+	</Target>
 
 </Project>

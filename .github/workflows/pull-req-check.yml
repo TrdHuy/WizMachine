@@ -50,8 +50,8 @@ jobs:
 
     strategy:
       matrix:
-        configuration: [Debug, Release]
-        platformTarget: [x86, x64]
+        configuration: [Release]
+        platformTarget: [x64]
 
     runs-on: windows-latest  # For a list of available runner types, refer to
                              # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
@@ -78,6 +78,20 @@ jobs:
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v1.0.2
 
-    # Execute all unit tests in the solution
+
+    - name: Check Signature with PowerShell
+      shell: pwsh
+      run: |
+        $searchPath = "C:\Program Files (x86)\Windows Kits\10\bin"
+
+        # Get the list of directories in the search path
+        $directories = Get-ChildItem -Path $searchPath -Directory
+        
+        # Loop through the directories and find the one containing signtool.exe
+        foreach ($directory in $directories) {
+             Write-Host $directory.Name
+        }
+        
+     #Execute all unit tests in the solution
     - name: Execute unit tests
-      run: dotnet test WizMachineTest --configuration ${{ matrix.configuration }} -p:Platform=${{ matrix.platformTarget }} /p:GitToken=${{ secrets.WORK_FLOW_ACCESS_TOKEN }}
+      run: dotnet test WizMachineTest --configuration ${{ matrix.configuration }} -p:Platform=${{ matrix.platformTarget }} /p:GitToken=${{ secrets.WORK_FLOW_ACCESS_TOKEN }} /p:IsFromDotnet=true

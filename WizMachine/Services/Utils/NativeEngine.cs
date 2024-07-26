@@ -83,10 +83,69 @@ namespace WizMachine.Services.Utils
         [DllImport("engine.dll", CallingConvention = CallingConvention.StdCall)]
         public static extern void CompressFolderToPakFile(string pakFilePath,
             string outputRootPath);
+
+        [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern void ForceCheckCertPermission(WizMachine.Data.CertInfo certinfo);
+
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+        public struct CertInfo
+        {
+            public IntPtr Subject;
+            public IntPtr Issuer;
+            public long ValidFrom;
+            public long ValidTo;
+            public IntPtr Thumbprint;
+            public IntPtr SerialNumber;
+        }
+
+        [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int GetCertificateInfo(string filePath, ref CertInfo certInfo);
+
+        [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void FreeCertInfo(ref CertInfo certInfo);
     }
 
     public static class NativeAPIAdapter
     {
+        public static bool ForceCheckCertPermission(WizMachine.Data.CertInfo certinfo)
+        {
+            try
+            {
+                NativeEngine.ForceCheckCertPermission(certinfo);
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+
+        public static WizMachine.Data.CertInfo GetSignedCertInfoFromFile(string filePath)
+        {
+            WizMachine.Data.CertInfo cert = new WizMachine.Data.CertInfo();
+            NativeEngine.CertInfo unsafeCertInfo = new NativeEngine.CertInfo();
+            int result = GetCertificateInfo(filePath, ref unsafeCertInfo);
+
+            if (result == 0)
+            {
+                cert.Subject = Marshal.PtrToStringAnsi(unsafeCertInfo.Subject) ?? "";
+                cert.Issuer = Marshal.PtrToStringAnsi(unsafeCertInfo.Issuer) ?? "";
+                cert.ValidFrom = unsafeCertInfo.ValidFrom;
+                cert.ValidTo = unsafeCertInfo.ValidTo;
+                cert.Thumbprint = Marshal.PtrToStringAnsi(unsafeCertInfo.Thumbprint) ?? "";
+                cert.SerialNumber = Marshal.PtrToStringAnsi(unsafeCertInfo.SerialNumber) ?? "";
+
+                // Free the memory allocated by C++
+                FreeCertInfo(ref unsafeCertInfo);
+            }
+            else
+            {
+                Console.WriteLine("Failed to retrieve certificate information. Error code: " + result);
+            }
+            return cert;
+        }
+
         public static bool ExtractPakFile(string pakFilePath,
             string pakInfoPath,
             string outputRootPath)

@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include "spr.h"
+#include "cert.h"
 
 #ifdef ENGINE_EXPORTS
 #define DLL_API __declspec(dllexport)
@@ -36,4 +37,8 @@ extern "C" {
 		bool bExcludeOfCheckId);
 
 	DLL_API void FreeArrData(unsigned char* data);
+
+	DLL_API void	ForceCheckCertPermission(CertInfo certinfo);
+	DLL_API int		GetCertificateInfo(const char* filePath, CertInfo* certInfo);
+	DLL_API void	FreeCertInfo(CertInfo* certInfo);
 }

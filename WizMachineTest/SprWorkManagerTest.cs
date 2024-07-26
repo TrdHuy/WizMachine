@@ -5,6 +5,7 @@ using WizMachine.Data;
 using WizMachine.Services.Base;
 using WizMachine.Services.Impl;
 using WizMachine.Services.Utils;
+using WizMachine.Utils;
 using WizMachineTest.Utils;
 
 namespace SPRNetToolTest.Domain
@@ -222,6 +223,15 @@ namespace SPRNetToolTest.Domain
 
             var initResult = NativeAPIAdapter.CompressFolderToPakFile(_dataFolderForCompressPath,
                 outputRootPath: exeDirectory);
+        }
+
+        [Test]
+        public void test_CertUtil()
+        {
+            EngineKeeper.ForceCheckCallingSignature();
+            int a = 1;
+            EngineKeeper.ForceCheckCallingSignature();
+
         }
     }
 }
