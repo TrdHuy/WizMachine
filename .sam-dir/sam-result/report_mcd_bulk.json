@@ -1,5 +1,0 @@
-{"index":{}}
-{"Metric": "MCD", "FromModule": "wizmachine/utils", "ToModule": "wizmachine/services", "RelationCount": "3", "Mark": "Y", "Key": "5", "Violation": "Y", "No": 1, "SCM_KEY": "__SCM_KEY__", "SCM_SUBMIT_DATE": "__SCM_SUBMIT_DATE__", "SCM_REPOSITORY": "__SCM_REPOSITORY__", "PLM_CODE": "__PLM_CODE__", "TARGET_PROJECT": "SW Project", "DATAWAREHOUSE_INDEX_NAME": "__DATAWAREHOUSE_INDEX_NAME__"}
-{"index":{}}
-{"Metric": "MCD", "FromModule": "wizmachine/utils", "ToModule": "wizmachine/{root}", "RelationCount": "1", "Mark": "Y", "Key": "6", "Violation": "Y", "No": 2, "SCM_KEY": "__SCM_KEY__", "SCM_SUBMIT_DATE": "__SCM_SUBMIT_DATE__", "SCM_REPOSITORY": "__SCM_REPOSITORY__", "PLM_CODE": "__PLM_CODE__", "TARGET_PROJECT": "SW Project", "DATAWAREHOUSE_INDEX_NAME": "__DATAWAREHOUSE_INDEX_NAME__"}
- 

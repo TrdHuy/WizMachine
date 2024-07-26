@@ -1,6 +1,0 @@
-Svace version: 3.3.230915 (git rev 0087cb5ea258fabece90200f1f236d9c48842265 2023-09-14 23:39:33 +0300)
-Host: DESKTOP-DIUEIGL
-Current directory: C:\Users\Hp\source\repos\users\trdhuy\ArtWiz\libs\WizMachine
-Build options: build --svace-dir C:\Users\Hp\source\repos\users\trdhuy\ArtWiz\libs\WizMachine\.sam-dir\svace-result\svace-dir --scra-only --verbose dotnet build WizMachine\WizMachine.csproj -c Release /p:Platform=x64 /p:GitToken=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 /p:IsFromDotnet=true
-Build start time: Fri, 26 Jul 2024 15:57:39 +0000
-Build finish time: Fri, 26 Jul 2024 15:58:12 +0000

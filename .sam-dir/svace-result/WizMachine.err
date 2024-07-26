@@ -1,7 +1,0 @@
-2024-07-26 22:58:16.4106 System.Globalization.CultureNotFoundException: Only the invariant culture is supported in globalization-invariant mode. See https://aka.ms/GlobalizationInvariantMode for more information. (Parameter 'name')
-en is an invalid culture identifier.
-   at System.Globalization.CultureInfo..ctor(String name, Boolean useUserOverride)
-   at System.Globalization.CultureInfo..ctor(String name)
-   at Microsoft.CodeAnalysis.CaseInsensitiveComparison.GetUnicodeCulture()
-System.Globalization.CultureNotFoundException: Only the invariant culture is supported in globalization-invariant mode. See https://aka.ms/GlobalizationInvariantMode for more information. (Parameter 'name')
-en is an invalid culture identifier.
