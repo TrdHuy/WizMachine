@@ -1,0 +1,5 @@
+RelationType;FromEntity;FromPath;FromLine;ToEntity;ToPath;FromClass;ToClass;RelationCount;FromModule>ToModule;Key;Violation
+CALLS;ForceCheckCurrentAssemblyCert;wizmachine/utils/certmanagerutil.cs;33;ForceCheckCertPermission;wizmachine/services/utils/nativeengine.cs;CertManagerUtil;NativeEngine;1;wizmachine/utils>wizmachine/services;5;Y
+CALLS;ForceCheckCert;wizmachine/utils/certmanagerutil.cs;38;GetSignedCertInfoFromFile;wizmachine/services/utils/nativeengine.cs;CertManagerUtil;NativeAPIAdapter;1;wizmachine/utils>wizmachine/services;5;Y
+CALLS;ForceCheckCert;wizmachine/utils/certmanagerutil.cs;38;ForceCheckCertPermission;wizmachine/services/utils/nativeengine.cs;CertManagerUtil;NativeEngine;1;wizmachine/utils>wizmachine/services;5;Y
+READS;Logger;wizmachine/utils/logger.cs;14;LogWriter;wizmachine/enginekeeper.cs;Logger;EngineKeeper;1;wizmachine/utils>wizmachine/{root};6;Y

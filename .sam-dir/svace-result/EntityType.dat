@@ -1,0 +1,39 @@
+101;DIRECTORY;Folder
+102;ENUM;Declaration of enumeration in C/C
+1021;ENUMERATOR;Declaration of enumeration in C/C
+103;FILE;File
+104;FUNCTION;Definition of function
+105;FUNCTION_DECLARATION;Declaration of functions
+106;FUNCTION_POINTER;Declaration of function-pointer (not local visibility)
+107;FUNCTION_POINTER_DECLARATION;Declaration of extern function-pointers
+108;LOCAL_FUNCTION_POINTER;Declaration of local function-pointer
+109;MACRO;Declaration of Macro
+110;STATIC_VARIABLE;Declaration of static variable
+111;STRUCT;Declaration of structure with member
+112;STRUCT_DECLARATION;Declaration of structure
+113;VARIABLE;Global variable
+114;VARIABLE_DECLARATION;Declaration of extern variables
+115;TYPE_DEF;Use typedef keyword with variable
+116;UNION;Declaration of union in C/C++
+117;LOCAL_VARIABLE;Local variable
+118;FUNCTION_PARAMETER;Function parameter
+201;CLASS;Definition of class with member
+202;CLASS_DATA_MEMBER;Declaration of class member variable
+203;CLASS_DATA_MEMBER_DECLARATION;Declaration of static member variable
+204;CLASS_DECLARATION;Declaration of Class
+205;CLASS_METHOD;Definition of class member method
+206;CLASS_METHOD_DECLARATION;Declaration of member method
+207;IMPORT;Namespace in C/c++
+208;NAMESPACE;Declaration fo Namespace
+209;NAMESPACE_ALIAS;Namespace alias
+301;CLASS_INSTANTIATION;Declaration of class template
+302;CLASS_TEMPLATE;Declaration of class template with member
+303;CLASS_TEMPLATE_DECLARATION;Declaration of class template
+304;DATA_MEMBER_INSTANTIATION;initialization of member in template
+305;FUNCTION_INSTANTIATION;initialization of function template
+306;FUNCTION_TEMPLATE;Definition of function template
+307;FUNCTION_TEMPLATE_DECLARATION;Declaration of function template
+308;METHOD_INSTANTIATION;initialization of class template method
+309;TEMPLATE_MEMBER;definition of Template members method
+310;TEMPLATE_MEMBER_DECLARATION;Declaration of Template members method
+311;ANONYMOUS_FUNCTION;Anonymous function (lambda)

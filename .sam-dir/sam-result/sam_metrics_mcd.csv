@@ -1,0 +1,3 @@
+Metric;FromModule;ToModule;RelationCount;Mark;Key;Violation
+MCD;wizmachine/utils;wizmachine/services;3;Y;5;Y
+MCD;wizmachine/utils;wizmachine/{root};1;Y;6;Y

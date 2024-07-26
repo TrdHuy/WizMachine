@@ -1,0 +1,3 @@
+ParentDepth;Parent;CycleNodeCount;Cycle;mfs;mfsFull;RelationCount;Key;Violation
+1;wizmachine;2;utils>{root}>utils;wizmachine/utils>wizmachine/{root};wizmachine/utils>wizmachine/{root};1;6;Y
+1;wizmachine;2;services>utils>services;wizmachine/utils>wizmachine/services;wizmachine/utils>wizmachine/services;3;5;Y

@@ -1,0 +1,14 @@
+101;CALLS;The calls relationship is created when a source entity invokes code from a destination entity
+102;FP_CALLS;A function-pointer Call
+103;READS;usages are classified as reading
+104;WRITES;usages are classified as writing
+105;INCLUDES;this is a relationship between a file and an included file (usually a header file).
+106;CONTAINS;Object contains Objects Object: Directory, File, Class, function, variable
+201;INHERITS;This is a relationship that points from a derived type, class or interface to a base type, class, or interface.
+202;OVERRIDES;can override a virtual class method in a derived class, redefining an object’s behavior at runtime. This relationship points from the overriding method to the original method in the base class.
+203;IMPORTS;There are two kinds of using directives in C++: one that imports all symbols from a namespace and one that imports just one symbol (such as a function, variable or class).
+204;IMPLICITLY_CALLS;The implicitly calls relationship is created when a function or method creates an object of a class, thus implicitly calling its constructor.
+205;ASSOCIATES;Represents class2 being used to declare members of class
+206;JNI_CALLS;Calls a c/c++ function from java code
+207;INTEROP_CALLS;Calls a c/c++ function from C# code
+212;VIRTUALLY_CALLS;Call of a virtual function

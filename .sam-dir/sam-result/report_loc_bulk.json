@@ -1,0 +1,3 @@
+{"index":{}}
+{"Metric": "LOC", "Path": "wizmachine/services/impl/sprworkmanagercore.cs", "Package": "", "Class": "SprWorkManagerCore", "LineNo": "13", "Value": "576", "ClassType": "CLASS", "Violation": "Y", "No": 1, "SCM_KEY": "__SCM_KEY__", "SCM_SUBMIT_DATE": "__SCM_SUBMIT_DATE__", "SCM_REPOSITORY": "__SCM_REPOSITORY__", "PLM_CODE": "__PLM_CODE__", "TARGET_PROJECT": "SW Project", "DATAWAREHOUSE_INDEX_NAME": "__DATAWAREHOUSE_INDEX_NAME__"}
+ 

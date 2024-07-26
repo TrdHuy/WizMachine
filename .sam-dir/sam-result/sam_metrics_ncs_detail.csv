@@ -1,0 +1,191 @@
+Metric;Path;Entity;Signature;LineNo;Value;Violation
+NCS;wizmachine/data/sprdata.cs;SetVersionInfoStr;void WizMachine.Data.US_SprFileHead.SetVersionInfoStr(System.Char[]);23;2;N
+NCS;wizmachine/data/sprdata.cs;SetVersionInfoStr;void WizMachine.Data.US_SprFileHead.SetVersionInfoStr(System.Byte[]);31;2;N
+NCS;wizmachine/data/sprdata.cs;SetReserved;void WizMachine.Data.US_SprFileHead.SetReserved(System.Byte[]);39;2;N
+NCS;wizmachine/data/sprdata.cs;GetVersionInfoStr;System.String WizMachine.Data.US_SprFileHead.GetVersionInfoStr();47;2;N
+NCS;wizmachine/data/sprdata.cs;GetVersionInfo;System.Byte[] WizMachine.Data.US_SprFileHead.GetVersionInfo();58;2;N
+NCS;wizmachine/data/sprdata.cs;GetReserved;System.Byte[] WizMachine.Data.US_SprFileHead.GetReserved();68;2;N
+NCS;wizmachine/data/sprdata.cs;SprFileHead;WizMachine.Data.SprFileHead.SprFileHead(System.Byte[],System.UInt16,System.UInt16,System.Int16,System.Int16,System.UInt16,System.UInt16,System.UInt16,System.UInt16,System.Byte[]);104;1;N
+NCS;wizmachine/data/sprdata.cs;get_modifiedSprFileHeadCache;WizMachine.Data.SprFileHead.SprFileHeadCache WizMachine.Data.SprFileHead.get_modifiedSprFileHeadCache();94;2;N
+NCS;wizmachine/data/sprdata.cs;ToUnsafe;WizMachine.Data.US_SprFileHead WizMachine.Data.SprFileHead.ToUnsafe();127;1;N
+NCS;wizmachine/data/sprdata.cs;IsNotEmpty;System.Boolean WizMachine.Data.SprFileHead.IsNotEmpty();147;1;N
+NCS;wizmachine/data/sprdata.cs;CreateSprFileHead;WizMachine.Data.SprFileHead WizMachine.Data.SprFileHead.CreateSprFileHead();152;1;N
+NCS;wizmachine/data/sprdata.cs;SprFileHeadCache;WizMachine.Data.SprFileHead.SprFileHeadCache.SprFileHeadCache(WizMachine.Data.SprFileHead);168;1;N
+NCS;wizmachine/data/sprdata.cs;get_globalWidth;System.UInt16 WizMachine.Data.SprFileHead.SprFileHeadCache.get_globalWidth();190;1;N
+NCS;wizmachine/data/sprdata.cs;set_globalWidth;void WizMachine.Data.SprFileHead.SprFileHeadCache.set_globalWidth();194;1;N
+NCS;wizmachine/data/sprdata.cs;get_globalHeight;System.UInt16 WizMachine.Data.SprFileHead.SprFileHeadCache.get_globalHeight();201;1;N
+NCS;wizmachine/data/sprdata.cs;set_globalHeight;void WizMachine.Data.SprFileHead.SprFileHeadCache.set_globalHeight();205;1;N
+NCS;wizmachine/data/sprdata.cs;get_offX;System.Int16 WizMachine.Data.SprFileHead.SprFileHeadCache.get_offX();212;1;N
+NCS;wizmachine/data/sprdata.cs;set_offX;void WizMachine.Data.SprFileHead.SprFileHeadCache.set_offX();216;1;N
+NCS;wizmachine/data/sprdata.cs;get_offY;System.Int16 WizMachine.Data.SprFileHead.SprFileHeadCache.get_offY();223;1;N
+NCS;wizmachine/data/sprdata.cs;set_offY;void WizMachine.Data.SprFileHead.SprFileHeadCache.set_offY();227;1;N
+NCS;wizmachine/data/sprdata.cs;get_Interval;System.UInt16 WizMachine.Data.SprFileHead.SprFileHeadCache.get_Interval();234;1;N
+NCS;wizmachine/data/sprdata.cs;set_Interval;void WizMachine.Data.SprFileHead.SprFileHeadCache.set_Interval();238;1;N
+NCS;wizmachine/data/sprdata.cs;get_FrameCounts;System.UInt16 WizMachine.Data.SprFileHead.SprFileHeadCache.get_FrameCounts();245;1;N
+NCS;wizmachine/data/sprdata.cs;set_FrameCounts;void WizMachine.Data.SprFileHead.SprFileHeadCache.set_FrameCounts();249;1;N
+NCS;wizmachine/data/sprdata.cs;ToSprFileHead;WizMachine.Data.SprFileHead WizMachine.Data.SprFileHead.SprFileHeadCache.ToSprFileHead();255;1;N
+NCS;wizmachine/data/sprdata.cs;ToUnsafe;WizMachine.Data.US_SprFileHead WizMachine.Data.SprFileHead.SprFileHeadCache.ToUnsafe();260;1;N
+NCS;wizmachine/data/sprdata.cs;InitFromSprFileHead;void WizMachine.Data.SprFileHead.SprFileHeadCache.InitFromSprFileHead(WizMachine.Data.SprFileHead);280;1;N
+NCS;wizmachine/data/sprdata.cs;PaletteColor;WizMachine.Data.PaletteColor.PaletteColor(System.Byte,System.Byte,System.Byte,System.Byte);294;1;N
+NCS;wizmachine/data/sprdata.cs;op_Equality;System.Boolean WizMachine.Data.PaletteColor.op_Equality(WizMachine.Data.PaletteColor,WizMachine.Data.PaletteColor);302;1;N
+NCS;wizmachine/data/sprdata.cs;op_Inequality;System.Boolean WizMachine.Data.PaletteColor.op_Inequality(WizMachine.Data.PaletteColor,WizMachine.Data.PaletteColor);307;1;N
+NCS;wizmachine/data/sprdata.cs;Equals;System.Boolean WizMachine.Data.PaletteColor.Equals(System.Object);312;3;N
+NCS;wizmachine/data/sprdata.cs;GetHashCode;System.Int32 WizMachine.Data.PaletteColor.GetHashCode();330;1;N
+NCS;wizmachine/data/sprdata.cs;Palette;WizMachine.Data.Palette.Palette(System.Int32);392;1;N
+NCS;wizmachine/data/sprdata.cs;Palette;WizMachine.Data.Palette.Palette(WizMachine.Data.PaletteColor[]);398;1;N
+NCS;wizmachine/data/sprdata.cs;PaletteCache;WizMachine.Data.Palette.PaletteCache.PaletteCache(WizMachine.Data.Palette);341;1;N
+NCS;wizmachine/data/sprdata.cs;get_this[];WizMachine.Data.PaletteColor WizMachine.Data.Palette.PaletteCache.get_this[]();349;2;N
+NCS;wizmachine/data/sprdata.cs;set_this[];void WizMachine.Data.Palette.PaletteCache.set_this[]();358;2;N
+NCS;wizmachine/data/sprdata.cs;get_Data;WizMachine.Data.PaletteColor[] WizMachine.Data.Palette.PaletteCache.get_Data();370;1;N
+NCS;wizmachine/data/sprdata.cs;get_modifiedPalette;WizMachine.Data.Palette.PaletteCache WizMachine.Data.Palette.get_modifiedPalette();382;2;N
+NCS;wizmachine/data/sprdata.cs;IsContain;System.Boolean WizMachine.Data.Palette.IsContain(WizMachine.Data.PaletteColor);405;3;N
+NCS;wizmachine/data/sprdata.cs;IsSame;System.Boolean WizMachine.Data.Palette.IsSame(WizMachine.Data.Palette);416;3;N
+NCS;wizmachine/data/sprdata.cs;op_Equality;System.Boolean WizMachine.Data.Palette.op_Equality(WizMachine.Data.Palette,WizMachine.Data.Palette);425;4;Y
+NCS;wizmachine/data/sprdata.cs;op_Inequality;System.Boolean WizMachine.Data.Palette.op_Inequality(WizMachine.Data.Palette,WizMachine.Data.Palette);438;1;N
+NCS;wizmachine/data/sprdata.cs;Equals;System.Boolean WizMachine.Data.Palette.Equals(System.Object);443;3;N
+NCS;wizmachine/data/sprdata.cs;GetHashCode;System.Int32 WizMachine.Data.Palette.GetHashCode();462;1;N
+NCS;wizmachine/data/sprdata.cs;get_modifiedFrameRGBACache;WizMachine.Data.FrameRGBA.FrameRGBACache WizMachine.Data.FrameRGBA.get_modifiedFrameRGBACache();492;2;N
+NCS;wizmachine/data/sprdata.cs;IsFrameSizeChanged;System.Boolean WizMachine.Data.FrameRGBA.IsFrameSizeChanged();507;1;N
+NCS;wizmachine/data/sprdata.cs;FrameRGBACache;WizMachine.Data.FrameRGBA.FrameRGBACache.FrameRGBACache(WizMachine.Data.FrameRGBA);520;1;N
+NCS;wizmachine/data/sprdata.cs;get_frameWidth;System.UInt16 WizMachine.Data.FrameRGBA.FrameRGBACache.get_frameWidth();534;1;N
+NCS;wizmachine/data/sprdata.cs;set_frameWidth;void WizMachine.Data.FrameRGBA.FrameRGBACache.set_frameWidth();538;1;N
+NCS;wizmachine/data/sprdata.cs;get_frameHeight;System.UInt16 WizMachine.Data.FrameRGBA.FrameRGBACache.get_frameHeight();545;1;N
+NCS;wizmachine/data/sprdata.cs;set_frameHeight;void WizMachine.Data.FrameRGBA.FrameRGBACache.set_frameHeight();549;1;N
+NCS;wizmachine/data/sprdata.cs;get_frameOffX;System.Int16 WizMachine.Data.FrameRGBA.FrameRGBACache.get_frameOffX();556;1;N
+NCS;wizmachine/data/sprdata.cs;set_frameOffX;void WizMachine.Data.FrameRGBA.FrameRGBACache.set_frameOffX();560;1;N
+NCS;wizmachine/data/sprdata.cs;get_frameOffY;System.Int16 WizMachine.Data.FrameRGBA.FrameRGBACache.get_frameOffY();567;1;N
+NCS;wizmachine/data/sprdata.cs;set_frameOffY;void WizMachine.Data.FrameRGBA.FrameRGBACache.set_frameOffY();571;1;N
+NCS;wizmachine/data/sprdata.cs;get_modifiedBGRAData;System.Byte[] WizMachine.Data.FrameRGBA.FrameRGBACache.get_modifiedBGRAData();579;1;N
+NCS;wizmachine/data/sprdata.cs;set_modifiedBGRAData;void WizMachine.Data.FrameRGBA.FrameRGBACache.set_modifiedBGRAData();583;1;N
+NCS;wizmachine/data/sprdata.cs;toFrameRGBA;WizMachine.Data.FrameRGBA WizMachine.Data.FrameRGBA.FrameRGBACache.toFrameRGBA();590;1;N
+NCS;wizmachine/data/sprdata.cs;SetCopiedPaletteData;void WizMachine.Data.FrameRGBA.FrameRGBACache.SetCopiedPaletteData(WizMachine.Data.Palette);595;1;N
+NCS;wizmachine/data/sprdata.cs;GetFramePaletteData;WizMachine.Data.Palette WizMachine.Data.FrameRGBA.FrameRGBACache.GetFramePaletteData();600;1;N
+NCS;wizmachine/data/sprdata.cs;get_paletteColorChangeIndexCache;System.Collections.Generic.Dictionary<System.Int32,System.ValueTuple<WizMachine.Data.PaletteColor,WizMachine.Data.PaletteColor>> WizMachine.Data.FrameRGBA.FrameRGBACache.get_paletteColorChangeIndexCache();609;2;N
+NCS;wizmachine/data/sprdata.cs;ResetPaletteColorChangedIndex;void WizMachine.Data.FrameRGBA.FrameRGBACache.ResetPaletteColorChangedIndex();619;1;N
+NCS;wizmachine/data/sprdata.cs;SetPaletteColorChangedIndex;void WizMachine.Data.FrameRGBA.FrameRGBACache.SetPaletteColorChangedIndex(System.Int32,WizMachine.Data.PaletteColor,WizMachine.Data.PaletteColor);625;2;N
+NCS;wizmachine/data/sprdata.cs;GetPaletteColorChangedIndex;System.Int32[] WizMachine.Data.FrameRGBA.FrameRGBACache.GetPaletteColorChangedIndex();637;1;N
+NCS;wizmachine/data/sprdata.cs;GetChangedPaletteColors;System.ValueTuple<WizMachine.Data.PaletteColor,WizMachine.Data.PaletteColor>[] WizMachine.Data.FrameRGBA.FrameRGBACache.GetChangedPaletteColors();641;1;N
+NCS;wizmachine/enginekeeper.cs;EngineKeeper;WizMachine.EngineKeeper.EngineKeeper();44;1;N
+NCS;wizmachine/enginekeeper.cs;GetSprWorkManagerService;WizMachine.Services.Base.ISprWorkManagerAdvance WizMachine.EngineKeeper.GetSprWorkManagerService();15;2;N
+NCS;wizmachine/enginekeeper.cs;ForceCheckCallingSignature;System.Boolean WizMachine.EngineKeeper.ForceCheckCallingSignature();22;3;N
+NCS;wizmachine/enginekeeper.cs;Init;void WizMachine.EngineKeeper.Init(System.IO.StreamWriter);35;2;N
+NCS;wizmachine/services/base/isprworkmanagercore.cs;ResetWorkSpace;void WizMachine.Services.Base.ISprWorkManagerCore.ResetWorkSpace();18;1;N
+NCS;wizmachine/services/base/isprworkmanagercore.cs;get_IsWorkSpaceEmpty;System.Boolean WizMachine.Services.Base.ISprWorkManagerCore.get_IsWorkSpaceEmpty();23;1;N
+NCS;wizmachine/services/base/isprworkmanagercore.cs;InitWorkManagerFromSprFile;System.Boolean WizMachine.Services.Base.ISprWorkManagerCore.InitWorkManagerFromSprFile(System.String);38;2;N
+NCS;wizmachine/services/base/isprworkmanagercore.cs;InitWorkManagerFromSprFile;System.Boolean WizMachine.Services.Base.ISprWorkManagerCore.InitWorkManagerFromSprFile(System.IO.FileStream);59;2;N
+NCS;wizmachine/services/base/isprworkmanagercore.cs;SaveCurrentWorkToSpr;void WizMachine.Services.Base.ISprWorkManagerCore.SaveCurrentWorkToSpr(System.String,System.Boolean);81;5;Y
+NCS;wizmachine/services/base/isprworkmanagercore.cs;SaveBitmapSourceToSprFile;void WizMachine.Services.Base.ISprWorkManagerCore.SaveBitmapSourceToSprFile(System.Windows.Media.Imaging.BitmapSource,System.String);153;2;N
+NCS;wizmachine/services/impl/sprworkmanageradvance.cs;WizMachine.Services.Base.ISprWorkManagerAdvance.SetNewColorToGlobalPalette;void WizMachine.Services.Impl.SprWorkManagerAdvance.WizMachine.Services.Base.ISprWorkManagerAdvance.SetNewColorToGlobalPalette(System.UInt32,System.Byte,System.Byte,System.Byte);16;2;N
+NCS;wizmachine/services/impl/sprworkmanageradvance.cs;WizMachine.Services.Base.ISprWorkManagerAdvance.SetNewColorToInsertedFramePalette;void WizMachine.Services.Impl.SprWorkManagerAdvance.WizMachine.Services.Base.ISprWorkManagerAdvance.SetNewColorToInsertedFramePalette(System.Int32,System.UInt32,System.Byte,System.Byte,System.Byte);35;3;N
+NCS;wizmachine/services/impl/sprworkmanageradvance.cs;WizMachine.Services.Base.ISprWorkManagerAdvance.InsertFrame;System.Boolean WizMachine.Services.Impl.SprWorkManagerAdvance.WizMachine.Services.Base.ISprWorkManagerAdvance.InsertFrame(System.UInt32,System.UInt16,System.UInt16,WizMachine.Data.PaletteColor[],System.Byte[],WizMachine.Data.Palette,System.Collections.Generic.Dictionary<System.Windows.Media.Color,System.Int64>,System.Collections.Generic.Dictionary<System.Int32,System.Collections.Generic.List<System.Int64>>);70;3;N
+NCS;wizmachine/services/impl/sprworkmanageradvance.cs;WizMachine.Services.Base.ISprWorkManagerAdvance.RemoveFrame;System.Boolean WizMachine.Services.Impl.SprWorkManagerAdvance.WizMachine.Services.Base.ISprWorkManagerAdvance.RemoveFrame(System.UInt32);146;4;Y
+NCS;wizmachine/services/impl/sprworkmanageradvance.cs;WizMachine.Services.Base.ISprWorkManagerAdvance.SwitchFrame;System.Boolean WizMachine.Services.Impl.SprWorkManagerAdvance.WizMachine.Services.Base.ISprWorkManagerAdvance.SwitchFrame(System.UInt32,System.UInt32);166;2;N
+NCS;wizmachine/services/impl/sprworkmanageradvance.cs;WizMachine.Services.Base.ISprWorkManagerAdvance.SetFrameSize;void WizMachine.Services.Impl.SprWorkManagerAdvance.WizMachine.Services.Base.ISprWorkManagerAdvance.SetFrameSize(System.UInt16,System.UInt16,System.UInt32,System.Nullable<System.Windows.Media.Color>);186;3;N
+NCS;wizmachine/services/impl/sprworkmanageradvance.cs;WizMachine.Services.Base.ISprWorkManagerAdvance.SetGlobalSize;void WizMachine.Services.Impl.SprWorkManagerAdvance.WizMachine.Services.Base.ISprWorkManagerAdvance.SetGlobalSize(System.UInt16,System.UInt16);200;2;N
+NCS;wizmachine/services/impl/sprworkmanageradvance.cs;WizMachine.Services.Base.ISprWorkManagerAdvance.SetGlobalOffset;void WizMachine.Services.Impl.SprWorkManagerAdvance.WizMachine.Services.Base.ISprWorkManagerAdvance.SetGlobalOffset(System.Int16,System.Int16);210;2;N
+NCS;wizmachine/services/impl/sprworkmanageradvance.cs;WizMachine.Services.Base.ISprWorkManagerAdvance.SetFrameOffset;void WizMachine.Services.Impl.SprWorkManagerAdvance.WizMachine.Services.Base.ISprWorkManagerAdvance.SetFrameOffset(System.Int16,System.Int16,System.UInt32);220;3;N
+NCS;wizmachine/services/impl/sprworkmanageradvance.cs;WizMachine.Services.Base.ISprWorkManagerAdvance.SetSprInterval;void WizMachine.Services.Impl.SprWorkManagerAdvance.WizMachine.Services.Base.ISprWorkManagerAdvance.SetSprInterval(System.UInt16);236;2;N
+NCS;wizmachine/services/impl/sprworkmanageradvance.cs;WizMachine.Services.Base.ISprWorkManagerAdvance.GetFrameData;System.Nullable<WizMachine.Data.FrameRGBA> WizMachine.Services.Impl.SprWorkManagerAdvance.WizMachine.Services.Base.ISprWorkManagerAdvance.GetFrameData(System.UInt32);244;2;N
+NCS;wizmachine/services/impl/sprworkmanageradvance.cs;WizMachine.Services.Base.ISprWorkManagerAdvance.GetDecodedBGRAData;System.Byte[] WizMachine.Services.Impl.SprWorkManagerAdvance.WizMachine.Services.Base.ISprWorkManagerAdvance.GetDecodedBGRAData(System.UInt32,out System.Collections.Generic.List<System.ValueTuple<System.Windows.Media.Color,System.Windows.Media.Color,System.Int32>>);253;4;Y
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;get_IsCacheEmpty;System.Boolean WizMachine.Services.Impl.SprWorkManagerCore.get_IsCacheEmpty();25;1;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;get_WizMachine.Services.Base.ISprWorkManagerCore.FileHead;WizMachine.Data.SprFileHead WizMachine.Services.Impl.SprWorkManagerCore.get_WizMachine.Services.Base.ISprWorkManagerCore.FileHead();30;1;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;get_WizMachine.Services.Base.ISprWorkManagerCore.PaletteData;WizMachine.Data.Palette WizMachine.Services.Impl.SprWorkManagerCore.get_WizMachine.Services.Base.ISprWorkManagerCore.PaletteData();38;1;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;get_WizMachine.Services.Base.ISprWorkManagerCore.IsCacheEmpty;System.Boolean WizMachine.Services.Impl.SprWorkManagerCore.get_WizMachine.Services.Base.ISprWorkManagerCore.IsCacheEmpty();44;1;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;ApplyPaletteToFrame;void WizMachine.Services.Impl.SprWorkManagerCore.ApplyPaletteToFrame(WizMachine.Data.Palette,WizMachine.Data.FrameRGBA);50;2;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;FindClosetRGBColorInPalette;WizMachine.Data.PaletteColor WizMachine.Services.Impl.SprWorkManagerCore.FindClosetRGBColorInPalette(System.Byte,System.Byte,System.Byte,WizMachine.Data.Palette);71;3;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;EncryptFrameData;System.Byte[] WizMachine.Services.Impl.SprWorkManagerCore.EncryptFrameData(System.Byte[],WizMachine.Data.PaletteColor[],System.UInt16,System.UInt16,System.UInt16,System.UInt16);91;5;Y
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;FindPaletteIndex;System.Byte WizMachine.Services.Impl.SprWorkManagerCore.FindPaletteIndex(System.Byte,System.Byte,System.Byte,WizMachine.Data.PaletteColor[]);94;3;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;EncryptedSprFile;System.Byte[] WizMachine.Services.Impl.SprWorkManagerCore.EncryptedSprFile(System.Collections.Generic.List<System.Byte[]>,WizMachine.Data.PaletteColor[],System.UInt16,System.UInt16,System.Int16,System.Int16,System.UInt16,System.UInt16,System.Byte[]);163;2;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WritePaletteColorToByteList;void WizMachine.Services.Impl.SprWorkManagerCore.WritePaletteColorToByteList(WizMachine.Data.PaletteColor,System.Collections.Generic.List<System.Byte>);174;1;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WriteFrameOffsetInfoList;void WizMachine.Services.Impl.SprWorkManagerCore.WriteFrameOffsetInfoList(System.Collections.Generic.List<System.Byte[]>,System.Collections.Generic.List<System.Byte>,System.Int32);181;2;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.InitCache;void WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.InitCache();236;1;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.ApplyNewPaletteToOldFrames;void WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.ApplyNewPaletteToOldFrames(WizMachine.Data.Palette);244;2;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.ApplyNewPaletteToInsertedFrames;void WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.ApplyNewPaletteToInsertedFrames(WizMachine.Data.Palette);255;2;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.IsNeedToApplyNewPaletteToOldFrames;System.Boolean WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.IsNeedToApplyNewPaletteToOldFrames(WizMachine.Data.Palette);266;1;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.IsPossibleToSaveFile;System.Boolean WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.IsPossibleToSaveFile();271;1;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.InitCacheAll;void WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.InitCacheAll(WizMachine.Data.SprFileHead,WizMachine.Data.Palette,System.Int32,WizMachine.Data.FrameRGBA[]);290;1;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.InitFromFileHead;void WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.InitFromFileHead(WizMachine.Data.US_SprFileHead);301;1;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.InitPaletteDataFromFileStream;void WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.InitPaletteDataFromFileStream(System.IO.FileStream,WizMachine.Data.US_SprFileHead);318;2;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.InitFrameData;void WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.InitFrameData(System.IO.FileStream);330;3;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.GetByteArrayFromHeader;System.Byte[] WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.GetByteArrayFromHeader(System.Boolean,System.Boolean,System.UInt16);360;3;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.GetByteArrayFromAllFramesOffsetInfo;System.Byte[] WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.GetByteArrayFromAllFramesOffsetInfo(System.Byte[][]);375;3;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.GetByteArrayFromPaletteData;System.Byte[] WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.GetByteArrayFromPaletteData(System.Boolean);392;2;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.GetByteArrayFromEncryptedFrameData;System.Byte[] WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.GetByteArrayFromEncryptedFrameData(System.Int32,System.Boolean,System.Boolean,System.Nullable<WizMachine.Data.Palette>);402;4;Y
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;getPaletteColorInRef;WizMachine.Data.PaletteColor WizMachine.Services.Impl.SprWorkManagerCore.getPaletteColorInRef(System.UInt32,System.UInt32,System.UInt16,System.UInt16,System.Byte[]);412;2;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.EncryptFrameData;System.Byte[] WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.EncryptFrameData(System.Byte[],WizMachine.Data.PaletteColor[],System.UInt16,System.UInt16,System.UInt16,System.UInt16);474;1;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.EncryptedSprFile;System.Byte[] WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.EncryptedSprFile(System.Collections.Generic.List<System.Byte[]>,WizMachine.Data.PaletteColor[],System.UInt16,System.UInt16,System.Int16,System.Int16,System.UInt16,System.UInt16,System.Byte[]);489;1;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.IsContainInsertedFrame;System.Boolean WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.IsContainInsertedFrame();510;1;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.RecalculatePaletteColorForAllInsertedFrame;System.Boolean WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.RecalculatePaletteColorForAllInsertedFrame(out System.Nullable<WizMachine.Data.Palette>);515;2;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;IsContainInsertedFrameInternal;System.Boolean WizMachine.Services.Impl.SprWorkManagerCore.IsContainInsertedFrameInternal();544;1;N
+NCS;wizmachine/services/impl/sprworkmanagercore.cs;InitDecodedFrameData;WizMachine.Data.PaletteColor[] WizMachine.Services.Impl.SprWorkManagerCore.InitDecodedFrameData(System.IO.FileStream,System.UInt32,out System.UInt16,out System.UInt16,WizMachine.Services.Impl.ColorMode,out System.UInt16,out System.UInt16,out System.Collections.Generic.Dictionary<System.Int32,System.Collections.Generic.List<System.Int64>>,out System.Byte[]);549;5;Y
+NCS;wizmachine/services/utils/nativeengine.cs;ExportToSPRFile;void WizMachine.Services.Utils.NativeEngine.ExportToSPRFile(System.String,WizMachine.Services.Utils.NativeEngine.NSPRFileHead,WizMachine.Services.Utils.NativeEngine.NColor[],System.Int32,WizMachine.Services.Utils.NativeEngine.NFrameData[]);54;1;N
+NCS;wizmachine/services/utils/nativeengine.cs;LoadSPRFile;void WizMachine.Services.Utils.NativeEngine.LoadSPRFile(System.String,out WizMachine.Services.Utils.NativeEngine.NSPRFileHead,out WizMachine.Services.Utils.NativeEngine.NColor[],out System.Int32,out System.Int32,out WizMachine.Services.Utils.NativeEngine.NFrameData[],out System.Int32);61;1;N
+NCS;wizmachine/services/utils/nativeengine.cs;FreeArrData;void WizMachine.Services.Utils.NativeEngine.FreeArrData(System.IntPtr);74;1;N
+NCS;wizmachine/services/utils/nativeengine.cs;ExtractPakFile;void WizMachine.Services.Utils.NativeEngine.ExtractPakFile(System.String,System.String,System.String);78;1;N
+NCS;wizmachine/services/utils/nativeengine.cs;CompressFolderToPakFile;void WizMachine.Services.Utils.NativeEngine.CompressFolderToPakFile(System.String,System.String);83;1;N
+NCS;wizmachine/services/utils/nativeengine.cs;ForceCheckCertPermission;void WizMachine.Services.Utils.NativeEngine.ForceCheckCertPermission(WizMachine.Data.CertInfo);87;1;N
+NCS;wizmachine/services/utils/nativeengine.cs;GetCertificateInfo;System.Int32 WizMachine.Services.Utils.NativeEngine.GetCertificateInfo(System.String,ref WizMachine.Services.Utils.NativeEngine.CertInfo);102;1;N
+NCS;wizmachine/services/utils/nativeengine.cs;FreeCertInfo;void WizMachine.Services.Utils.NativeEngine.FreeCertInfo(ref WizMachine.Services.Utils.NativeEngine.CertInfo);105;1;N
+NCS;wizmachine/services/utils/nativeengine.cs;ForceCheckCertPermission;System.Boolean WizMachine.Services.Utils.NativeAPIAdapter.ForceCheckCertPermission(WizMachine.Data.CertInfo);111;3;N
+NCS;wizmachine/services/utils/nativeengine.cs;GetSignedCertInfoFromFile;WizMachine.Data.CertInfo WizMachine.Services.Utils.NativeAPIAdapter.GetSignedCertInfoFromFile(System.String);124;2;N
+NCS;wizmachine/services/utils/nativeengine.cs;ExtractPakFile;System.Boolean WizMachine.Services.Utils.NativeAPIAdapter.ExtractPakFile(System.String,System.String,System.String);149;1;N
+NCS;wizmachine/services/utils/nativeengine.cs;CompressFolderToPakFile;System.Boolean WizMachine.Services.Utils.NativeAPIAdapter.CompressFolderToPakFile(System.String,System.String);157;1;N
+NCS;wizmachine/services/utils/nativeengine.cs;LoadSPRFile;System.Boolean WizMachine.Services.Utils.NativeAPIAdapter.LoadSPRFile(System.String,out WizMachine.Data.SprFileHead,out WizMachine.Data.Palette,out System.Int32,out WizMachine.Data.FrameRGBA[]);164;2;N
+NCS;wizmachine/services/utils/nativeengine.cs;ConvertNativeSprFileHeadToAppData;WizMachine.Data.SprFileHead WizMachine.Services.Utils.NativeAPIAdapter.ConvertNativeSprFileHeadToAppData(WizMachine.Services.Utils.NativeEngine.NSPRFileHead);196;1;N
+NCS;wizmachine/services/utils/nativeengine.cs;ConvertNativeColorPaletteToAppData;WizMachine.Data.Palette WizMachine.Services.Utils.NativeAPIAdapter.ConvertNativeColorPaletteToAppData(WizMachine.Services.Utils.NativeEngine.NColor[],System.Int32);210;2;N
+NCS;wizmachine/services/utils/nativeengine.cs;ConvertAndFreeNativeFrameDataToAppData;WizMachine.Data.FrameRGBA WizMachine.Services.Utils.NativeAPIAdapter.ConvertAndFreeNativeFrameDataToAppData(WizMachine.Services.Utils.NativeEngine.NFrameData);224;3;N
+NCS;wizmachine/utils/bitmaputil.cs;SelectMostUsePaletteColorFromCountableColorSource;WizMachine.Data.PaletteColor[] WizMachine.Utils.BitmapUtil.SelectMostUsePaletteColorFromCountableColorSource(System.Int32,System.UInt32,System.Collections.Generic.Dictionary<System.Windows.Media.Color,System.Int64>[]);13;1;N
+NCS;wizmachine/utils/bitmaputil.cs;SelectMostUseColorFromCountableColorSource;System.Collections.Generic.List<System.Windows.Media.Color> WizMachine.Utils.BitmapUtil.SelectMostUseColorFromCountableColorSource(System.Int32,System.UInt32,System.Collections.Generic.Dictionary<System.Windows.Media.Color,System.Int64>[]);25;4;Y
+NCS;wizmachine/utils/bitmaputil.cs;SelectMostUseColorFromCountableColorSource;System.Collections.Generic.List<System.Windows.Media.Color> WizMachine.Utils.BitmapUtil.SelectMostUseColorFromCountableColorSource(System.Collections.Generic.List<System.ValueTuple<System.Windows.Media.Color,System.Int64>>,System.Int32,System.UInt32,out System.Int32,out System.Collections.Generic.List<System.Windows.Media.Color>,out System.Collections.Generic.List<System.Windows.Media.Color>,out System.Collections.Generic.List<System.Windows.Media.Color>,System.Boolean,System.Nullable<System.Windows.Media.Color>,System.Int32,System.Int32,System.Int32);64;1;N
+NCS;wizmachine/utils/bitmaputil.cs;SelectMostUseColorFromOrderedDescendingColorSource;System.Collections.Generic.List<System.Windows.Media.Color> WizMachine.Utils.BitmapUtil.SelectMostUseColorFromOrderedDescendingColorSource(System.Collections.Generic.List<System.ValueTuple<System.Windows.Media.Color,System.Int64>>,System.Int32,System.UInt32,out System.Int32,out System.Collections.Generic.List<System.Windows.Media.Color>,out System.Collections.Generic.List<System.Windows.Media.Color>,out System.Collections.Generic.List<System.Windows.Media.Color>,System.Boolean,System.Nullable<System.Windows.Media.Color>,System.Int32,System.Int32,System.Int32);98;7;Y
+NCS;wizmachine/utils/bitmaputil.cs;CountBGRAColors;System.Collections.Generic.Dictionary<System.Windows.Media.Color,System.Int64> WizMachine.Utils.BitmapUtil.CountBGRAColors(System.Byte[],out System.Int64,out System.Int64,out System.Collections.Generic.Dictionary<System.Windows.Media.Color,System.Int64>,out System.Collections.Generic.Dictionary<System.Windows.Media.Color,System.Int64>);194;3;N
+NCS;wizmachine/utils/bitmaputil.cs;CountColors;System.Collections.Generic.Dictionary<System.Windows.Media.Color,System.Int64> WizMachine.Utils.BitmapUtil.CountColors(WizMachine.Data.PaletteColor[],out System.Int64,out System.Int64,out System.Collections.Generic.Dictionary<System.Windows.Media.Color,System.Int64>,out System.Collections.Generic.Dictionary<System.Windows.Media.Color,System.Int64>);237;3;N
+NCS;wizmachine/utils/bitmaputil.cs;CountColors;void WizMachine.Utils.BitmapUtil.CountColors(System.Windows.Media.Imaging.BitmapSource,out System.Int64,out System.Int64,out System.Collections.Generic.Dictionary<System.Windows.Media.Color,System.Int64>,out System.Collections.Generic.HashSet<System.Windows.Media.Color>);280;4;Y
+NCS;wizmachine/utils/bitmaputil.cs;ConvertBitmapSourceToByteArray;System.Byte[] WizMachine.Utils.BitmapUtil.ConvertBitmapSourceToByteArray(System.Windows.Media.Imaging.BitmapSource);325;1;N
+NCS;wizmachine/utils/bitmaputil.cs;ConvertBitmapSourceToPaletteColorArray;WizMachine.Data.PaletteColor[] WizMachine.Utils.BitmapUtil.ConvertBitmapSourceToPaletteColorArray(System.Windows.Media.Imaging.BitmapSource);336;3;N
+NCS;wizmachine/utils/bitmaputil.cs;ConvertBitmapSourceToPaletteColorArray;WizMachine.Data.PaletteColor[] WizMachine.Utils.BitmapUtil.ConvertBitmapSourceToPaletteColorArray(System.Windows.Media.Imaging.BitmapSource,out System.Collections.Generic.Dictionary<System.Windows.Media.Color,System.Int64>,out System.Collections.Generic.Dictionary<System.Windows.Media.Color,System.Int64>,out WizMachine.Data.Palette,out System.Byte[],out System.Collections.Generic.Dictionary<System.Int32,System.Collections.Generic.List<System.Int64>>);374;3;N
+NCS;wizmachine/utils/bitmaputil.cs;AreByteArraysEqual;System.Boolean WizMachine.Utils.BitmapUtil.AreByteArraysEqual(System.Byte[],System.Byte[]);482;3;N
+NCS;wizmachine/utils/certmanagerutil.cs;CertManagerUtil;static WizMachine.Utils.CertManagerUtil.CertManagerUtil();17;1;N
+NCS;wizmachine/utils/certmanagerutil.cs;ForceCheckCurrentAssemblyCert;void WizMachine.Utils.CertManagerUtil.ForceCheckCurrentAssemblyCert();33;1;N
+NCS;wizmachine/utils/certmanagerutil.cs;ForceCheckCert;void WizMachine.Utils.CertManagerUtil.ForceCheckCert(System.String);38;2;N
+NCS;wizmachine/utils/colorutil.cs;CalculateEuclideanDistance;System.Double WizMachine.Utils.ColorUtil.CalculateEuclideanDistance(System.Windows.Media.Color,System.Windows.Media.Color);9;1;N
+NCS;wizmachine/utils/colorutil.cs;CalculateRGBEuclideanDistance;System.Double WizMachine.Utils.ColorUtil.CalculateRGBEuclideanDistance(System.Byte,System.Byte,System.Byte,WizMachine.Data.PaletteColor);17;1;N
+NCS;wizmachine/utils/colorutil.cs;CalculateRGBEuclideanDistance;System.Double WizMachine.Utils.ColorUtil.CalculateRGBEuclideanDistance(WizMachine.Data.PaletteColor,WizMachine.Data.PaletteColor);25;1;N
+NCS;wizmachine/utils/colorutil.cs;BlendColors;System.Windows.Media.Color WizMachine.Utils.ColorUtil.BlendColors(System.Windows.Media.Color,System.Windows.Media.Color);33;1;N
+NCS;wizmachine/utils/colorutil.cs;FindAlphaColors;System.Byte WizMachine.Utils.ColorUtil.FindAlphaColors(System.Windows.Media.Color,System.Windows.Media.Color,System.Windows.Media.Color,out System.Byte);54;1;N
+NCS;wizmachine/utils/extension.cs;ReduceSameItem;System.Collections.Generic.IEnumerable<T> WizMachine.Utils.Extension.ReduceSameItem<T>(System.Collections.Generic.IEnumerable<T>);11;1;N
+NCS;wizmachine/utils/extension.cs;CopyStructToList;void WizMachine.Utils.Extension.CopyStructToList<T>(T,System.Collections.Generic.List<System.Byte>);16;1;N
+NCS;wizmachine/utils/extension.cs;BinToStruct;System.Nullable<T> WizMachine.Utils.Extension.BinToStruct<T>(System.IO.FileStream,System.Int64);27;2;N
+NCS;wizmachine/utils/extension.cs;ToByteArray;System.Byte[] WizMachine.Utils.Extension.ToByteArray<T>(T);49;1;N
+NCS;wizmachine/utils/extension.cs;CopyStructToArray;void WizMachine.Utils.Extension.CopyStructToArray<T>(T,System.Byte[],System.Int32);60;2;N
+NCS;wizmachine/utils/extension.cs;IfNullThenLet;T WizMachine.Utils.SharpExtension.IfNullThenLet<T>(T,System.Func<T>);75;2;N
+NCS;wizmachine/utils/extension.cs;ApplyIfNotNull;void WizMachine.Utils.SharpExtension.ApplyIfNotNull<T1,T2>(System.ValueTuple<T1,T2>,System.Action<T1,T2>);84;2;N
+NCS;wizmachine/utils/extension.cs;Apply;void WizMachine.Utils.SharpExtension.Apply<T>(T,System.Action<T>);92;1;N
+NCS;wizmachine/utils/extension.cs;Let;R WizMachine.Utils.SharpExtension.Let<T,R>(T,System.Func<T,R>);97;1;N
+NCS;wizmachine/utils/extension.cs;Also;T WizMachine.Utils.SharpExtension.Also<T>(T,System.Action<T>);102;1;N
+NCS;wizmachine/utils/extension.cs;FoEach;void WizMachine.Utils.SharpExtension.FoEach<T>(System.Collections.Generic.IEnumerable<T>,System.Action<T>);108;2;N
+NCS;wizmachine/utils/extension.cs;FoEach;void WizMachine.Utils.SharpExtension.FoEach<T>(System.Collections.Generic.IEnumerable<T>,System.Action<System.Int32,T>);116;2;N
+NCS;wizmachine/utils/extension.cs;IfNullOrEmpty;void WizMachine.Utils.SharpExtension.IfNullOrEmpty(System.String,System.Action);127;2;N
+NCS;wizmachine/utils/extension.cs;IfNotNullOrEmpty;void WizMachine.Utils.SharpExtension.IfNotNullOrEmpty(System.String,System.Action<System.String>);135;2;N
+NCS;wizmachine/utils/extension.cs;FoEach;void WizMachine.Utils.SharpExtension.FoEach<T>(System.Collections.Generic.IEnumerable<T>,System.Func<System.Int32,T,System.Boolean>);143;2;N
+NCS;wizmachine/utils/extension.cs;FoEach;System.Boolean WizMachine.Utils.SharpExtension.FoEach<T>(System.Collections.Generic.IEnumerable<T>,System.Func<T,System.Boolean>);155;2;N
+NCS;wizmachine/utils/extension.cs;For;void WizMachine.Utils.SharpExtension.For<T>(System.Int32,out T,System.Func<System.Int32,T,T>);165;2;N
+NCS;wizmachine/utils/extension.cs;ForEachNonEmptyLine;void WizMachine.Utils.SharpExtension.ForEachNonEmptyLine(System.String,System.Action<System.String>);174;2;N
+NCS;wizmachine/utils/extension.cs;ForEachLine;void WizMachine.Utils.SharpExtension.ForEachLine(System.String,System.Action<System.String>);183;2;N
+NCS;wizmachine/utils/extension.cs;IfFalseApply;System.Boolean WizMachine.Utils.SharpExtension.IfFalseApply(System.Boolean,System.Action<System.Boolean>);192;2;N
+NCS;wizmachine/utils/extension.cs;IfTrueApply;System.Boolean WizMachine.Utils.SharpExtension.IfTrueApply(System.Boolean,System.Action<System.Boolean>);201;2;N
+NCS;wizmachine/utils/extension.cs;ThrowIfNull;void WizMachine.Utils.SharpExtension.ThrowIfNull<T>(T);210;2;N
+NCS;wizmachine/utils/extension.cs;IfNull;T WizMachine.Utils.SharpExtension.IfNull<T>(T,System.Action<T>);215;2;N
+NCS;wizmachine/utils/extension.cs;IfIs;void WizMachine.Utils.SharpExtension.IfIs<T>(System.Object,System.Action<T>,System.Action);222;2;N
+NCS;wizmachine/utils/extension.cs;IfIsThenAlso;T WizMachine.Utils.SharpExtension.IfIsThenAlso<T>(System.Object,System.Func<T,T>);234;2;N
+NCS;wizmachine/utils/extension.cs;IfIsThenLet;R WizMachine.Utils.SharpExtension.IfIsThenLet<T,R>(System.Object,System.Func<T,R>);243;2;N
+NCS;wizmachine/utils/extension.cs;ThrowIfNull;T WizMachine.Utils.SharpExtension.ThrowIfNull<T>(T,System.Exception);253;1;N
+NCS;wizmachine/utils/logger.cs;Logger;WizMachine.Utils.Logger.Logger(System.String);22;1;N
+NCS;wizmachine/utils/logger.cs;Logger;static WizMachine.Utils.Logger.Logger();14;1;N
+NCS;wizmachine/utils/logger.cs;CurrentDomain_UnhandledException;void WizMachine.Utils.Logger.CurrentDomain_UnhandledException(System.Object,System.UnhandledExceptionEventArgs);27;1;N
+NCS;wizmachine/utils/logger.cs;D;void WizMachine.Utils.Logger.D(System.String,System.String);35;1;N
+NCS;wizmachine/utils/logger.cs;I;void WizMachine.Utils.Logger.I(System.String,System.String);44;1;N
+NCS;wizmachine/utils/logger.cs;E;void WizMachine.Utils.Logger.E(System.String,System.String);51;1;N
+NCS;wizmachine/utils/logger.cs;D;void WizMachine.Utils.Logger.Raw.D(System.String,System.String);61;1;N
+NCS;wizmachine/utils/logger.cs;I;void WizMachine.Utils.Logger.Raw.I(System.String,System.String);70;1;N
+NCS;wizmachine/utils/logger.cs;E;void WizMachine.Utils.Logger.Raw.E(System.String,System.String);77;1;N

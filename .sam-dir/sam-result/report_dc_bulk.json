@@ -1,0 +1,21 @@
+{"index":{}}
+{"Metric": "DC", "BlockKey": "1", "Path": "wizmachine/utils/bitmaputil.cs", "LineStart": "208", "LineEnd": "237", "LineCount": "30", "Token": "114", "Violation": "Y", "No": 1, "SCM_KEY": "__SCM_KEY__", "SCM_SUBMIT_DATE": "__SCM_SUBMIT_DATE__", "SCM_REPOSITORY": "__SCM_REPOSITORY__", "PLM_CODE": "__PLM_CODE__", "TARGET_PROJECT": "SW Project", "DATAWAREHOUSE_INDEX_NAME": "__DATAWAREHOUSE_INDEX_NAME__"}
+{"index":{}}
+{"Metric": "DC", "BlockKey": "1", "Path": "wizmachine/utils/bitmaputil.cs", "LineStart": "251", "LineEnd": "280", "LineCount": "30", "Token": "114", "Violation": "Y", "No": 2, "SCM_KEY": "__SCM_KEY__", "SCM_SUBMIT_DATE": "__SCM_SUBMIT_DATE__", "SCM_REPOSITORY": "__SCM_REPOSITORY__", "PLM_CODE": "__PLM_CODE__", "TARGET_PROJECT": "SW Project", "DATAWAREHOUSE_INDEX_NAME": "__DATAWAREHOUSE_INDEX_NAME__"}
+{"index":{}}
+{"Metric": "DC", "BlockKey": "5", "Path": "wizmachine/utils/bitmaputil.cs", "LineStart": "208", "LineEnd": "218", "LineCount": "11", "Token": "50", "Violation": "Y", "No": 3, "SCM_KEY": "__SCM_KEY__", "SCM_SUBMIT_DATE": "__SCM_SUBMIT_DATE__", "SCM_REPOSITORY": "__SCM_REPOSITORY__", "PLM_CODE": "__PLM_CODE__", "TARGET_PROJECT": "SW Project", "DATAWAREHOUSE_INDEX_NAME": "__DATAWAREHOUSE_INDEX_NAME__"}
+{"index":{}}
+{"Metric": "DC", "BlockKey": "2", "Path": "wizmachine/utils/bitmaputil.cs", "LineStart": "194", "LineEnd": "203", "LineCount": "10", "Token": "81", "Violation": "Y", "No": 4, "SCM_KEY": "__SCM_KEY__", "SCM_SUBMIT_DATE": "__SCM_SUBMIT_DATE__", "SCM_REPOSITORY": "__SCM_REPOSITORY__", "PLM_CODE": "__PLM_CODE__", "TARGET_PROJECT": "SW Project", "DATAWAREHOUSE_INDEX_NAME": "__DATAWAREHOUSE_INDEX_NAME__"}
+{"index":{}}
+{"Metric": "DC", "BlockKey": "2", "Path": "wizmachine/utils/bitmaputil.cs", "LineStart": "237", "LineEnd": "246", "LineCount": "10", "Token": "81", "Violation": "Y", "No": 5, "SCM_KEY": "__SCM_KEY__", "SCM_SUBMIT_DATE": "__SCM_SUBMIT_DATE__", "SCM_REPOSITORY": "__SCM_REPOSITORY__", "PLM_CODE": "__PLM_CODE__", "TARGET_PROJECT": "SW Project", "DATAWAREHOUSE_INDEX_NAME": "__DATAWAREHOUSE_INDEX_NAME__"}
+{"index":{}}
+{"Metric": "DC", "BlockKey": "5", "Path": "wizmachine/utils/bitmaputil.cs", "LineStart": "304", "LineEnd": "313", "LineCount": "10", "Token": "50", "Violation": "Y", "No": 6, "SCM_KEY": "__SCM_KEY__", "SCM_SUBMIT_DATE": "__SCM_SUBMIT_DATE__", "SCM_REPOSITORY": "__SCM_REPOSITORY__", "PLM_CODE": "__PLM_CODE__", "TARGET_PROJECT": "SW Project", "DATAWAREHOUSE_INDEX_NAME": "__DATAWAREHOUSE_INDEX_NAME__"}
+{"index":{}}
+{"Metric": "DC", "BlockKey": "4", "Path": "wizmachine/utils/bitmaputil.cs", "LineStart": "354", "LineEnd": "362", "LineCount": "9", "Token": "61", "Violation": "Y", "No": 7, "SCM_KEY": "__SCM_KEY__", "SCM_SUBMIT_DATE": "__SCM_SUBMIT_DATE__", "SCM_REPOSITORY": "__SCM_REPOSITORY__", "PLM_CODE": "__PLM_CODE__", "TARGET_PROJECT": "SW Project", "DATAWAREHOUSE_INDEX_NAME": "__DATAWAREHOUSE_INDEX_NAME__"}
+{"index":{}}
+{"Metric": "DC", "BlockKey": "4", "Path": "wizmachine/utils/bitmaputil.cs", "LineStart": "421", "LineEnd": "429", "LineCount": "9", "Token": "61", "Violation": "Y", "No": 8, "SCM_KEY": "__SCM_KEY__", "SCM_SUBMIT_DATE": "__SCM_SUBMIT_DATE__", "SCM_REPOSITORY": "__SCM_REPOSITORY__", "PLM_CODE": "__PLM_CODE__", "TARGET_PROJECT": "SW Project", "DATAWAREHOUSE_INDEX_NAME": "__DATAWAREHOUSE_INDEX_NAME__"}
+{"index":{}}
+{"Metric": "DC", "BlockKey": "3", "Path": "wizmachine/utils/bitmaputil.cs", "LineStart": "347", "LineEnd": "354", "LineCount": "8", "Token": "69", "Violation": "Y", "No": 9, "SCM_KEY": "__SCM_KEY__", "SCM_SUBMIT_DATE": "__SCM_SUBMIT_DATE__", "SCM_REPOSITORY": "__SCM_REPOSITORY__", "PLM_CODE": "__PLM_CODE__", "TARGET_PROJECT": "SW Project", "DATAWAREHOUSE_INDEX_NAME": "__DATAWAREHOUSE_INDEX_NAME__"}
+{"index":{}}
+{"Metric": "DC", "BlockKey": "3", "Path": "wizmachine/utils/bitmaputil.cs", "LineStart": "406", "LineEnd": "413", "LineCount": "8", "Token": "69", "Violation": "Y", "No": 10, "SCM_KEY": "__SCM_KEY__", "SCM_SUBMIT_DATE": "__SCM_SUBMIT_DATE__", "SCM_REPOSITORY": "__SCM_REPOSITORY__", "PLM_CODE": "__PLM_CODE__", "TARGET_PROJECT": "SW Project", "DATAWAREHOUSE_INDEX_NAME": "__DATAWAREHOUSE_INDEX_NAME__"}
+ 

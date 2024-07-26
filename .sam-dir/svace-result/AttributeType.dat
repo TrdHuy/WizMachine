@@ -1,0 +1,12 @@
+101;member_accessor;Accessor of each class, member variable, method
+102;polymorphism;A function or method whose behavior can be overridden within an inheriting class by a function with the same signature
+103;signature;Return type  and full name and arguments of Method ex> Client* getClientByIDUnsafe(int cameraId)
+104;variable_type;Type of each variable includes primitive and defined type
+105;static;Define static keyword for variable, method and etc
+106;const;Define const keyword for variable, method and etc
+107;inline;Define inline keyword for method
+108;extern;Define extern keyword for variable, method and etc
+109;namespace_file;file where the namespace is defined
+110;partial;Define partial keyword for C# class
+111;virtual_partial;Define artificial instance for partial C# class
+112;unused;Whether the entity is conservatively unused

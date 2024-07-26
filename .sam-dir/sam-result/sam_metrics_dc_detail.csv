@@ -1,0 +1,6 @@
+Metric;BlockKey;Path;LineStart;LineEnd;LineCount;ExcludeDuplicatedLine
+DC;1;wizmachine/utils/bitmaputil.cs;251;280;30;Exclude
+DC;2;wizmachine/utils/bitmaputil.cs;194;203;10;Exclude
+DC;3;wizmachine/utils/bitmaputil.cs;406;413;8;Exclude
+DC;4;wizmachine/utils/bitmaputil.cs;421;429;9;Exclude
+DC;5;wizmachine/utils/bitmaputil.cs;304;313;10;Exclude

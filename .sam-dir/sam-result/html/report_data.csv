@@ -1,0 +1,95 @@
+@complementary_indicator
+No.;SAM Metrics;Tool;Score;RefactoringItems;Density;Ratio;Scoring
+1;CyclomaticComplexity;scra;5.00;0;0.00;0.00 %;Y
+2;DuplicateCode;cpd;4.67;10;2.99;1.65 %;Y
+3;ModuleCircularDependency;scra;1.47;4;74.07;7.41 %;Y
+4;CouplingBetweenObjects;scra;5.00;0;0.00;0.00 %;Y
+5;LinesOfCode;scra;4.82;1;33.33;21.61 %;Y
+6;DependencyComplexity;scra;N/A;0;0.00;0.00 %;
+7;GodModule;scra;N/A;0;0.00;0.00 %;
+8;UnusedCode;scra;4.73;0;0.00;0.00 %;
+9;NestedControlStatements;scra;4.29;10;52.63;14.15 %;Y
+10;MacroRelation;scra;5.00;0;0.00;0.00 %;
+@cc
+No.;Metric;Path;Entity;Value;LineNo;Violation
+@dc
+No.;Metric;BlockKey;Path;LineStart;LineEnd;LineCount;Token;Violation
+1;DC;1;wizmachine/utils/bitmaputil.cs;208;237;30;114;Y 
+
+
+2;DC;1;wizmachine/utils/bitmaputil.cs;251;280;30;114;Y 
+
+
+3;DC;5;wizmachine/utils/bitmaputil.cs;208;218;11;50;Y 
+
+
+4;DC;2;wizmachine/utils/bitmaputil.cs;194;203;10;81;Y 
+
+
+5;DC;2;wizmachine/utils/bitmaputil.cs;237;246;10;81;Y 
+
+
+6;DC;5;wizmachine/utils/bitmaputil.cs;304;313;10;50;Y 
+
+
+7;DC;4;wizmachine/utils/bitmaputil.cs;354;362;9;61;Y 
+
+
+8;DC;4;wizmachine/utils/bitmaputil.cs;421;429;9;61;Y 
+
+
+9;DC;3;wizmachine/utils/bitmaputil.cs;347;354;8;69;Y 
+
+
+10;DC;3;wizmachine/utils/bitmaputil.cs;406;413;8;69;Y 
+
+
+@mcd
+No.;Metric;FromModule;ToModule;RelationCount;Mark;Key;Violation
+1;MCD;wizmachine/utils;wizmachine/services;3;Y;5;Y 
+
+
+2;MCD;wizmachine/utils;wizmachine/{root};1;Y;6;Y 
+
+
+@cbo
+No.;Metric;Path;Package;Class;LineNo;Value;Violation
+@loc
+No.;Metric;Path;Package;Class;LineNo;Value;ClassType;Violation
+1;LOC;wizmachine/services/impl/sprworkmanagercore.cs;;SprWorkManagerCore;13;576;CLASS;Y 
+
+
+@gm
+No.;Metric;Module;BLOC;FunctionCnt;BLOCxFunctionCnt;ModulePath;Violation
+@ncs
+No.;Metric;Path;Entity;Signature;LineNo;Value;Violation
+1;NCS;wizmachine/utils/bitmaputil.cs;SelectMostUseColorFromOrderedDescendingColorSource;System.Collections.Generic.List<System.Windows.Media.Color> WizMachine.Utils.BitmapUtil.SelectMostUseColorFromOrderedDescendingColorSource(System.Collections.Generic.List<System.ValueTuple<System.Windows.Media.Color,System.Int64>>,System.Int32,System.UInt32,out System.Int32,out System.Collections.Generic.List<System.Windows.Media.Color>,out System.Collections.Generic.List<System.Windows.Media.Color>,out System.Collections.Generic.List<System.Windows.Media.Color>,System.Boolean,System.Nullable<System.Windows.Media.Color>,System.Int32,System.Int32,System.Int32);98;7;Y 
+
+
+2;NCS;wizmachine/services/base/isprworkmanagercore.cs;SaveCurrentWorkToSpr;void WizMachine.Services.Base.ISprWorkManagerCore.SaveCurrentWorkToSpr(System.String,System.Boolean);81;5;Y 
+
+
+3;NCS;wizmachine/services/impl/sprworkmanagercore.cs;EncryptFrameData;System.Byte[] WizMachine.Services.Impl.SprWorkManagerCore.EncryptFrameData(System.Byte[],WizMachine.Data.PaletteColor[],System.UInt16,System.UInt16,System.UInt16,System.UInt16);91;5;Y 
+
+
+4;NCS;wizmachine/services/impl/sprworkmanagercore.cs;InitDecodedFrameData;WizMachine.Data.PaletteColor[] WizMachine.Services.Impl.SprWorkManagerCore.InitDecodedFrameData(System.IO.FileStream,System.UInt32,out System.UInt16,out System.UInt16,WizMachine.Services.Impl.ColorMode,out System.UInt16,out System.UInt16,out System.Collections.Generic.Dictionary<System.Int32,System.Collections.Generic.List<System.Int64>>,out System.Byte[]);549;5;Y 
+
+
+5;NCS;wizmachine/data/sprdata.cs;op_Equality;System.Boolean WizMachine.Data.Palette.op_Equality(WizMachine.Data.Palette,WizMachine.Data.Palette);425;4;Y 
+
+
+6;NCS;wizmachine/services/impl/sprworkmanageradvance.cs;WizMachine.Services.Base.ISprWorkManagerAdvance.RemoveFrame;System.Boolean WizMachine.Services.Impl.SprWorkManagerAdvance.WizMachine.Services.Base.ISprWorkManagerAdvance.RemoveFrame(System.UInt32);146;4;Y 
+
+
+7;NCS;wizmachine/services/impl/sprworkmanageradvance.cs;WizMachine.Services.Base.ISprWorkManagerAdvance.GetDecodedBGRAData;System.Byte[] WizMachine.Services.Impl.SprWorkManagerAdvance.WizMachine.Services.Base.ISprWorkManagerAdvance.GetDecodedBGRAData(System.UInt32,out System.Collections.Generic.List<System.ValueTuple<System.Windows.Media.Color,System.Windows.Media.Color,System.Int32>>);253;4;Y 
+
+
+8;NCS;wizmachine/services/impl/sprworkmanagercore.cs;WizMachine.Services.Base.ISprWorkManagerCore.GetByteArrayFromEncryptedFrameData;System.Byte[] WizMachine.Services.Impl.SprWorkManagerCore.WizMachine.Services.Base.ISprWorkManagerCore.GetByteArrayFromEncryptedFrameData(System.Int32,System.Boolean,System.Boolean,System.Nullable<WizMachine.Data.Palette>);402;4;Y 
+
+
+9;NCS;wizmachine/utils/bitmaputil.cs;SelectMostUseColorFromCountableColorSource;System.Collections.Generic.List<System.Windows.Media.Color> WizMachine.Utils.BitmapUtil.SelectMostUseColorFromCountableColorSource(System.Int32,System.UInt32,System.Collections.Generic.Dictionary<System.Windows.Media.Color,System.Int64>[]);25;4;Y 
+
+
+10;NCS;wizmachine/utils/bitmaputil.cs;CountColors;void WizMachine.Utils.BitmapUtil.CountColors(System.Windows.Media.Imaging.BitmapSource,out System.Int64,out System.Int64,out System.Collections.Generic.Dictionary<System.Windows.Media.Color,System.Int64>,out System.Collections.Generic.HashSet<System.Windows.Media.Color>);280;4;Y 
+
+

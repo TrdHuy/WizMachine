@@ -1,0 +1,2 @@
+Metric;Path;Package;Class;LineNo;Value;ClassType;Violation
+LOC;wizmachine/services/impl/sprworkmanagercore.cs;;SprWorkManagerCore;13;576;CLASS;Y

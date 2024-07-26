@@ -1,0 +1,11 @@
+Metric;BlockKey;Path;LineStart;LineEnd;LineCount;Token;Violation
+DC;1;wizmachine/utils/bitmaputil.cs;208;237;30;114;Y
+DC;1;wizmachine/utils/bitmaputil.cs;251;280;30;114;Y
+DC;2;wizmachine/utils/bitmaputil.cs;194;203;10;81;Y
+DC;2;wizmachine/utils/bitmaputil.cs;237;246;10;81;Y
+DC;3;wizmachine/utils/bitmaputil.cs;347;354;8;69;Y
+DC;3;wizmachine/utils/bitmaputil.cs;406;413;8;69;Y
+DC;4;wizmachine/utils/bitmaputil.cs;354;362;9;61;Y
+DC;4;wizmachine/utils/bitmaputil.cs;421;429;9;61;Y
+DC;5;wizmachine/utils/bitmaputil.cs;208;218;11;50;Y
+DC;5;wizmachine/utils/bitmaputil.cs;304;313;10;50;Y

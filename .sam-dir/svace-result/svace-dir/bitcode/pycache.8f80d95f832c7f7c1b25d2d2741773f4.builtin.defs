@@ -1,0 +1,153 @@
+#undef __STDC_HOSTED__
+#undef __STDC_VERSION__
+#undef __STDC_UTF_16__
+#undef __STDC_UTF_32__
+#undef __STDC__
+#undef __BOOL_DEFINED
+#define __BOOL_DEFINED 1
+#undef __cplusplus
+#define __cplusplus 199711L
+#undef _CPPRTTI
+#define _CPPRTTI 1
+#undef _CPPUNWIND
+#define _CPPUNWIND 1
+#undef _DLL
+#define _DLL 1
+#undef _INTEGRAL_MAX_BITS
+#define _INTEGRAL_MAX_BITS 64
+#undef _M_AMD64
+#define _M_AMD64 100
+#undef _M_FP_PRECISE
+#define _M_FP_PRECISE 1
+#undef _M_X64
+#define _M_X64 100
+#undef _MSC_BUILD
+#define _MSC_BUILD 0
+#undef _MSC_EXTENSIONS
+#define _MSC_EXTENSIONS 1
+#undef _MSC_FULL_VER
+#define _MSC_FULL_VER 193632537
+#undef _MSC_VER
+#define _MSC_VER 1936
+#undef _MSVC_LANG
+#define _MSVC_LANG 201703L
+#undef _MSVC_TRADITIONAL
+#define _MSVC_TRADITIONAL 1
+#undef _MT
+#define _MT 1
+#undef _NATIVE_WCHAR_T_DEFINED
+#define _NATIVE_WCHAR_T_DEFINED 1
+#undef __STDC_HOSTED__
+#define __STDC_HOSTED__ 1
+#undef __STDCPP_DEFAULT_NEW_ALIGNMENT__
+#define __STDCPP_DEFAULT_NEW_ALIGNMENT__ 16ull
+#undef __STDCPP_THREADS__
+#define __STDCPP_THREADS__ 1
+#undef _WCHAR_T_DEFINED
+#define _WCHAR_T_DEFINED 1
+#undef _WIN32
+#define _WIN32 1
+#undef _WIN64
+#define _WIN64 1
+#undef __cpp_rtti
+#define __cpp_rtti 199711L
+#undef __cpp_exceptions
+#define __cpp_exceptions 199711L
+#undef __cpp_unicode_characters
+#define __cpp_unicode_characters 200704L
+#undef __cpp_raw_strings
+#define __cpp_raw_strings 200710L
+#undef __cpp_unicode_literals
+#define __cpp_unicode_literals 200710L
+#undef __cpp_user_defined_literals
+#define __cpp_user_defined_literals 200809L
+#undef __cpp_lambdas
+#define __cpp_lambdas 200907L
+#undef __cpp_constexpr
+#define __cpp_constexpr 201603L
+#undef __cpp_range_based_for
+#define __cpp_range_based_for 201603L
+#undef __cpp_static_assert
+#define __cpp_static_assert 201411L
+#undef __cpp_decltype
+#define __cpp_decltype 200707L
+#undef __cpp_attributes
+#define __cpp_attributes 200809L
+#undef __cpp_rvalue_references
+#define __cpp_rvalue_references 200610L
+#undef __cpp_variadic_templates
+#define __cpp_variadic_templates 200704L
+#undef __cpp_initializer_lists
+#define __cpp_initializer_lists 200806L
+#undef __cpp_delegating_constructors
+#define __cpp_delegating_constructors 200604L
+#undef __cpp_nsdmi
+#define __cpp_nsdmi 200809L
+#undef __cpp_inheriting_constructors
+#define __cpp_inheriting_constructors 201511L
+#undef __cpp_ref_qualifiers
+#define __cpp_ref_qualifiers 200710L
+#undef __cpp_alias_templates
+#define __cpp_alias_templates 200704L
+#undef __cpp_threadsafe_static_init
+#define __cpp_threadsafe_static_init 200806L
+#undef __cpp_binary_literals
+#define __cpp_binary_literals 201304L
+#undef __cpp_init_captures
+#define __cpp_init_captures 201304L
+#undef __cpp_generic_lambdas
+#define __cpp_generic_lambdas 201304L
+#undef __cpp_decltype_auto
+#define __cpp_decltype_auto 201304L
+#undef __cpp_return_type_deduction
+#define __cpp_return_type_deduction 201304L
+#undef __cpp_aggregate_nsdmi
+#define __cpp_aggregate_nsdmi 201304L
+#undef __cpp_variable_templates
+#define __cpp_variable_templates 201304L
+#undef __cpp_sized_deallocation
+#define __cpp_sized_deallocation 201309L
+#undef __cpp_hex_float
+#define __cpp_hex_float 201603L
+#undef __cpp_inline_variables
+#define __cpp_inline_variables 201606L
+#undef __cpp_noexcept_function_type
+#define __cpp_noexcept_function_type 201510L
+#undef __cpp_capture_star_this
+#define __cpp_capture_star_this 201603L
+#undef __cpp_if_constexpr
+#define __cpp_if_constexpr 201606L
+#undef __cpp_deduction_guides
+#define __cpp_deduction_guides 201703L
+#undef __cpp_namespace_attributes
+#define __cpp_namespace_attributes 201411L
+#undef __cpp_enumerator_attributes
+#define __cpp_enumerator_attributes 201411L
+#undef __cpp_variadic_using
+#define __cpp_variadic_using 201611L
+#undef __cpp_aggregate_bases
+#define __cpp_aggregate_bases 201603L
+#undef __cpp_structured_bindings
+#define __cpp_structured_bindings 201606L
+#undef __cpp_nontype_template_args
+#define __cpp_nontype_template_args 201411L
+#undef __cpp_fold_expressions
+#define __cpp_fold_expressions 201603L
+#undef __cpp_guaranteed_copy_elision
+#define __cpp_guaranteed_copy_elision 201606L
+#undef __cpp_nontype_template_parameter_auto
+#define __cpp_nontype_template_parameter_auto 201606L
+#undef __cpp_aligned_new
+#define __cpp_aligned_new 201606L
+#undef __cpp_template_template_args
+#define __cpp_template_template_args 201611L
+#define __FUNCDNAME__ "__svace__funcdname"
+#define __FUNCSIG__ "__svace__funcsig"
+#define __FUNCTION__ "__svace__function"
+class type_info;
+#undef __DATE__
+#define __DATE__ "Jan  1 1970"
+#undef __TIME__
+#define __TIME__ "00:00:00"
+#undef __TIMESTAMP__
+#define __TIMESTAMP__ "Thu Jan  1 00:00:00 1970\n"
