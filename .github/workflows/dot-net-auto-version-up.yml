@@ -18,7 +18,7 @@ jobs:
     runs-on: windows-latest
     env:
      ISLOCAL: false
-     BUILD_PERMISSION_JSON: ${{ secrets.BUILD_PERMISSION_JSON }}
+     BUILD_PERMISSION_JSON: ${{ vars.BUILD_PERMISSION_JSON }}
      GITHUB_TOKEN: ${{ secrets.WORK_FLOW_ACCESS_TOKEN_CLASSIC }}
      TARGET_BRANCH: ${{ github.event.inputs.branch }}
      TARGET_MODULE: WizMachine
