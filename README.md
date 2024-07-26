@@ -14,18 +14,24 @@ where gh >nul 2>nul && gh --version && git clone "https://github.com/TrdHuy/WizM
 gh workflow run AutoVersionBump -F branch="dev" -F type="build"
 ```
 
-```
-In there:
-type is Version up type
-type="major"
-type="minor"
-type="build"
-type="patch"
+  - #### branch: Target release branch
+  - #### type: Version up type
+     - 👉 major
+     - 👉 minor
+     - 👉 build
+     - 👉 patch
 
-force indicates that, you will version up even if previous commit is version up commit
-force="true"
-force="false"
+---
+</br>
+</br>
+</br>
+
+# 💩 To calculate sam metric
+``` cmd
+gh workflow run SamArcService -F branch="dev"
 ```
+
+  - #### branch: Target calculate branch
 ---
 </br>
 </br>
