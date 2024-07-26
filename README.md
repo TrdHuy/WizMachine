@@ -11,16 +11,16 @@ where gh >nul 2>nul && gh --version && git clone "https://github.com/TrdHuy/WizM
 
 # 💩 To create a new version up automatically
 ``` cmd
-gh workflow run AutoVersionBump -F vT="minor" -F force="true"
+gh workflow run AutoVersionBump -F branch="dev" -F type="build"
 ```
 
 ```
 In there:
-vT is Version up type
-vT="major"
-vT="minor"
-vT="patch"
-vT="build"
+type is Version up type
+type="major"
+type="minor"
+type="build"
+type="patch"
 
 force indicates that, you will version up even if previous commit is version up commit
 force="true"
