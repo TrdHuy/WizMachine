@@ -10,7 +10,7 @@ on:
         required: true
 
 jobs:
-  version_bump:
+  calculate_metric:
     runs-on: windows-latest
     env:
      ISLOCAL: false
@@ -76,7 +76,7 @@ jobs:
             Write-Host Hello world
             $url = "https://api.github.com/repos/TrdHuy/ArcRpter/releases/assets/126947734"
             $outPath = "ArcRpter.zip"
-            $pat = "${{ secrets.WORK_FLOW_ACCESS_TOKEN }}"
+            $pat = "${{ env.GITHUB_TOKEN }}"
             Invoke-WebRequest -Uri $url -OutFile $outPath -Headers @{"Authorization" = "token $pat"; "Accept" = "application/octet-stream"}
             Expand-Archive -Path ArcRpter.zip -DestinationPath ArcRpter
       - name: Run arcrunner.bat
