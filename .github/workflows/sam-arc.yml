@@ -49,19 +49,19 @@ jobs:
       - name: create arcrunner.bat
         shell: cmd
         run: |
-            set projectPath=%CD%
-            set samPath=%projectPath%\ArcRpter\bin\sam.exe
-            set samDir=%projectPath%\.sam-dir
-            (
-        	    echo @echo off
-        	    echo %samPath% init --sam-dir %samDir%
-        	    echo dotnet clean ${{ env.CS_VERSION_UP_FILE_PATH }} -c Release /p:Platform=x64 /p:GitToken=${{ env.GITHUB_TOKEN }} /p:IsFromDotnet=true
-        	    echo %samPath% scan --sam-dir %samDir% --source-path %projectPath% --language cs dotnet build ${{ env.CS_VERSION_UP_FILE_PATH }} -c Release /p:Platform=x64 /p:GitToken=${{ env.GITHUB_TOKEN }} /p:IsFromDotnet=true
-        	    echo %samPath% analyze --sam-dir %samDir% --source-path %projectPath% --language cs 
-        	    echo %samPath% calculate --sam-dir %samDir% --source-path %projectPath% --language cs --scoring-metrics cc,dc,mcd,cbo,loc,ncs
-            ) > arcrunner.bat
-            type %CD%\arcrunner.bat
-            powershell -command "ls"
+             set projectPath=%CD%
+             set samPath=%projectPath%\ArcRpter\bin\sam.exe
+             set samDir=%projectPath%\.sam-dir
+             (
+             echo @echo off
+             echo %samPath% init --sam-dir %samDir%
+             echo dotnet clean ${{ env.CS_VERSION_UP_FILE_PATH }} -c Release /p:Platform=x64 /p:GitToken=${{ env.GITHUB_TOKEN }} /p:IsFromDotnet=true
+             echo %samPath% scan --sam-dir %samDir% --source-path %projectPath% --language cs dotnet build ${{ env.CS_VERSION_UP_FILE_PATH }} -c Release /p:Platform=x64 /p:GitToken=${{ env.GITHUB_TOKEN }} /p:IsFromDotnet=true
+             echo %samPath% analyze --sam-dir %samDir% --source-path %projectPath% --language cs 
+             echo %samPath% calculate --sam-dir %samDir% --source-path %projectPath% --language cs --scoring-metrics cc,dc,mcd,cbo,loc,ncs
+             ) > arcrunner.bat
+             type %CD%\arcrunner.bat
+             powershell -command "ls"
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
