@@ -2,9 +2,10 @@ param (
 	[string]$PLATFORM
 )
 $psVersion = $PSVersionTable.PSVersion
-
+$scriptRoot = (Get-Location).Path
 # In ra phiên bản PowerShell
 Write-Host "PowerShell Version: $($psVersion.Major).$($psVersion.Minor).$($psVersion.Build)"
+Write-Host "ScriptRoot: $scriptRoot"
 
 $ISLOCAL = $env:ISLOCAL
 if (-not $ISLOCAL) {
@@ -306,7 +307,6 @@ else {
 			$nuspecFileName = ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString() + "." + $PLATFORM + ".nuspec"
 			$absoluteRawNuspecPath = Resolve-Path $RAW_NUSPEC_FILE_PATH
 			$absoluteRawNuspecParentPath = Split-Path $absoluteRawNuspecPath
-			$scriptRoot = $PSScriptRoot
 			$nupkgFilePath = $scriptRoot + "\" + $NUGET_PUBLISH_DIR + "\" + $nupkgFileName
 			$nuspecFilePath = $absoluteRawNuspecParentPath + "\" + $nuspecFileName
 		
