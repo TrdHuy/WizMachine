@@ -303,7 +303,7 @@ else {
 				$newFilesElement.AppendChild($newFileElement)
 			}
 
-			$nupkgFileName = ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString() + "." + $PLATFORM + ".nupkg"
+			$nupkgFileName = ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString() + ".nupkg"
 			$nuspecFileName = ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString() + "." + $PLATFORM + ".nuspec"
 			$absoluteRawNuspecPath = Resolve-Path $RAW_NUSPEC_FILE_PATH
 			$absoluteRawNuspecParentPath = Split-Path $absoluteRawNuspecPath
