@@ -1,4 +1,3 @@
-
 param (
 	[string]$PLATFORM
 )
@@ -267,10 +266,17 @@ else {
 		$lastReleasedVersion = [version]$lastReleasedInfo.Version
 		$lastCommitOnBranchVersion = [version]$lastCommitOnBranchInfo.Version
 		if ($lastCommitOnBranchVersion -gt $lastReleasedVersion) {
-
+			$publishDir = $scriptRoot + "\" + $NUGET_PUBLISH_DIR + "\" + $PUBLISH_DIR + $PLATFORM
 			$releaseNote = Create-ReleaseNote $lastReleasedCommitSha $lastCommitOnBranchSha 
 			$xmlString = Get-Content -Raw -Path $RAW_NUSPEC_FILE_PATH
-	
+			$filesToInclude = @(@{
+				extension = "dll"
+				target    = "lib\net6.0-windows7.0"
+			}, 
+			@{
+				extension = "md"
+				target    = "docs"
+			})
 			# Tạo đối tượng XmlDocument và load chuỗi XML vào nó
 			$xmlDocument = New-Object System.Xml.XmlDocument
 			$xmlDocument.PreserveWhitespace = $true
@@ -280,6 +286,21 @@ else {
 			$xmlDocument.package.metadata.version = $lastCommitOnBranchVersion.ToString()
 			$xmlDocument.package.metadata.releaseNotes = $releaseNote
 			$xmlDocument.package.metadata.description = $NUGET_PUBLISH_DESCRIPTION_TITLE + "`n" + $releaseNote
+			if ($xmlDocument.package.files.HasChildNodes -eq $true) {
+				$needRemoveNode = $xmlDocument.package.files.FirstChild.ParentNode
+				$xmlDocument.package.RemoveChild($needRemoveNode)
+				$newFilesElement = $xmlDocument.CreateElement("files", $null)
+				$xmlDocument.package.AppendChild($newFilesElement)
+			}
+			else {
+				$newFilesElement = $xmlDocument.package.files
+			}
+			foreach ($item in $filesToInclude) {
+				$newFileElement = $xmlDocument.CreateElement("file")
+				$newFileElement.SetAttribute("src", $publishDir + "\*." + $item.extension)
+				$newFileElement.SetAttribute("target", $item.target)
+				$newFilesElement.AppendChild($newFileElement)
+			}
 
 			$nupkgFileName = ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString() + "." + $PLATFORM + ".nupkg"
 			$nuspecFileName = ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString() + "." + $PLATFORM + ".nuspec"
@@ -319,9 +340,10 @@ else {
 			
 			Write-Host "`n`n`n"
 			Write-Host "==================Start publish project: ================="
-			$publishDir = $scriptRoot + "\" + $NUGET_PUBLISH_DIR + "\" + $PUBLISH_DIR + $PLATFORM
 			msbuild /t:Restore
-			msbuild $PROJECT_PATH /t:Publish /p:GitToken=$TOKEN /p:IsFromDotnet=true /p:Configuration=Release /p:Platform=$PLATFORM /p:PublishDir=$publishDir /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
+			msbuild $PROJECT_PATH /t:Publish /p:IsFromDotnet=true /p:GitToken=$TOKEN `
+				/p:Configuration=Release /p:Platform=$PLATFORM /p:PublishDir=$publishDir `
+				/p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false  
 			Write-Host "==========================================================`n`n`n"
 
 			Write-Host "==================Start create new release : ================="
@@ -342,7 +364,8 @@ else {
 					$cache = dotnet nuget remove source "github"
 					Write-Host $cache
 				}
-				$cache = dotnet nuget add source "https://nuget.pkg.github.com/TrdHuy/index.json" --name "github" --username "trdtranduchuy@gmail.com" --password $TOKEN
+				$cache = dotnet nuget add source "https://nuget.pkg.github.com/TrdHuy/index.json" `
+					--name "github" --username "trdtranduchuy@gmail.com" --password $TOKEN
 				Write-Host $cache
 			}
 			catch {
