@@ -108,10 +108,11 @@
 		</PropertyGroup>
 		<Message Text="___________PublishDir=$(PublishDir)" Importance="high" />
 		<Exec Command="xcopy /E /Y &quot;$(DllPathLines)*&quot; &quot;$(PublishDir)&quot;" />
+		<Exec Command="copy /Y &quot;$(ProjectFullPath)\README.md*&quot; &quot;$(PublishDir)&quot;" />
 		<Exec Command="echo $(BuildTag): ExtractCppModuleToPublishFolder: PublishZipDir=$(PublishZipDir)" />
-		<Exec Command="echo $(BuildTag): ExtractCppModuleToPublishFolder: $(PublishZipDir)\$(AssemblyName)_v$(Version).zip &gt; ..\bin\publishedZipPath" />
+		<Exec Command="echo $(PublishZipDir)\$(AssemblyName)_v$(Version)_$(Platform).zip &gt; ..\bin\publishedZipPath$(Platform)" />
 		<ItemGroup>
-			<OldPublishFile Include="$(PublishZipDir)\$(AssemblyName)_v$(Version).zip" />
+			<OldPublishFile Include="$(PublishZipDir)\$(AssemblyName)_v$(Version)_$(Platform).zip" />
 			<PdbFilesToDelete Include="$(PublishDir)\*.pdb" />
 			<ExpFilesToDelete Include="$(PublishDir)\*.exp" />
 			<LibFilesToDelete Include="$(PublishDir)\*.lib" />
@@ -120,7 +121,7 @@
 		<Delete Files="@(PdbFilesToDelete)" />
 		<Delete Files="@(ExpFilesToDelete)" />
 		<Delete Files="@(LibFilesToDelete)" />
-		<ZipDirectory SourceDirectory="$(PublishDir)" DestinationFile="$(PublishZipDir)\$(AssemblyName)_v$(Version).zip" />
+		<ZipDirectory SourceDirectory="$(PublishDir)" DestinationFile="$(PublishZipDir)\$(AssemblyName)_v$(Version)_$(Platform).zip" />
 	</Target>
 	<Target Name="PackTaskDependencies" BeforeTargets="GenerateNuspec">
 		<Message Text="Start PackTaskDependencies:" Importance="high" />
