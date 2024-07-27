@@ -13,9 +13,9 @@
 		<GetSignToolPath>$(SolutionDirectory)\GetSignToolPath.ps1</GetSignToolPath>
 		<SignToolPathResuleCachePath>$(SolutionDirectory)\bin\signtoolpath.txt</SignToolPathResuleCachePath>
 		<IsFromDotnet>false</IsFromDotnet>
-		<AssemblyVersion>0.0.0.8</AssemblyVersion>
-		<FileVersion>0.0.0.8</FileVersion>
-		<Version>0.0.0.8</Version>
+		<AssemblyVersion>0.0.0.17</AssemblyVersion>
+		<FileVersion>0.0.0.17</FileVersion>
+		<Version>0.0.0.17</Version>
 		<Platforms>x64;x86</Platforms>
 		<BuildTag>WIZMACHINE_BUILD_TAG</BuildTag>
 </PropertyGroup>
@@ -108,10 +108,11 @@
 		</PropertyGroup>
 		<Message Text="___________PublishDir=$(PublishDir)" Importance="high" />
 		<Exec Command="xcopy /E /Y &quot;$(DllPathLines)*&quot; &quot;$(PublishDir)&quot;" />
+		<Exec Command="copy /Y &quot;$(ProjectFullPath)\README.md*&quot; &quot;$(PublishDir)&quot;" />
 		<Exec Command="echo $(BuildTag): ExtractCppModuleToPublishFolder: PublishZipDir=$(PublishZipDir)" />
-		<Exec Command="echo $(BuildTag): ExtractCppModuleToPublishFolder: $(PublishZipDir)\$(AssemblyName)_v$(Version).zip &gt; ..\bin\publishedZipPath" />
+		<Exec Command="echo $(PublishZipDir)\$(AssemblyName)_v$(Version)_$(Platform).zip &gt; ..\bin\publishedZipPath$(Platform)" />
 		<ItemGroup>
-			<OldPublishFile Include="$(PublishZipDir)\$(AssemblyName)_v$(Version).zip" />
+			<OldPublishFile Include="$(PublishZipDir)\$(AssemblyName)_v$(Version)_$(Platform).zip" />
 			<PdbFilesToDelete Include="$(PublishDir)\*.pdb" />
 			<ExpFilesToDelete Include="$(PublishDir)\*.exp" />
 			<LibFilesToDelete Include="$(PublishDir)\*.lib" />
@@ -120,7 +121,7 @@
 		<Delete Files="@(PdbFilesToDelete)" />
 		<Delete Files="@(ExpFilesToDelete)" />
 		<Delete Files="@(LibFilesToDelete)" />
-		<ZipDirectory SourceDirectory="$(PublishDir)" DestinationFile="$(PublishZipDir)\$(AssemblyName)_v$(Version).zip" />
+		<ZipDirectory SourceDirectory="$(PublishDir)" DestinationFile="$(PublishZipDir)\$(AssemblyName)_v$(Version)_$(Platform).zip" />
 	</Target>
 	<Target Name="PackTaskDependencies" BeforeTargets="GenerateNuspec">
 		<Message Text="Start PackTaskDependencies:" Importance="high" />

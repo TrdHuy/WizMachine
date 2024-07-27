@@ -5,6 +5,9 @@ jobs:
 
   ReleaseAndPublishNuget:
     runs-on: windows-latest
+    strategy:
+     matrix:
+      platform: [x86, x64]
     env:
      ISLOCAL: false
      VERSION_UP_ID: 2
@@ -14,12 +17,13 @@ jobs:
      GITHUB_TOKEN: ${{ secrets.WORK_FLOW_ACCESS_TOKEN_CLASSIC }}
      PUBLISH_DIR: light_publish
      PUBLISH_NAME_CONTAINER_FILE_PATH: bin\publishedZipPath
-     NUSPEC_FILE_PATH: WizMachine\WizMachine_RELEASE.nuspec
+     RAW_NUSPEC_FILE_PATH: WizMachine\WizMachine_RELEASE.nuspec
      NUGET_PUBLISH_DIR: nuget_publish
-     NUSPEC_FILE_NAME: WizMachine_RELEASE.nuspec
+     RAW_NUSPEC_FILE_NAME: WizMachine_RELEASE.nuspec
      REPO_OWNER: TrdHuy
      REPO_NAME: WizMachine
-     TARGET_RELEASED_BRANCH: dev
+     PROJECT_NAME: WizMachine
+     TARGET_RELEASED_BRANCH: ${{ github.ref }}
      
     steps:
     ################### CORE REGION #######################
@@ -27,6 +31,7 @@ jobs:
       uses: actions/checkout@v3
       with: 
         fetch-depth: 0
+        ref: ${{ env.TARGET_RELEASED_BRANCH }}
     - name: Install .NET Core
       uses: actions/setup-dotnet@v3
       with:
@@ -36,7 +41,8 @@ jobs:
     - name: Build, create release, publish to nuget github
       shell: pwsh
       run: |
-        $result = & .\release_and_publish_nuget.ps1
+        msbuild --version
+        $result = & .\release_and_publish_nuget.ps1 -PLATFORM ${{ matrix.platform }}
         echo result=$result
     #- name: Set outputs
     #  id: vars
