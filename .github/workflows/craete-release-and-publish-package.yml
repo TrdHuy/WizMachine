@@ -22,6 +22,7 @@ jobs:
      RAW_NUSPEC_FILE_NAME: WizMachine_RELEASE.nuspec
      REPO_OWNER: TrdHuy
      REPO_NAME: WizMachine
+     PROJECT_NAME: WizMachine
      TARGET_RELEASED_BRANCH: ${{ github.ref }}
      
     steps:
