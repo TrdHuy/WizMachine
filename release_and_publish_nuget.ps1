@@ -321,9 +321,7 @@ else {
 			Write-Host "==================Start publish project: ================="
 			$publishDir = $scriptRoot + "\" + $NUGET_PUBLISH_DIR + "\" + $PUBLISH_DIR + $PLATFORM
 			msbuild /t:Restore
-			msbuild $PROJECT_PATH /t:Publish /p:IsFromDotnet=true `
-				/p:Configuration=Release /p:Platform=$PLATFORM /p:PublishDir=$publishDir `
-				/p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
+			msbuild $PROJECT_PATH /t:Publish /p:IsFromDotnet=true /p:Configuration=Release /p:Platform=$PLATFORM /p:PublishDir=$publishDir /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
 			Write-Host "==========================================================`n`n`n"
 
 			Write-Host "==================Start create new release : ================="
@@ -335,7 +333,7 @@ else {
 			Write-Host assetName=$assetName
 			Write-Host tagName=$tagName
 			$releaseBody = "# " + $NUGET_PUBLISH_DESCRIPTION_TITLE + "`n" + $releaseNote
-			#Create-NewRelease $tagName $tagName $releaseBody $assetFilePath $assetName
+			Create-NewRelease $tagName $tagName $releaseBody $assetFilePath $assetName
 			Write-Host "==========================================================`n`n`n"
 
 			Write-Host "==================Start packing project: ================="
@@ -344,8 +342,7 @@ else {
 					$cache = dotnet nuget remove source "github"
 					Write-Host $cache
 				}
-				$cache = dotnet nuget add source "https://nuget.pkg.github.com/TrdHuy/index.json" `
-					--name "github" --username "trdtranduchuy@gmail.com" --password $TOKEN
+				$cache = dotnet nuget add source "https://nuget.pkg.github.com/TrdHuy/index.json" --name "github" --username "trdtranduchuy@gmail.com" --password $TOKEN
 				Write-Host $cache
 			}
 			catch {
@@ -354,7 +351,7 @@ else {
 			finally {}
 			$cache = dotnet pack --configuration Release $PROJECT_PATH -p:NuspecFile=$nuspecFilePath --no-build -o $NUGET_PUBLISH_DIR
 			Write-Host $cache
-			#dotnet nuget push $nupkgFilePath --api-key $TOKEN --source "github"
+			dotnet nuget push $nupkgFilePath --api-key $TOKEN --source "github"
 			Write-Host "==========================================================`n`n`n"
 		
 		
