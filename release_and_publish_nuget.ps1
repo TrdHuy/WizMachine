@@ -321,7 +321,7 @@ else {
 			Write-Host "==================Start publish project: ================="
 			$publishDir = $scriptRoot + "\" + $NUGET_PUBLISH_DIR + "\" + $PUBLISH_DIR + $PLATFORM
 			msbuild /t:Restore
-			msbuild $PROJECT_PATH /t:Publish /p:IsFromDotnet=true /p:Configuration=Release /p:Platform=$PLATFORM /p:PublishDir=$publishDir /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
+			msbuild $PROJECT_PATH /t:Publish /p:GitToken=$TOKEN /p:IsFromDotnet=true /p:Configuration=Release /p:Platform=$PLATFORM /p:PublishDir=$publishDir /p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false
 			Write-Host "==========================================================`n`n`n"
 
 			Write-Host "==================Start create new release : ================="
