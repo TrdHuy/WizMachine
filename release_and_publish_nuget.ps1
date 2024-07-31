@@ -117,6 +117,24 @@ Write-Host NUGET_PUBLISH_DESCRIPTION_TITLE=$NUGET_PUBLISH_DESCRIPTION_TITLE
 Write-Host IS_FIRST_RELEASE=$IS_FIRST_RELEASE
 Write-Host ================================`n`n`n
 
+function Convert-NupkgVersion {
+	param (
+		[string]$version
+	)
+ 
+	# Split the version string by '.'
+	$versionParts = $version -split '\.'
+ 
+	# Remove trailing zeros
+	if ($versionParts[-1] -eq '0') {
+		$versionParts = $versionParts[0..($versionParts.Length - 2)]
+	}
+ 
+	# Join the version parts back into a string
+	$newVersion = $versionParts -join '.'
+ 
+	return $newVersion
+}
 
 function Get-TitleAndIssueIdFromMessage($commitMessage) {
 	
@@ -271,13 +289,13 @@ else {
 			$releaseNote = Create-ReleaseNote $lastReleasedCommitSha $lastCommitOnBranchSha 
 			$xmlString = Get-Content -Raw -Path $RAW_NUSPEC_FILE_PATH
 			$filesToInclude = @(@{
-				extension = "dll"
-				target    = "lib\net6.0-windows7.0"
-			}, 
-			@{
-				extension = "md"
-				target    = "docs"
-			})
+					extension = "dll"
+					target    = "lib\net6.0-windows7.0"
+				}, 
+				@{
+					extension = "md"
+					target    = "docs"
+				})
 			# Tạo đối tượng XmlDocument và load chuỗi XML vào nó
 			$xmlDocument = New-Object System.Xml.XmlDocument
 			$xmlDocument.PreserveWhitespace = $true
@@ -303,7 +321,7 @@ else {
 				$newFilesElement.AppendChild($newFileElement)
 			}
 
-			$nupkgFileName = ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString() + ".nupkg"
+			$nupkgFileName = ($xmlDocument.package.metadata.id) + "." + (Convert-NupkgVersion -version $lastCommitOnBranchVersion.ToString()) + ".nupkg"
 			$nuspecFileName = ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString() + "." + $PLATFORM + ".nuspec"
 			$absoluteRawNuspecPath = Resolve-Path $RAW_NUSPEC_FILE_PATH
 			$absoluteRawNuspecParentPath = Split-Path $absoluteRawNuspecPath
@@ -364,8 +382,7 @@ else {
 					$cache = dotnet nuget remove source "github"
 					Write-Host $cache
 				}
-				$cache = dotnet nuget add source "https://nuget.pkg.github.com/TrdHuy/index.json" `
-					--name "github" --username "trdtranduchuy@gmail.com" --password $TOKEN
+				$cache = dotnet nuget add source "https://nuget.pkg.github.com/TrdHuy/index.json" --name "github" --username "trdtranduchuy@gmail.com" --password $TOKEN
 				Write-Host $cache
 			}
 			catch {
