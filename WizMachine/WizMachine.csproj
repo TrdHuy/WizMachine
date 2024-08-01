@@ -107,7 +107,8 @@
 			<PublishZipDir>$([System.IO.Path]::GetFullPath('$(PublishDir)\..'))</PublishZipDir>
 		</PropertyGroup>
 		<Message Text="___________PublishDir=$(PublishDir)" Importance="high" />
-		<Exec Command="xcopy /E /Y &quot;$(DllPathLines)*&quot; &quot;$(PublishDir)&quot;" />
+		<Message Text="___________TargetDir=$(TargetDir)" Importance="high" />
+		<Exec Command="xcopy /E /Y &quot;$(TargetDir)*&quot; &quot;$(PublishDir)&quot;" />
 		<Exec Command="copy /Y &quot;$(ProjectFullPath)\README.md*&quot; &quot;$(PublishDir)&quot;" />
 		<Exec Command="echo $(BuildTag): ExtractCppModuleToPublishFolder: PublishZipDir=$(PublishZipDir)" />
 		<Exec Command="echo $(PublishZipDir)\$(AssemblyName)_v$(Version)_$(Platform).zip &gt; ..\bin\publishedZipPath$(Platform)" />
