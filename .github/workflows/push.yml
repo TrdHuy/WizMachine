@@ -103,7 +103,7 @@ jobs:
         reporttypes: 'HtmlInline;Cobertura'
         verbosity: 'Verbose'
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       if: env.ISSUE_NUMBER == env.VERSION_UP_ISSUE_ID || startsWith(github.ref, 'refs/heads/unittest_') || startsWith(github.ref, 'refs/heads/dev')
       with:
         name: CoverageReports-Release # Artifact name        
