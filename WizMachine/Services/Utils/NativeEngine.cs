@@ -4,128 +4,121 @@ using System.IO;
 using System.Runtime.InteropServices;
 using WizMachine.Data;
 using WizMachine.Utils;
-using static WizMachine.Services.Utils.NativeEngine;
 
 namespace WizMachine.Services.Utils
 {
-    public static class NativeEngine
-    {
-        public struct NFrameInfo
-        {
-            public ushort Width;
-            public ushort Height;
-            public ushort OffX;
-            public ushort OffY;
-        };
-
-        public struct NFrameData
-        {
-            public FrameInfo FrameInfo;
-            public uint EncryptedFrameDataOffset;
-            public uint EncryptedLength;
-            public uint DecodedLength;
-            public IntPtr DecodedFrameData;
-            public IntPtr ColorMap;
-        };
-
-        public struct NSPRFileHead
-        {
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-            public byte[] VersionInfo;
-            public ushort GlobalWidth;
-            public ushort GlobalHeight;
-            public short OffX;
-            public short OffY;
-            public ushort FrameCounts;
-            public ushort ColorCounts;
-            public ushort DirectionCount;
-            public ushort Interval;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
-            public byte[] Reserved;
-        }
-
-        public struct NColor
-        {
-            public byte R;
-            public byte G;
-            public byte B;
-        };
-
-        [DllImport("engine.dll")]
-        public static extern void ExportToSPRFile(string filePath,
-            NSPRFileHead fileHead,
-            NColor[] palette,
-            int paletteSize,
-            NFrameData[] frame);
-
-        [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void LoadSPRFile(string filePath,
-            out NSPRFileHead fileHead,
-            [MarshalAs(UnmanagedType.LPArray,
-            ArraySubType = UnmanagedType.Struct,
-            SizeParamIndex = 3)] out NColor[] palette,
-            out int paletteLength,
-            out int frameDataBeginPos,
-            [MarshalAs(UnmanagedType.LPArray,
-            ArraySubType = UnmanagedType.Struct,
-            SizeParamIndex = 6)] out NFrameData[] frameData,
-            out int frameCount);
-
-        [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void FreeArrData(IntPtr arrPtr);
-
-
-        [DllImport("engine.dll", CallingConvention = CallingConvention.StdCall)]
-        public static extern void ExtractPakFile(string pakFilePath,
-            string pakInfoPath,
-            string outputRootPath);
-
-        [DllImport("engine.dll", CallingConvention = CallingConvention.StdCall)]
-        public static extern void CompressFolderToPakFile(string pakFilePath,
-            string outputRootPath);
-
-        [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-        public static extern void ForceCheckCertPermission(WizMachine.Data.CertInfo certinfo);
-
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-        public struct CertInfo
-        {
-            public IntPtr Subject;
-            public IntPtr Issuer;
-            public long ValidFrom;
-            public long ValidTo;
-            public IntPtr Thumbprint;
-            public IntPtr SerialNumber;
-        }
-
-        [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int GetCertificateInfo(string filePath, ref CertInfo certInfo);
-
-        [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void FreeCertInfo(ref CertInfo certInfo);
-    }
-
+   
     public static class NativeAPIAdapter
     {
-        public static bool ForceCheckCertPermission(WizMachine.Data.CertInfo certinfo)
+        private class NativeEngine
         {
-            try
+            public struct NFrameInfo
             {
-                NativeEngine.ForceCheckCertPermission(certinfo);
-                return true;
-            }
-            catch (Exception e)
+                public ushort Width;
+                public ushort Height;
+                public ushort OffX;
+                public ushort OffY;
+            };
+
+            public struct NFrameData
             {
-                return false;
+                public FrameInfo FrameInfo;
+                public uint EncryptedFrameDataOffset;
+                public uint EncryptedLength;
+                public uint DecodedLength;
+                public IntPtr DecodedFrameData;
+                public IntPtr ColorMap;
+            };
+
+            public struct NSPRFileHead
+            {
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+                public byte[] VersionInfo;
+                public ushort GlobalWidth;
+                public ushort GlobalHeight;
+                public short OffX;
+                public short OffY;
+                public ushort FrameCounts;
+                public ushort ColorCounts;
+                public ushort DirectionCount;
+                public ushort Interval;
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
+                public byte[] Reserved;
             }
+
+            public struct NColor
+            {
+                public byte R;
+                public byte G;
+                public byte B;
+            };
+
+            [DllImport("engine.dll")]
+            public static extern void ExportToSPRFile(string filePath,
+                NSPRFileHead fileHead,
+                NColor[] palette,
+                int paletteSize,
+                NFrameData[] frame);
+
+            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            public static extern void LoadSPRFile(string filePath,
+                out NSPRFileHead fileHead,
+                [MarshalAs(UnmanagedType.LPArray,
+            ArraySubType = UnmanagedType.Struct,
+            SizeParamIndex = 3)] out NColor[] palette,
+                out int paletteLength,
+                out int frameDataBeginPos,
+                [MarshalAs(UnmanagedType.LPArray,
+            ArraySubType = UnmanagedType.Struct,
+            SizeParamIndex = 6)] out NFrameData[] frameData,
+                out int frameCount);
+
+            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            public static extern void FreeArrData(IntPtr arrPtr);
+
+
+            [DllImport("engine.dll", CallingConvention = CallingConvention.StdCall)]
+            public static extern void ExtractPakFile(string pakFilePath,
+                string pakInfoPath,
+                string outputRootPath);
+
+            [DllImport("engine.dll", CallingConvention = CallingConvention.StdCall)]
+            public static extern void CompressFolderToPakFile(string pakFilePath,
+                string outputRootPath);
+
+            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+            public static extern void ForceCheckCertPermission(WizMachine.Data.CertInfo certinfo);
+
+
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+            public struct CertInfo
+            {
+                public IntPtr Subject;
+                public IntPtr Issuer;
+                public long ValidFrom;
+                public long ValidTo;
+                public IntPtr Thumbprint;
+                public IntPtr SerialNumber;
+            }
+
+            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            public static extern int GetCertificateInfo(string filePath, ref CertInfo certInfo);
+
+            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            public static extern void FreeCertInfo(ref CertInfo certInfo);
+        }
+
+
+        public static void ForceCheckCertPermission(WizMachine.Data.CertInfo certinfo)
+        {
+            NativeEngine.ForceCheckCertPermission(certinfo);
         }
 
         public static WizMachine.Data.CertInfo GetSignedCertInfoFromFile(string filePath)
         {
             WizMachine.Data.CertInfo cert = new WizMachine.Data.CertInfo();
             NativeEngine.CertInfo unsafeCertInfo = new NativeEngine.CertInfo();
-            int result = GetCertificateInfo(filePath, ref unsafeCertInfo);
+            int result = NativeEngine.GetCertificateInfo(filePath, ref unsafeCertInfo);
 
             if (result == 0)
             {
@@ -137,7 +130,7 @@ namespace WizMachine.Services.Utils
                 cert.SerialNumber = Marshal.PtrToStringAnsi(unsafeCertInfo.SerialNumber) ?? "";
 
                 // Free the memory allocated by C++
-                FreeCertInfo(ref unsafeCertInfo);
+                NativeEngine.FreeCertInfo(ref unsafeCertInfo);
             }
             else
             {
@@ -167,13 +160,13 @@ namespace WizMachine.Services.Utils
             out int frameDataBeginPos,
             out FrameRGBA[] frameRGBA)
         {
-            NColor[] nativePalette;
+            NativeEngine.NColor[] nativePalette;
             int nativePaletteLength;
-            NFrameData[] nativeFrameData;
+            NativeEngine.NFrameData[] nativeFrameData;
 
             int frameCount;
             NativeEngine.LoadSPRFile(filePath,
-                out NSPRFileHead nativeFileHead,
+                out NativeEngine.NSPRFileHead nativeFileHead,
                 out nativePalette,
                 out nativePaletteLength,
                 out frameDataBeginPos,
@@ -193,7 +186,7 @@ namespace WizMachine.Services.Utils
             return true;
         }
 
-        private static SprFileHead ConvertNativeSprFileHeadToAppData(NSPRFileHead nativeData)
+        private static SprFileHead ConvertNativeSprFileHeadToAppData(NativeEngine.NSPRFileHead nativeData)
         {
             return new SprFileHead(nativeData.VersionInfo,
                 nativeData.GlobalWidth,
@@ -207,7 +200,7 @@ namespace WizMachine.Services.Utils
                 nativeData.Reserved);
         }
 
-        private static Palette ConvertNativeColorPaletteToAppData(NColor[] nativeData, int nativeDataLength)
+        private static Palette ConvertNativeColorPaletteToAppData(NativeEngine.NColor[] nativeData, int nativeDataLength)
         {
             var paletteAppData = new PaletteColor[nativeDataLength];
             for (int i = 0; i < nativeDataLength; i++)
@@ -221,7 +214,7 @@ namespace WizMachine.Services.Utils
             return new Palette(paletteAppData);
         }
 
-        private static FrameRGBA ConvertAndFreeNativeFrameDataToAppData(NFrameData nativeData)
+        private static FrameRGBA ConvertAndFreeNativeFrameDataToAppData(NativeEngine.NFrameData nativeData)
         {
             var frameRawData = new byte[(int)nativeData.DecodedLength];
             Marshal.Copy(nativeData.DecodedFrameData,
@@ -229,7 +222,7 @@ namespace WizMachine.Services.Utils
                 0,
                 (int)nativeData.DecodedLength);
 
-            FreeArrData(nativeData.DecodedFrameData);
+            NativeEngine.FreeArrData(nativeData.DecodedFrameData);
             nativeData.DecodedFrameData = IntPtr.Zero;
 
             var colorMap = new int[(int)nativeData.DecodedLength / 4];
@@ -251,7 +244,7 @@ namespace WizMachine.Services.Utils
                 }
             }
 
-            FreeArrData(nativeData.ColorMap);
+            NativeEngine.FreeArrData(nativeData.ColorMap);
             nativeData.ColorMap = IntPtr.Zero;
 
             var frameData = new FrameRGBA

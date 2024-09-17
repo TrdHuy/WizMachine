@@ -19,17 +19,12 @@ namespace WizMachine
             return _engineInstance.sprWorkManagerAdvanceInstance;
         }
 
-        public static bool ForceCheckCallingSignature()
+        public static void ForceCheckCallingSignature()
         {
-            try
-            {
-                var calling = Assembly.GetCallingAssembly().Location;
-                CertManagerUtil.ForceCheckCert(calling);
-                return true;
-            }
-            catch (Exception ex) {
-                return false;
-            }
+            if (_engineInstance == null) throw new Exception("Engine was not inited yet");
+
+            var calling = Assembly.GetCallingAssembly().Location;
+            CertManagerUtil.ForceCheckCert(calling);
         }
 
         public static void Init(StreamWriter logWriter)

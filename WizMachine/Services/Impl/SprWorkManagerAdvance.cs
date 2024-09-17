@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Media;
 using WizMachine.Data;
 using WizMachine.Services.Base;
+using WizMachine.Services.Utils;
 using WizMachine.Utils;
 
 namespace WizMachine.Services.Impl

@@ -5,8 +5,9 @@ using System.Windows.Media;
 using WizMachine.Data;
 using System.Diagnostics;
 using System.Linq;
+using WizMachine.Utils;
 
-namespace WizMachine.Utils
+namespace WizMachine.Services.Utils
 {
     internal static class BitmapUtil
     {
