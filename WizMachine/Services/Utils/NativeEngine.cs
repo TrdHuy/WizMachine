@@ -8,7 +8,7 @@ using WizMachine.Utils;
 namespace WizMachine.Services.Utils
 {
    
-    public static class NativeAPIAdapter
+    internal static class NativeAPIAdapter
     {
         private class NativeEngine
         {
