@@ -27,6 +27,11 @@
 		<None Include="..\local.config" />
 		<None Include="..\.github\**" />
 	</ItemGroup>
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+			<_Parameter1>WizMachineTest</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
 	<ItemGroup Condition="'$(IsFromDotnet)' == 'false'">
 	  <ProjectReference Include="..\engine\engine.vcxproj" />
 	</ItemGroup>

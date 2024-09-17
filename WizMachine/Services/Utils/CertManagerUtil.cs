@@ -10,7 +10,7 @@ using WizMachine.Services.Utils;
 
 namespace WizMachine.Utils
 {
-    public static class CertManagerUtil
+    internal static class CertManagerUtil
     {
         private static Dictionary<string, CertInfo> _certCache = new Dictionary<string, CertInfo>();
         public static CertInfo AssemblySignedCert { get; private set; }

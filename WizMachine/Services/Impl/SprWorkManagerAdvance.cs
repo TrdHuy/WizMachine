@@ -9,7 +9,8 @@ using WizMachine.Utils;
 
 namespace WizMachine.Services.Impl
 {
-    public class SprWorkManagerAdvance : SprWorkManagerCore, ISprWorkManagerAdvance
+    // Do not public this to client layer
+    internal class SprWorkManagerAdvance : SprWorkManagerCore, ISprWorkManagerAdvance
     {
         private Logger logger = new Logger("SprWorkManagerAdvance");
         private Logger pf_logger = new Logger("SprWorkManagerAdvance_PF");

@@ -11,7 +11,7 @@ using WizMachine.Utils;
 
 namespace WizMachine.Services.Impl
 {
-    public class SprWorkManagerCore : ISprWorkManagerCore
+    internal class SprWorkManagerCore : ISprWorkManagerCore
     {
         private Logger logger = new Logger("SprWorkManagerCore");
         private Logger pf_logger = new Logger("SprWorkManagerCore_PF");
