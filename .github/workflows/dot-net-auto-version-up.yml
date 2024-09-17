@@ -24,6 +24,8 @@ jobs:
      TARGET_MODULE: WizMachine
      TRIGGER_ACTOR: ${{ github.triggering_actor }}
      VERSION_UP_ISSUE_ID: "#2"
+     EXCLUDE_ISSUE_ID: "1,2"
+     AUTO_DECIDE_VERSION_UP: true
      REPO_OWNER: ${{ github.repository_owner }}
      REPO_NAME: WizMachine  # Github event ko có giá trị này :((
      TARGET_RELEASED_BRANCH: ${{ github.event.inputs.branch || 'dev' }}
