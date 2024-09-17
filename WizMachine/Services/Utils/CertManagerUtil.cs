@@ -32,7 +32,7 @@ namespace WizMachine.Utils
 
         public static void ForceCheckCurrentAssemblyCert()
         {
-            NativeEngine.ForceCheckCertPermission(AssemblySignedCert);
+            NativeAPIAdapter.ForceCheckCertPermission(AssemblySignedCert);
         }
 
         public static void ForceCheckCert(string filePath)
@@ -48,7 +48,7 @@ namespace WizMachine.Utils
                 _certCache[filePath] = ci;
             }
 
-            NativeEngine.ForceCheckCertPermission(ci);
+            NativeAPIAdapter.ForceCheckCertPermission(ci);
         }
     }
 }
