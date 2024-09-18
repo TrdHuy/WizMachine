@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "pak.h"
 
 int ParsePakInfoFile(const char* filename, PakInfo& pakInfo) {
@@ -138,7 +138,7 @@ std::unique_ptr<BYTE[]> ReadBlock(int block
 
 		if ((xPackIndexInfo->uCompressSizeFlag & XPACK_FLAG_FRAGMENT) == 0)
 		{
-			// TODO: l�m sau
+			// TODO: làm sau
 			bOk = ReadElemBufferFromPak(file, xPackIndexInfo->uOffset, (xPackIndexInfo->uCompressSizeFlag & XPACK_COMPRESS_SIZE_FILTER),
 				(xPackIndexInfo->uCompressSizeFlag & XPACK_METHOD_FILTER), (char*)decompressedBuffer.get(), xPackIndexInfo->uSize);
 			return decompressedBuffer;
@@ -215,6 +215,7 @@ int LoadPakInternal(const char* pakfilePath,
 		if (extractedBuffer) {
 			std::string rootPath = std::string(outputRootPath);
 			std::string outFileName = "extracted_block_" + std::to_string(block) + ".bin";
+			// TODO: hỗ trợ kiểm tra có phải file spr hay không trong trường hợp không tìm thấy extract file map
 			if (infoFound && !compressInfo.fileName.empty()) {
 				outFileName = compressInfo.fileName;
 			}

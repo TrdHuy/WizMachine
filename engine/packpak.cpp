@@ -384,7 +384,7 @@ void CompressFolderToPakFileInternal(const char* inputFolderPath, const char* ou
 	// Create new pak item
 	PACK_ITEM currentPakItem = PACK_ITEM();
 	*(int*)(&(currentPakItem.Header.Signature)) = IPACK_FILE_SIGNATURE_FLAG;
-	currentPakItem.pIOFile = g_OpenFile(outputFileName.c_str(), false, true);
+	currentPakItem.pIOFile = g_OpenFile(outputFileName.c_str(), false, true, true);
 	currentPakItem.pIndexList = (XPackIndexInfo*)malloc(sizeof(XPackIndexInfo) * PACK_FILE_SHELL_MAX_SUPPORT_ELEM_FILE_NUM);
 	if (currentPakItem.pIOFile->write(&(currentPakItem.Header), sizeof(currentPakItem.Header)) != sizeof(currentPakItem.Header))
 		throw std::runtime_error("Failed to write pak header!");

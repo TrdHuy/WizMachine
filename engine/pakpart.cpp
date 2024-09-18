@@ -60,7 +60,7 @@ bool KPackFilePartner::Load(const char* pFileName)
 		return false;
 
 	IFile* file;
-	file = g_OpenFile(pFileName, true, false);
+	file = g_OpenFile(pFileName, true, false, false);
 	if (!file)
 		return false;
 	char* pFileBuffer = (char*)file->getBuffer();
@@ -161,7 +161,7 @@ bool KPackFilePartner::Save(const char* pFileName, unsigned int uPackTime, unsig
 	m_uCRC = uPackCRC;
 
 	IFile* file;
-	file = g_OpenFile(pFileName, true, true);
+	file = g_OpenFile(pFileName, true, true, true);
 	if (!file)
 		return false;
 
