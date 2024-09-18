@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "file_alone.h"
 
-IFile* g_OpenFile(const char* FileName, int ForceSingleFile/* = false*/, int ForWrite/* = false*/)
+IFile* g_OpenFile(const char* FileName, int ForceSingleFile/* = false*/, int ForWrite/* = false*/, int ForceCreate = false)
 {
 	if (FileName == NULL || FileName[0] == 0)
 		return 0;
@@ -38,7 +38,7 @@ IFile* g_OpenFile(const char* FileName, int ForceSingleFile/* = false*/, int For
 		else if (TryTurn[nTry] == 1)
 		{
 			AloneFile* alone = new AloneFile();
-			if (alone->open(FileName, ForWrite))
+			if (alone->open(FileName, ForWrite, ForceCreate))
 			{
 				return alone;
 				break;

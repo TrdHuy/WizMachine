@@ -40,7 +40,6 @@ public:
 		}
 		return 0;
 	}
-
 	// Write to file
 	unsigned long write(const void* buffer, unsigned long writeBytes) {
 		if (fileStream.is_open() && fileStream.good()) {
@@ -134,10 +133,10 @@ public:
 	}
 
 public:
-	
+
 
 	// Open file with automatic directory and file creation
-	bool open(const char* fileName, bool writeSupport = false) {
+	bool open(const char* fileName, bool writeSupport = false, bool forceCreate = false) {
 		close();  // Ensure any previously open file is closed
 
 		// Generate the full path for the file
@@ -147,11 +146,11 @@ public:
 		std::string mode = "rb";  // Default read-only mode
 
 		if (writeSupport) {
-			if (std::filesystem::exists(fullPath)) {
-				mode = "r+b";  // Read-write mode (file must exist)
+			if (!std::filesystem::exists(fullPath) || forceCreate) {
+				mode = "w+b";  // Read-write mode (file will be created)
 			}
 			else {
-				mode = "w+b";  // Read-write mode (file will be created)
+				mode = "r+b";  // Read-write mode (file must exist)
 			}
 		}
 

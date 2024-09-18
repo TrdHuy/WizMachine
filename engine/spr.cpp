@@ -254,7 +254,7 @@ void TestAloneFile() {
 
 	// Mở file mới để viết, nếu file không tồn tại, nó sẽ được tạo
 	const char* fileName = "t\\example.txt";
-	IFile* file = g_OpenFile(fileName, true, true);
+	IFile* file = g_OpenFile(fileName, true, true, true);
 
 	assert(file->isOpen());
 	if (file->isOpen()) {  // true cho writeSupport để có thể viết vào file
@@ -274,7 +274,7 @@ void TestAloneFile() {
 		file->close();
 	}
 
-	file = g_OpenFile(fileName, true, false);
+	file = g_OpenFile(fileName, true, false, false);
 	assert(file->isOpen());
 	if (file->isOpen()) {  // false cho writeSupport vì chỉ đọc
 		// Đọc dữ liệu từ file
@@ -324,7 +324,7 @@ void LoadPakFile(const char* pakFilePath, const char* pakInfoFilePath, const cha
 	//std::cout << message << std::endl;  // In thông điệp nhận được
 
 	const char* fileName = "t\\example.txt";
-	IFile* file = g_OpenFile(fileName, true, false);
+	IFile* file = g_OpenFile(fileName, true, false, false);
 
 	if (file->isOpen()) {
 		void* pSrcBuffer = file->getBuffer();

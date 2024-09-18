@@ -46,6 +46,6 @@ public:
 };
 
 
-IFile* g_OpenFile(const char* FileName, int ForceSingleFile/* = false*/, int ForWrite/* = false*/);
+IFile* g_OpenFile(const char* FileName, int ForceSingleFile/* = false*/, int ForWrite/* = false*/, int ForceCreate /* = false*/);
 
 #endif  //#ifndef _ENGINE_FILE_H_
