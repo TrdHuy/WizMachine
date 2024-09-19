@@ -96,7 +96,7 @@ void ExtractPakFile(const char* pakFilePath, const char* pakInfoFilePath, const 
 	PakInfoInternal pakInfo;
 	int p = ParsePakInfoFileInternal(pakInfoFilePath, pakInfo);
 	std::unique_ptr<PakHeader> header;
-	int res = LoadPakInternal(pakFilePath, outputRootPath, pakInfo, header);
+	int res = ExtractPakInternal(pakFilePath, outputRootPath, pakInfo, header);
 }
 
 void CompressFolderToPakFile(const char* inputFolderPath, const char* outputFolderPath, bool bExcludeOfCheckId) {
