@@ -191,7 +191,7 @@ enum XPACK_METHOD_AND_FLAG {
 	XPACK_METHOD_NONE = 0x00000000,
 	XPACK_METHOD_UCL = 0x20000000,
 	XPACK_METHOD_FILTER = 0xf0000000,
-	XPACK_FLAG_FRAGMENT = 0x10000000,
+	XPACK_FLAG_FRAGMENT = 0x10000000, // pack bằng cách chia nhỏ file theo từng fragment
 	XPACK_COMPRESS_SIZE_FILTER = 0x07ffffff,
 	XPACK_COMPRESS_SIZE_BIT = 27
 };
@@ -233,9 +233,13 @@ struct PACK_ITEM
 
 int ParsePakInfoFileInternal(const char* filename, PakInfoInternal& pakInfo);
 
-int LoadPakInternal(const char* pakfilePath,
+int ExtractPakInternal(const char* pakfilePath,
 	const char* outputRootPath,
 	PakInfoInternal pakInfo,
+	std::unique_ptr<PakHeader>& header);
+
+int ExtractPakInternal(const char* pakfilePath,
+	const char* outputRootPath,
 	std::unique_ptr<PakHeader>& header);
 
 bool AddFileToPak(PACK_ITEM& currentPackItem,
