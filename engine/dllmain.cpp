@@ -74,9 +74,27 @@ void ExportToSPRFile(const char* filePath,
 		frame);
 }
 
+void ParsePakInfoFile(const char* pakInfoPath,
+	PakInfo* pakInfo) {
+	PakInfoInternal pakInfoInternal;
+	int result = ParsePakInfoFileInternal(pakInfoPath, pakInfoInternal);
+
+	if (result != 0) {
+		throw std::exception("Failed to parse pak info file!");
+	}
+	pakInfoInternal.ConvertToPakInfo(*pakInfo);
+}
+
+void FreePakInfo(PakInfo* pakInfo) {
+	if (pakInfo) {
+		pakInfo->freeMem();
+	}
+}
+
+
 void ExtractPakFile(const char* pakFilePath, const char* pakInfoFilePath, const char* outputRootPath) {
-	PakInfo pakInfo;
-	int p = ParsePakInfoFile(pakInfoFilePath, pakInfo);
+	PakInfoInternal pakInfo;
+	int p = ParsePakInfoFileInternal(pakInfoFilePath, pakInfo);
 	std::unique_ptr<PakHeader> header;
 	int res = LoadPakInternal(pakFilePath, outputRootPath, pakInfo, header);
 }

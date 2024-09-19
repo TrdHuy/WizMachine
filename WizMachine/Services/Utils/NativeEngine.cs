@@ -7,7 +7,7 @@ using WizMachine.Utils;
 
 namespace WizMachine.Services.Utils
 {
-   
+
     internal static class NativeAPIAdapter
     {
         private class NativeEngine
@@ -76,6 +76,39 @@ namespace WizMachine.Services.Utils
             [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
             public static extern void FreeArrData(IntPtr arrPtr);
 
+            #region PAK
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+            public struct CompressedFileInfo
+            {
+                public int index;
+                public IntPtr id;
+                public ulong idValue;
+                public IntPtr time;
+                public IntPtr fileName;
+                public int size;
+                public int inPakSize;
+                public int comprFlag;
+                public IntPtr crc;
+            }
+
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+            public struct PakInfo
+            {
+                public int totalFiles;
+                public IntPtr pakTime;
+                public IntPtr pakTimeSave;
+                public IntPtr crc;
+
+                public IntPtr files;  // Con trỏ đến mảng CompressedFileInfo
+                public int fileCount;
+            }
+
+            [DllImport("engine.dll", CharSet = CharSet.Ansi)]
+            public static extern void FreePakInfo(ref PakInfo pakInfo);
+
+            [DllImport("engine.dll", CallingConvention = CallingConvention.StdCall)]
+            public static extern void ParsePakInfoFile(string pakInfoPath,
+                ref PakInfo pakInfo);
 
             [DllImport("engine.dll", CallingConvention = CallingConvention.StdCall)]
             public static extern void ExtractPakFile(string pakFilePath,
@@ -85,10 +118,11 @@ namespace WizMachine.Services.Utils
             [DllImport("engine.dll", CallingConvention = CallingConvention.StdCall)]
             public static extern void CompressFolderToPakFile(string pakFilePath,
                 string outputRootPath);
+            #endregion 
 
+            #region CERT
             [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
             public static extern void ForceCheckCertPermission(WizMachine.Data.CertInfo certinfo);
-
 
             [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
             public struct CertInfo
@@ -106,9 +140,10 @@ namespace WizMachine.Services.Utils
 
             [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
             public static extern void FreeCertInfo(ref CertInfo certInfo);
+            #endregion
         }
 
-
+        #region CERT
         public static void ForceCheckCertPermission(WizMachine.Data.CertInfo certinfo)
         {
             NativeEngine.ForceCheckCertPermission(certinfo);
@@ -138,6 +173,21 @@ namespace WizMachine.Services.Utils
             }
             return cert;
         }
+        #endregion
+
+        #region PAK
+        public static PakInfo ParsePakInfoFile(string pakInfoPath)
+        {
+            NativeEngine.PakInfo nPakInfo = new NativeEngine.PakInfo();
+            NativeEngine.ParsePakInfoFile(pakInfoPath, ref nPakInfo);
+            PakInfo appLayerPakInfo = ConvertNativePakInfo(nPakInfo);
+
+            // Mặc dù nPakInfo được khai báo trên C# (bộ nhớ của nPakInfo do C# quản lý)
+            // nhưng các element trong nPakInfo lại được khai báo và khởi tạo dưới C++
+            // vì vậy vẫn cần phải giải phóng bộ nhớ để tránh memory leak
+            NativeEngine.FreePakInfo(ref nPakInfo);
+            return appLayerPakInfo;
+        }
 
         public static bool ExtractPakFile(string pakFilePath,
             string pakInfoPath,
@@ -154,6 +204,46 @@ namespace WizMachine.Services.Utils
             return true;
         }
 
+        private static PakInfo ConvertNativePakInfo(NativeEngine.PakInfo pakInfo)
+        {
+            PakInfo pakInfo2 = new PakInfo
+            {
+                totalFiles = pakInfo.totalFiles,
+                pakTime = Marshal.PtrToStringAnsi(pakInfo.pakTime) ?? "",
+                pakTimeSave = Marshal.PtrToStringAnsi(pakInfo.pakTimeSave) ?? "",
+                crc = Marshal.PtrToStringAnsi(pakInfo.crc) ?? "",
+                fileMap = new Dictionary<ulong, CompressedFileInfo>()
+            };
+
+            if (pakInfo.fileCount > 0 && pakInfo.files != IntPtr.Zero)
+            {
+                int structSize = Marshal.SizeOf(typeof(NativeEngine.CompressedFileInfo));
+
+                for (int i = 0; i < pakInfo.fileCount; i++)
+                {
+                    IntPtr currentPtr = new IntPtr(pakInfo.files.ToInt64() + i * structSize);
+                    NativeEngine.CompressedFileInfo nFileInfo = Marshal.PtrToStructure<NativeEngine.CompressedFileInfo>(currentPtr);
+                    var cFileInfo = new CompressedFileInfo()
+                    {
+                        index = nFileInfo.index,
+                        id = Marshal.PtrToStringAnsi(nFileInfo.id) ?? "",
+                        idValue = nFileInfo.idValue,
+                        time = Marshal.PtrToStringAnsi(nFileInfo.time) ?? "",
+                        fileName = Marshal.PtrToStringAnsi(nFileInfo.fileName) ?? "",
+                        size = nFileInfo.size,
+                        inPakSize = nFileInfo.inPakSize,
+                        comprFlag = nFileInfo.comprFlag,
+                        crc = Marshal.PtrToStringAnsi(nFileInfo.crc) ?? ""
+                    };
+                    pakInfo2.fileMap[cFileInfo.idValue] = cFileInfo;
+                }
+            }
+
+            return pakInfo2;
+        }
+        #endregion
+
+        #region SPR
         public static bool LoadSPRFile(string filePath,
             out SprFileHead sprFileHead,
             out Palette palette,
@@ -258,5 +348,6 @@ namespace WizMachine.Services.Utils
             frameData.modifiedFrameRGBACache.PaletteIndexToPixelIndexMap = colorDics;
             return frameData;
         }
+        #endregion
     }
 }
