@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "pak.h"
 
-int ParsePakInfoFile(const char* filename, PakInfo& pakInfo) {
+int ParsePakInfoFileInternal(const char* filename, PakInfoInternal& pakInfo) {
 	std::ifstream file(filename);
 	if (!file.is_open()) {
 		std::cerr << "Error opening file." << std::endl;
@@ -41,7 +41,7 @@ int ParsePakInfoFile(const char* filename, PakInfo& pakInfo) {
 
 	while (std::getline(file, line)) {
 		if (std::regex_match(line, matches, lineFormat)) {
-			CompressedFileInfo fi;
+			CompressedFileInfoInternal fi;
 			fi.index = std::stoi(matches[1].str());
 			fi.id = matches[2].str();
 			fi.time = matches[3].str();
@@ -177,7 +177,7 @@ std::unique_ptr<BYTE[]> ReadBlock(int block
 
 int LoadPakInternal(const char* pakfilePath,
 	const char* outputRootPath,
-	PakInfo pakInfo,
+	PakInfoInternal pakInfo,
 	std::unique_ptr<PakHeader>& header) {
 	std::ifstream file(pakfilePath, std::ios::binary | std::ios::ate);
 	if (!file.is_open()) {
@@ -196,7 +196,7 @@ int LoadPakInternal(const char* pakfilePath,
 	int blockCount = header->Count;
 	for (int block = 0; block < blockCount; ++block) {
 		int decrompressLenght;
-		CompressedFileInfo compressInfo;
+		CompressedFileInfoInternal compressInfo;
 		bool infoFound = false;
 
 		auto extractedBuffer = ReadBlock(block,

@@ -6,6 +6,7 @@
 #include <vector>
 #include "spr.h"
 #include "cert.h"
+#include "pak.h"
 
 #ifdef ENGINE_EXPORTS
 #define DLL_API __declspec(dllexport)
@@ -27,6 +28,11 @@ extern "C" {
 		Color palette[],
 		int paletteSize,
 		FrameData frame[]);
+
+	DLL_API void ParsePakInfoFile(const char* pakInfoPath,
+		PakInfo* pakInfo);
+
+	DLL_API void FreePakInfo(PakInfo* pakInfo);
 
 	DLL_API void ExtractPakFile(const char* pakFilePath,
 		const char* pakInfoPath,

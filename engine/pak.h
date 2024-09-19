@@ -20,7 +20,67 @@
 
 namespace fs = std::filesystem;
 
+/// <summary>
+/// This struct for C# comunicating
+/// </summary>
 struct CompressedFileInfo {
+	int index;
+	char* id;
+	unsigned long idValue;
+	char* time;
+	char* fileName;
+	int size;
+	int inPakSize;
+	int comprFlag;
+	char* crc;
+
+	void freeMem() {
+		if (id) {
+			free((void*)id);
+		}
+		if (time) {
+			free((void*)time);
+		}
+		if (fileName) {
+			free((void*)fileName);
+		}
+		if (crc) {
+			free((void*)crc);
+		}
+	}
+};
+
+/// <summary>
+/// This struct for C# comunicating
+/// </summary>
+struct PakInfo
+{
+	int totalFiles;
+	char* pakTime;
+	char* pakTimeSave;
+	char* crc;
+
+	CompressedFileInfo* files; // Mảng các CompressedFileInfo
+	int fileCount;             // Số lượng file trong mảng
+	
+	void freeMem() {
+		if (pakTime) {
+			free((void*)pakTime);
+		}
+		if (pakTimeSave) {
+			free((void*)pakTimeSave);
+		}
+		if (crc) {
+			free((void*)crc);
+		}
+		if (files) {
+			files->freeMem();
+			free((CompressedFileInfo*)files);
+		}
+	}
+};
+
+struct CompressedFileInfoInternal {
 	int index;
 	std::string id;
 	unsigned long idValue;
@@ -35,23 +95,53 @@ struct CompressedFileInfo {
 	}
 };
 
-struct PakInfo {
+struct PakInfoInternal {
 	int totalFiles;
 	std::string pakTime;
 	std::string pakTimeSave;
 	std::string crc;
-	std::unordered_map<unsigned long, CompressedFileInfo> fileMap;
+	std::unordered_map<unsigned long, CompressedFileInfoInternal> fileMap;
 
-	void addFile(const CompressedFileInfo& file) {
+	void addFile(const CompressedFileInfoInternal& file) {
 		fileMap[file.idValue] = file;
 	}
 
-	std::unique_ptr<CompressedFileInfo> findFileByIdValue(unsigned long searchIdValue) {
+	std::unique_ptr<CompressedFileInfoInternal> findFileByIdValue(unsigned long searchIdValue) {
 		auto it = fileMap.find(searchIdValue);
 		if (it != fileMap.end()) {
-			return std::make_unique<CompressedFileInfo>(it->second);
+			return std::make_unique<CompressedFileInfoInternal>(it->second);
 		}
 		return nullptr;
+	}
+
+	// Hàm chuyển đổi từ PakInfoInternal thành PakInfo
+	void ConvertToPakInfo(PakInfo& external) {
+		// Sao chép các thông tin cơ bản
+		external.totalFiles = totalFiles;
+		external.pakTime = _strdup(pakTime.c_str());
+		external.pakTimeSave = _strdup(pakTimeSave.c_str());
+		external.crc = _strdup(crc.c_str());
+
+		// Sao chép các file từ fileMap sang mảng files
+		external.fileCount = fileMap.size();
+		external.files = new CompressedFileInfo[external.fileCount]; // Cấp phát bộ nhớ cho mảng files
+
+		int i = 0;
+		for (const auto& pair : fileMap) {
+			const CompressedFileInfoInternal& internalFile = pair.second;
+
+			// Sao chép các thuộc tính từ internalFile sang externalFile
+			external.files[i].index = internalFile.index;
+			external.files[i].id = _strdup(internalFile.id.c_str());
+			external.files[i].idValue = internalFile.idValue;
+			external.files[i].time = _strdup(internalFile.time.c_str());
+			external.files[i].fileName = _strdup(internalFile.fileName.c_str());
+			external.files[i].size = internalFile.size;
+			external.files[i].inPakSize = internalFile.inPakSize;
+			external.files[i].comprFlag = internalFile.comprFlag;
+			external.files[i].crc = _strdup(internalFile.crc.c_str());
+			i++;
+		}
 	}
 
 };
@@ -141,11 +231,11 @@ struct PACK_ITEM
 #define MAX_SUPPORTABLE_STORE_SIZE	XPACK_COMPRESS_SIZE_FILTER
 #define PAK_SIGNATURE "PACK"
 
-int ParsePakInfoFile(const char* filename, PakInfo& pakInfo);
+int ParsePakInfoFileInternal(const char* filename, PakInfoInternal& pakInfo);
 
 int LoadPakInternal(const char* pakfilePath,
 	const char* outputRootPath,
-	PakInfo pakInfo,
+	PakInfoInternal pakInfo,
 	std::unique_ptr<PakHeader>& header);
 
 bool AddFileToPak(PACK_ITEM& currentPackItem,

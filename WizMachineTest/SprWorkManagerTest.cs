@@ -210,9 +210,30 @@ namespace SPRNetToolTest.Domain
             string exePath = Assembly.GetExecutingAssembly().Location;
             string exeDirectory = Path.GetDirectoryName(exePath) ?? "";
 
-            var initResult = NativeAPIAdapter.ExtractPakFile(_dataWithSprPakPath,
+
+            Assert.IsTrue(NativeAPIAdapter.ExtractPakFile(_dataWithSprPakPath,
                 _daPakTxtPath,
-                outputRootPath: exeDirectory);
+                outputRootPath: exeDirectory));
+            using (FileStream fs = new FileStream("data\\12345.spr", FileMode.Open, FileAccess.Read))
+            {
+                var initResult = sprWorkManager.InitWorkManagerFromSprFile(fs);
+                Assert.That(initResult);
+                Assert.That(sprWorkManager.FileHead.GlobalHeight * sprWorkManager.FileHead.GlobalWidth == 90000);
+
+                var frameData1Byte = sprWorkManagerTestObject.GetFrameDataCache()![0].originDecodedBGRAData;
+                var frameData1FromFile = TestUtil.ReadBytesFromFile(_1binFilePath);
+                Assert.That(TestUtil.AreByteArraysEqual(frameData1Byte, frameData1FromFile!));
+            }
+
+            // Kiểm tra nội dung file test.txt
+            string testTxtPath = Path.Combine(exeDirectory, "data", "test.txt");
+            string testTxtContent = File.ReadAllText(testTxtPath);
+            Assert.That(testTxtContent.Trim(), Is.EqualTo("12345"), "Nội dung file test.txt không đúng.");
+
+            // Kiểm tra nội dung file test.xml
+            string testXmlPath = Path.Combine(exeDirectory, "data", "test.xml");
+            string testXmlContent = File.ReadAllText(testXmlPath);
+            Assert.That(testXmlContent.Trim(), Is.EqualTo("<config></config>"), "Nội dung file test.xml không đúng.");
         }
 
         [Test]
@@ -226,9 +247,37 @@ namespace SPRNetToolTest.Domain
         }
 
         [Test]
+        public void test_ParsePakInfo()
+        {
+            var pakInfo = NativeAPIAdapter.ParsePakInfoFile(_daPakTxtPath);
+
+            Assert.That(pakInfo.fileMap.Count, Is.EqualTo(3), "Tổng số file trong pak phải là 3!");
+            Assert.That(pakInfo.fileMap.Values.ElementAt(0).id, Is.EqualTo("95a1ffa3"));
+            Assert.That(pakInfo.fileMap.Values.ElementAt(1).id, Is.EqualTo("95ad8b72"));
+            Assert.That(pakInfo.fileMap.Values.ElementAt(2).id, Is.EqualTo("a9c272ec")); 
+            Assert.That(pakInfo.pakTime, Is.EqualTo("2024-7-6 14:16:4"));
+            Assert.That(pakInfo.pakTimeSave, Is.EqualTo("6688ef34"));
+            Assert.That(pakInfo.crc, Is.EqualTo("49bc4c3a"));
+        }
+
+        [Test]
+        public void test_ParsePakInfo2()
+        {
+            var pakInfo = EngineKeeper.GetPakWorkManagerService().ParsePakInfoFile(_daPakTxtPath);
+
+            Assert.That(pakInfo.fileMap.Count, Is.EqualTo(3), "Tổng số file trong pak phải là 3!");
+            Assert.That(pakInfo.fileMap.Values.ElementAt(0).id, Is.EqualTo("95a1ffa3"));
+            Assert.That(pakInfo.fileMap.Values.ElementAt(1).id, Is.EqualTo("95ad8b72"));
+            Assert.That(pakInfo.fileMap.Values.ElementAt(2).id, Is.EqualTo("a9c272ec"));
+            Assert.That(pakInfo.pakTime, Is.EqualTo("2024-7-6 14:16:4"));
+            Assert.That(pakInfo.pakTimeSave, Is.EqualTo("6688ef34"));
+            Assert.That(pakInfo.crc, Is.EqualTo("49bc4c3a"));
+        }
+
+        [Test]
         public void test_CertUtil()
         {
-           EngineKeeper.ForceCheckCallingSignature();
+            EngineKeeper.ForceCheckCallingSignature();
         }
     }
 }
