@@ -93,10 +93,15 @@ void FreePakInfo(PakInfo* pakInfo) {
 
 
 void ExtractPakFile(const char* pakFilePath, const char* pakInfoFilePath, const char* outputRootPath) {
-	PakInfoInternal pakInfo;
-	int p = ParsePakInfoFileInternal(pakInfoFilePath, pakInfo);
 	std::unique_ptr<PakHeader> header;
-	int res = ExtractPakInternal(pakFilePath, outputRootPath, pakInfo, header);
+	if (pakInfoFilePath != nullptr) {
+		PakInfoInternal pakInfo;
+		int p = ParsePakInfoFileInternal(pakInfoFilePath, pakInfo);
+		ExtractPakInternal(pakFilePath, outputRootPath, pakInfo, header);
+	}
+	else {
+		ExtractPakInternal(pakFilePath, outputRootPath, header);
+	}
 }
 
 void CompressFolderToPakFile(const char* inputFolderPath, const char* outputFolderPath, bool bExcludeOfCheckId) {

@@ -59,6 +59,13 @@ int ParsePakInfoFileInternal(const char* filename, PakInfoInternal& pakInfo) {
 	return 0;
 }
 
+bool isSprBlock(char* decompessedBlockBytes, int blockLenght) {
+	if (blockLenght < sizeof(SPRFileHead)) {
+		return false;
+	}
+	SPRFileHead* fileHead = reinterpret_cast<SPRFileHead*>(decompessedBlockBytes);
+	return (std::strncmp(fileHead->VersionInfo, "SPR", 3) == 0);
+}
 bool DecompressData(char* pSrcBuffer, unsigned nSrcLen, unsigned char* pDestBuffer, unsigned int uExtractSize)
 {
 	unsigned int uDestLen = 0;
@@ -92,7 +99,7 @@ std::unique_ptr<BYTE[]> ReadBlock(int block
 	, int blockHeaderIndex
 	, std::ifstream& file
 	, int* decompressLenght
-	, std::function<bool(PakBlockHeader)> blockHeaderPredicate = nullptr) {
+	, std::function<bool(PakBlockHeader, XPackIndexInfo)> blockHeaderPredicate = nullptr) {
 	if (!file.is_open() || block < 0 || block >= blockCount) {
 		return nullptr;
 	}
@@ -103,12 +110,14 @@ std::unique_ptr<BYTE[]> ReadBlock(int block
 	file.seekg(blockHeaderOffset, std::ios::beg);
 	file.read(reinterpret_cast<char*>(blockHeaderBuffer.get()), sizeof(PakBlockHeader));
 	auto* pBlockHeader = reinterpret_cast<PakBlockHeader*>(blockHeaderBuffer.get());
+	XPackIndexInfo* xPackIndexInfo = nullptr;
+	xPackIndexInfo = reinterpret_cast<XPackIndexInfo*>(pBlockHeader);
 
 	if (pBlockHeader->ID <= 0 || pBlockHeader->RealLength <= 0 || pBlockHeader->Offset <= 0) {
 		return nullptr;
 	}
 
-	if (blockHeaderPredicate != nullptr && !blockHeaderPredicate(*pBlockHeader)) {
+	if (blockHeaderPredicate != nullptr && !blockHeaderPredicate(*pBlockHeader, *xPackIndexInfo)) {
 		return nullptr;
 	}
 
@@ -120,17 +129,16 @@ std::unique_ptr<BYTE[]> ReadBlock(int block
 	file.seekg(pBlockHeader->Offset, std::ios::beg);
 	file.read(reinterpret_cast<char*>(blockBuffer.get()), size);
 
-	XPackIndexInfo* xPackIndexInfo = nullptr;
-	xPackIndexInfo = reinterpret_cast<XPackIndexInfo*>(pBlockHeader);
+
 	bool bOk = true;
 	auto decompressedBuffer = std::make_unique<unsigned char[]>(xPackIndexInfo->uSize);
 
 
 	// Nếu không chứa cờ FRAGMENT
-	if ((xPackIndexInfo->uCompressSizeFlag & XPACK_FLAG_FRAGMENT) == 0)
+	if (!xPackIndexInfo->isBlockFragment())
 	{
-		unsigned int pakMethod = xPackIndexInfo->uCompressSizeFlag & XPACK_METHOD_FILTER;
-		unsigned int storedSize = xPackIndexInfo->uCompressSizeFlag & XPACK_COMPRESS_SIZE_FILTER;
+		unsigned int pakMethod = xPackIndexInfo->getPackMethod();
+		unsigned int storedSize = xPackIndexInfo->getStoredSize();	
 		bOk = ReadElemBufferFromPak(file, xPackIndexInfo->uOffset, storedSize,
 			pakMethod, (char*)decompressedBuffer.get(), xPackIndexInfo->uSize);
 		return decompressedBuffer;
@@ -152,8 +160,8 @@ std::unique_ptr<BYTE[]> ReadBlock(int block
 			bOk = false;
 			break;
 		}
-		if (!ReadElemBufferFromPak(file, xPackIndexInfo->uOffset + fragment.uOffset, (fragment.uCompressSizeFlag & XPACK_COMPRESS_SIZE_FILTER),
-			(fragment.uCompressSizeFlag & XPACK_METHOD_FILTER), (char*)decompressedBuffer.get() + uSize, fragment.uSize))
+		if (!ReadElemBufferFromPak(file, xPackIndexInfo->uOffset + fragment.uOffset, fragment.getStoredSize(),
+			fragment.getPackMethod(), (char*)decompressedBuffer.get() + uSize, fragment.uSize))
 		{
 			bOk = false;
 			break;
@@ -192,7 +200,7 @@ int ExtractPakInternal(const char* pakfilePath,
 			header->Index,
 			file,
 			&decrompressLenght,
-			[&pakInfo, &compressInfo, &infoFound](PakBlockHeader header) {
+			[&pakInfo, &compressInfo, &infoFound](PakBlockHeader header, XPackIndexInfo xPackHeader) {
 				auto fileResult = pakInfo.findFileByIdValue(header.ID);
 				if (fileResult) {
 					compressInfo = *fileResult.get();
@@ -230,58 +238,56 @@ int ExtractPakInternal(const char* pakfilePath,
 int ExtractPakInternal(const char* pakfilePath,
 	const char* outputRootPath,
 	std::unique_ptr<PakHeader>& header) {
-	//std::ifstream file(pakfilePath, std::ios::binary | std::ios::ate);
-	//if (!file.is_open()) {
-	//	return 0;
-	//}
+	std::ifstream file(pakfilePath, std::ios::binary | std::ios::ate);
+	if (!file.is_open()) {
+		return 0;
+	}
 
-	//file.seekg(0, std::ios::beg);
-	//auto headerBuffer = std::make_unique<unsigned char[]>(sizeof(PakHeader));
-	//file.read(reinterpret_cast<char*>(headerBuffer.get()), sizeof(PakHeader));
-	//header.reset(reinterpret_cast<PakHeader*>(headerBuffer.release()));
+	file.seekg(0, std::ios::beg);
+	auto headerBuffer = std::make_unique<unsigned char[]>(sizeof(PakHeader));
+	file.read(reinterpret_cast<char*>(headerBuffer.get()), sizeof(PakHeader));
+	header.reset(reinterpret_cast<PakHeader*>(headerBuffer.release()));
 
-	//if (!file) {
-	//	return 0;
-	//}
+	if (!file) {
+		return 0;
+	}
 
-	//int blockCount = header->Count;
-	//for (int block = 0; block < blockCount; ++block) {
-	//	int decrompressLenght;
-	//	CompressedFileInfoInternal compressInfo;
-	//	PakBlockHeader blockHeader;
-	//	auto extractedBuffer = ReadBlock(block,
-	//		blockCount,
-	//		header->Index,
-	//		file,
-	//		&decrompressLenght,
-	//		[&blockHeader](PakBlockHeader header) {
-	//			blockHeader = header;
-	//			return true;
-	//		});
-	//	if (extractedBuffer) {
-	//		std::string rootPath = std::string(outputRootPath);
-	//		std::string outFileName = "extracted_block_" + std::to_string(block) + ".bin";
-	//		// TODO: hỗ trợ kiểm tra có phải file spr hay không trong trường hợp không tìm thấy extract file map
-	//		if (infoFound && !compressInfo.fileName.empty()) {
-	//			outFileName = compressInfo.fileName;
-	//		}
-	//		outFileName = rootPath + "\\" + outFileName;
+	int blockCount = header->Count;
+	for (int block = 0; block < blockCount; ++block) {
+		int decrompressLenght;
+		CompressedFileInfoInternal compressInfo;
+		PakBlockHeader blockHeader;
+		auto extractedBuffer = ReadBlock(block,
+			blockCount,
+			header->Index,
+			file,
+			&decrompressLenght,
+			[&blockHeader](PakBlockHeader header, XPackIndexInfo xPackHeader) {
+				blockHeader = header;
+				return true;
+			});
+		if (extractedBuffer) {
+			std::string rootPath = std::string(outputRootPath);
+			std::string outFileName = "extracted_block_" + std::to_string(block) + ".bin";
+			if (isSprBlock(reinterpret_cast<char*>(extractedBuffer.get()), decrompressLenght)) {
+				outFileName = "extracted_block_" + std::to_string(block) + ".spr";
+			}
+			outFileName = rootPath + "\\" + outFileName;
 
-	//		// Ensure the directory path exists
-	//		fs::path filePath(outFileName);
-	//		fs::create_directories(filePath.parent_path());
+			// Ensure the directory path exists
+			fs::path filePath(outFileName);
+			fs::create_directories(filePath.parent_path());
 
-	//		std::ofstream outFile(filePath, std::ios::binary);
-	//		if (!outFile.is_open()) {
-	//			std::cerr << "Failed to open output file: " << outFileName << std::endl;
-	//			continue;
-	//		}
-	//		outFile.write(reinterpret_cast<const char*>(extractedBuffer.get()), decrompressLenght);
-	//		outFile.close();
-	//	}
-	//}
+			std::ofstream outFile(filePath, std::ios::binary);
+			if (!outFile.is_open()) {
+				std::cerr << "Failed to open output file: " << outFileName << std::endl;
+				continue;
+			}
+			outFile.write(reinterpret_cast<const char*>(extractedBuffer.get()), decrompressLenght);
+			outFile.close();
+		}
+	}
 
-	//file.close();
-	//return blockCount;
-	return 0;
+	file.close();
+	return blockCount;
 }
