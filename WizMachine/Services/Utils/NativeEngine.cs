@@ -112,7 +112,7 @@ namespace WizMachine.Services.Utils
 
             [DllImport("engine.dll", CallingConvention = CallingConvention.StdCall)]
             public static extern void ExtractPakFile(string pakFilePath,
-                string pakInfoPath,
+                string? pakInfoPath,
                 string outputRootPath);
 
             [DllImport("engine.dll", CallingConvention = CallingConvention.StdCall)]
@@ -194,6 +194,13 @@ namespace WizMachine.Services.Utils
             string outputRootPath)
         {
             NativeEngine.ExtractPakFile(pakFilePath, pakInfoPath, outputRootPath);
+            return true;
+        }
+
+        public static bool ExtractPakFile(string pakFilePath,
+           string outputRootPath)
+        {
+            NativeEngine.ExtractPakFile(pakFilePath, null, outputRootPath);
             return true;
         }
 

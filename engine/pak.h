@@ -201,6 +201,21 @@ struct XPackIndexInfo {
 	unsigned int uOffset;
 	unsigned int uSize;
 	unsigned int uCompressSizeFlag;
+
+	unsigned int getPackMethod() {
+		unsigned int pakMethod = uCompressSizeFlag & XPACK_METHOD_FILTER;
+		return pakMethod;
+	}
+
+	unsigned int getStoredSize() {
+		unsigned int storedSize = uCompressSizeFlag & XPACK_COMPRESS_SIZE_FILTER;
+		return storedSize;
+	}
+
+	// Kiểm tra block có nén theo dạng phân mảnh 
+	bool isBlockFragment() {
+		return (uCompressSizeFlag & XPACK_FLAG_FRAGMENT) != 0;
+	}
 };
 
 struct XPackFileFragmentElemHeader {
@@ -212,6 +227,16 @@ struct XPackFileFragmentInfo {
 	unsigned int uOffset;
 	unsigned int uSize;
 	unsigned int uCompressSizeFlag;
+
+	unsigned int getStoredSize() {
+		unsigned int storedSize = uCompressSizeFlag & XPACK_COMPRESS_SIZE_FILTER;
+		return storedSize;
+	}
+
+	unsigned int getPackMethod() {
+		unsigned int pakMethod = uCompressSizeFlag & XPACK_METHOD_FILTER;
+		return pakMethod;
+	}
 };
 
 

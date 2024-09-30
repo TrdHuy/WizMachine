@@ -62,9 +62,9 @@ namespace SPRNetToolTest.Domain
         private string _5binFilePath = "Resources\\5.bin";
         private string _testTxtPakPath = "Resources\\testTxtFile.pak";
         private string _testTxtPakTxtPath = "Resources\\testTxtFile.pak.txt";
-        private string _dataWithSprPakPath = "Resources\\dataWithSpr.pak";
+        private string _dataWithSprPakPath = "data.pak";
         private string _dataForCompressPakPath = "Resources\\dataForCompressTest.pak";
-        private string _daPakTxtPath = "Resources\\dataWithSpr.pak.txt";
+        private string _daPakTxtPath = "data.pak.txt";
         private string _dataFolderForCompressPath = "Resources\\dataForCompressTest\\data";
         private ISprWorkManagerAdvance sprWorkManager;
         private SprWorkManagerTestObject sprWorkManagerTestObject;
@@ -234,6 +234,16 @@ namespace SPRNetToolTest.Domain
             string testXmlPath = Path.Combine(exeDirectory, "data", "test.xml");
             string testXmlContent = File.ReadAllText(testXmlPath);
             Assert.That(testXmlContent.Trim(), Is.EqualTo("<config></config>"), "Nội dung file test.xml không đúng.");
+        }
+
+        [Test]
+        public void test_ExtractPakFile2()
+        {
+            string exePath = Assembly.GetExecutingAssembly().Location;
+            string exeDirectory = Path.GetDirectoryName(exePath) ?? "";
+
+            Assert.IsTrue(NativeAPIAdapter.ExtractPakFile(_dataWithSprPakPath,
+                outputRootPath: exeDirectory));
         }
 
         [Test]
