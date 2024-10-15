@@ -58,11 +58,4 @@ extern "C" {
 	DLL_API int		GetCertificateInfo(const char* filePath, CertInfo* certInfo);
 	DLL_API void	FreeCertInfo(CertInfo* certInfo);
 
-	extern "C" __declspec(dllexport) void createLeak(int id) {
-		char* leakyInt = new char[2000000];  // Allocate memory and never deallocate
-		for (int i = 0; i < 2000000; i++) {
-			leakyInt[i] = id;  // Set each element to 123
-		}
-		delete[] leakyInt;
-	}
 }

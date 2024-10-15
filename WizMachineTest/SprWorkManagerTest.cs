@@ -160,7 +160,6 @@ namespace SPRNetToolTest.Domain
         }
 
 
-
         [Test]
         public void test_InitWorkManagerFromSprFile_file12345()
         {
@@ -278,5 +277,7 @@ namespace SPRNetToolTest.Domain
         {
             EngineKeeper.ForceCheckCallingSignature();
         }
+
+        //TODO: Add unittest for MemoryManager native code
     }
 }
