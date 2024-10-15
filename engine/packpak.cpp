@@ -1,4 +1,6 @@
 ﻿#include "pch.h"
+#include "base.h"
+#include "MemoryManager.h"
 
 bool CompressData(const unsigned char* pSrcBuffer, unsigned int nSrcLen,
 	unsigned char* pDestBuffer, unsigned int* pDestLen, int nCompressLevel)
@@ -74,7 +76,7 @@ static bool AddBufferToFile(PACK_ITEM& currentPackItem,
 	unsigned int& uDestCompressType)
 {
 	void* pWriteBuffer = pSrcBuffer;
-	unsigned char* compressBuffer = new unsigned char [COMPRESS_BUFFER_SIZE];
+	unsigned char* compressBuffer = MemoryManager::getInstance()->allocateArray<unsigned char>(COMPRESS_BUFFER_SIZE);
 	uDestSize = nSrcSize;
 	uDestCompressType = XPACK_METHOD_NONE;
 	if (uCompressType == XPACK_METHOD_UCL)
@@ -100,11 +102,11 @@ static bool AddBufferToFile(PACK_ITEM& currentPackItem,
 
 	if (currentPackItem.pIOFile->write(pWriteBuffer, uDestSize) == uDestSize)
 	{
-		delete[] compressBuffer;
+		MemoryManager::getInstance()->deallocate(compressBuffer);
 		return true;
 	}
 
-	delete[] compressBuffer;
+	MemoryManager::getInstance()->deallocate(compressBuffer);
 	printf("Error: Cannot write XPackFileFragment\n");
 	return false;
 }

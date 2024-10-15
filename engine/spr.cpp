@@ -1,4 +1,5 @@
 ﻿#include "pch.h"
+#include "base.h"
 #include "ucl/ucl.h"
 
 UCHAR FindPaletteIndex(UCHAR B, UCHAR G, UCHAR R, Color palette[], int paletteSize) {
@@ -146,7 +147,12 @@ void LoadSPRFileInternal(const char* filePath,
 
 	file.read(reinterpret_cast<char*>(fileHead), sizeof(SPRFileHead));
 
-	*palette = (Color*)::CoTaskMemAlloc(sizeof(Color) * fileHead->ColorCounts);
+	// CoTaskMemAlloc Là hàm của COM API trong Windows, 
+	// chủ yếu được sử dụng trong các ngữ cảnh COM hoặc khi bạn 
+	// cần tương tác với các hàm cấp phát bộ nhớ tương thích với hệ thống COM.
+	//*palette = (Color*)::CoTaskMemAlloc(sizeof(Color) * fileHead->ColorCounts);
+	//*palette = new Color[fileHead->ColorCounts];
+	*palette = MemoryManager::getInstance()->allocateArray<Color>(fileHead->ColorCounts);
 	::memset(*palette, 0, sizeof(Color) * fileHead->ColorCounts);
 	for (int i = 0; i < fileHead->ColorCounts; i++) {
 		(*palette)[i].R = file.get();
@@ -156,19 +162,20 @@ void LoadSPRFileInternal(const char* filePath,
 	*paletteLength = fileHead->ColorCounts;
 	*frameDataBeginPos = sizeof(SPRFileHead) + fileHead->ColorCounts * sizeof(Color);
 
-	*frame = (FrameData*)::CoTaskMemAlloc(sizeof(FrameData) * fileHead->FrameCounts);
+	//*frame = (FrameData*)::CoTaskMemAlloc(sizeof(FrameData) * fileHead->FrameCounts);
+	*frame = MemoryManager::getInstance()->allocateArray<FrameData>(fileHead->FrameCounts);
 	*frameCount = fileHead->FrameCounts;
 	for (int frameIndex = 0; frameIndex < fileHead->FrameCounts; frameIndex++) {
 		// Frame offset
 		file.seekg(*frameDataBeginPos + sizeof(FrameOffsetInfo) * frameIndex, std::ios::beg);
-		FrameOffsetInfo* offsetInfo = new FrameOffsetInfo();
+		FrameOffsetInfo* offsetInfo = MemoryManager::getInstance()->allocate<FrameOffsetInfo>();
 		file.read(reinterpret_cast<char*>(offsetInfo), sizeof(FrameOffsetInfo));
 
 		unsigned int frameBeginPos = *frameDataBeginPos +
 			sizeof(FrameOffsetInfo) * fileHead->FrameCounts +
 			offsetInfo->FrameOffset;
 		unsigned int dataLength = offsetInfo->DataLength;
-		(*frame)[frameIndex].EncyptedFrameDataOffset = offsetInfo->FrameOffset;
+		(*frame)[frameIndex].EncryptedFrameDataOffset = offsetInfo->FrameOffset;
 		(*frame)[frameIndex].EncryptedLength = offsetInfo->DataLength;
 		if (dataLength == 0)
 		{
@@ -183,9 +190,7 @@ void LoadSPRFileInternal(const char* filePath,
 		{
 			continue;
 		}
-		(*frame)[frameIndex].DecodedFrameData = new unsigned char[decDataLength * 4];
-		(*frame)[frameIndex].ColorMap = new int[decDataLength];
-		(*frame)[frameIndex].DecodedLength = decDataLength * 4;
+		(*frame)[frameIndex].initMemory(decDataLength * 4);
 
 		long frameDataPos = frameBeginPos + sizeof(FrameInfo);
 		file.seekg(frameDataPos, std::ios::beg);
@@ -232,7 +237,7 @@ void LoadSPRFileInternal(const char* filePath,
 			}
 			i += 2;
 		}
-		delete offsetInfo;
+		MemoryManager::getInstance()->deallocate(offsetInfo);
 	}
 
 	file.close();
@@ -279,7 +284,7 @@ void TestAloneFile() {
 	if (file->isOpen()) {  // false cho writeSupport vì chỉ đọc
 		// Đọc dữ liệu từ file
 		unsigned long fileSize = file->size();
-		char* buffer = new char[fileSize + 1];  // Cấp phát bộ đệm để đọc
+		char* buffer = MemoryManager::getInstance()->allocateArray<char>(fileSize + 1);
 		unsigned long bytesRead = file->read(buffer, fileSize);
 		if (bytesRead > 0) {
 			buffer[bytesRead] = '\0';  // Đảm bảo chuỗi kết thúc bằng null
@@ -290,7 +295,7 @@ void TestAloneFile() {
 		}
 
 		// Dọn dẹp
-		delete[] buffer;
+		MemoryManager::getInstance()->deallocate(buffer);
 		file->close();
 	}
 	else {

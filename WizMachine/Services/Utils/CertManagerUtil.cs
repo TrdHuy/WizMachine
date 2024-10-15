@@ -38,15 +38,17 @@ namespace WizMachine.Utils
         public static void ForceCheckCert(string filePath)
         {
             CertInfo ci;
-            if (_certCache.ContainsKey(filePath))
-            {
-                ci = _certCache[filePath];
-            }
-            else
-            {
-                ci = NativeAPIAdapter.GetSignedCertInfoFromFile(filePath);
-                _certCache[filePath] = ci;
-            }
+            ci = NativeAPIAdapter.GetSignedCertInfoFromFile(filePath);
+            _certCache[filePath] = ci;
+            //if (_certCache.ContainsKey(filePath))
+            //{
+            //    ci = _certCache[filePath];
+            //}
+            //else
+            //{
+            //    ci = NativeAPIAdapter.GetSignedCertInfoFromFile(filePath);
+            //    _certCache[filePath] = ci;
+            //}
 
             NativeAPIAdapter.ForceCheckCertPermission(ci);
         }

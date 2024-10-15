@@ -5,6 +5,9 @@
 //	CreateTime:	2005-3-23
 *****************************************************************************************/
 #include "pch.h"
+#include "base.h"
+#include "MemoryManager.h"
+
 #include <time.h>
 
 #define LINE_FORMAT_FIRST	"TotalFile:%d\tPakTime:%d-%d-%d %d:%d:%d\tPakTimeSave:%x\tCRC:%x\r\n"
@@ -167,7 +170,7 @@ bool KPackFilePartner::Save(const char* pFileName, unsigned int uPackTime, unsig
 
 #define	MAX_BUFF_SIZE	10240
 	int			nElemIndex;
-	tm* pFormatTime = new tm();
+	tm* pFormatTime = MemoryManager::getInstance()->allocate<tm>();
 	struct tm	t = { 0 };
 	char		line[MAX_BUFF_SIZE + 512];
 	int			nPos = 0;
@@ -215,6 +218,8 @@ bool KPackFilePartner::Save(const char* pFileName, unsigned int uPackTime, unsig
 	}
 
 	file->close();
+
+	MemoryManager::getInstance()->deallocate(pFormatTime);
 	return bResult;
 }
 bool KPackFilePartner::AddElem(PACKPARTNER_ELEM_INFO& ElemInfo)

@@ -1,11 +1,9 @@
 ﻿using System.Reflection;
-using System.Reflection.Metadata;
 using WizMachine;
 using WizMachine.Data;
 using WizMachine.Services.Base;
 using WizMachine.Services.Impl;
 using WizMachine.Services.Utils;
-using WizMachine.Utils;
 using WizMachineTest.Utils;
 
 namespace SPRNetToolTest.Domain
@@ -64,7 +62,8 @@ namespace SPRNetToolTest.Domain
         private string _testTxtPakTxtPath = "Resources\\testTxtFile.pak.txt";
         private string _dataWithSprPakPath = "data.pak";
         private string _dataForCompressPakPath = "Resources\\dataForCompressTest.pak";
-        private string _daPakTxtPath = "data.pak.txt";
+        private string _output_daPakTxtPath = "data.pak.txt";
+        private string _input_daPakTxtPath = "Resources\\dataWithSpr.pak.txt";
         private string _dataFolderForCompressPath = "Resources\\dataForCompressTest\\data";
         private ISprWorkManagerAdvance sprWorkManager;
         private SprWorkManagerTestObject sprWorkManagerTestObject;
@@ -160,6 +159,8 @@ namespace SPRNetToolTest.Domain
             }
         }
 
+
+
         [Test]
         public void test_InitWorkManagerFromSprFile_file12345()
         {
@@ -212,7 +213,7 @@ namespace SPRNetToolTest.Domain
 
 
             Assert.IsTrue(NativeAPIAdapter.ExtractPakFile(_dataWithSprPakPath,
-                _daPakTxtPath,
+                _output_daPakTxtPath,
                 outputRootPath: exeDirectory));
             using (FileStream fs = new FileStream("data\\12345.spr", FileMode.Open, FileAccess.Read))
             {
@@ -259,30 +260,18 @@ namespace SPRNetToolTest.Domain
         [Test]
         public void test_ParsePakInfo()
         {
-            var pakInfo = NativeAPIAdapter.ParsePakInfoFile(_daPakTxtPath);
-
-            Assert.That(pakInfo.fileMap.Count, Is.EqualTo(3), "Tổng số file trong pak phải là 3!");
-            Assert.That(pakInfo.fileMap.Values.ElementAt(0).id, Is.EqualTo("95a1ffa3"));
-            Assert.That(pakInfo.fileMap.Values.ElementAt(1).id, Is.EqualTo("95ad8b72"));
-            Assert.That(pakInfo.fileMap.Values.ElementAt(2).id, Is.EqualTo("a9c272ec")); 
-            Assert.That(pakInfo.pakTime, Is.EqualTo("2024-7-6 14:16:4"));
-            Assert.That(pakInfo.pakTimeSave, Is.EqualTo("6688ef34"));
-            Assert.That(pakInfo.crc, Is.EqualTo("49bc4c3a"));
-        }
-
-        [Test]
-        public void test_ParsePakInfo2()
-        {
-            var pakInfo = EngineKeeper.GetPakWorkManagerService().ParsePakInfoFile(_daPakTxtPath);
+            var pakInfo = NativeAPIAdapter.ParsePakInfoFile(_input_daPakTxtPath);
 
             Assert.That(pakInfo.fileMap.Count, Is.EqualTo(3), "Tổng số file trong pak phải là 3!");
             Assert.That(pakInfo.fileMap.Values.ElementAt(0).id, Is.EqualTo("95a1ffa3"));
             Assert.That(pakInfo.fileMap.Values.ElementAt(1).id, Is.EqualTo("95ad8b72"));
             Assert.That(pakInfo.fileMap.Values.ElementAt(2).id, Is.EqualTo("a9c272ec"));
+
             Assert.That(pakInfo.pakTime, Is.EqualTo("2024-7-6 14:16:4"));
             Assert.That(pakInfo.pakTimeSave, Is.EqualTo("6688ef34"));
             Assert.That(pakInfo.crc, Is.EqualTo("49bc4c3a"));
         }
+
 
         [Test]
         public void test_CertUtil()

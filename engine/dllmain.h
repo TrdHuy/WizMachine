@@ -15,13 +15,25 @@
 #endif
 
 extern "C" {
-	DLL_API void LoadSPRFile(const char* filePath,
+	/*DLL_API void LoadSPRFile(const char* filePath,
 		SPRFileHead* fileHead,
 		Color** palette,
 		int* paletteLength,
 		int* frameDataBeginPos,
 		FrameData** frame,
+		int* frameCount);*/
+
+	DLL_API void LoadSPRFile(const char* filePath,
+		SPRFileHead* fileHead,
+		Color** palette,
+		int* paletteLength,
+		int* frameDataBeginPos,
+		FrameData** frameData,
 		int* frameCount);
+
+	DLL_API void FreeSPRMemory(
+		Color* palette,
+		FrameData* frame, int frameCount);
 
 	DLL_API void ExportToSPRFile(const char* filePath,
 		SPRFileHead fileHead,
@@ -42,9 +54,15 @@ extern "C" {
 		const char* outputPath,
 		bool bExcludeOfCheckId);
 
-	DLL_API void FreeArrData(unsigned char* data);
-
 	DLL_API void	ForceCheckCertPermission(CertInfo certinfo);
 	DLL_API int		GetCertificateInfo(const char* filePath, CertInfo* certInfo);
 	DLL_API void	FreeCertInfo(CertInfo* certInfo);
+
+	extern "C" __declspec(dllexport) void createLeak(int id) {
+		char* leakyInt = new char[2000000];  // Allocate memory and never deallocate
+		for (int i = 0; i < 2000000; i++) {
+			leakyInt[i] = id;  // Set each element to 123
+		}
+		delete[] leakyInt;
+	}
 }

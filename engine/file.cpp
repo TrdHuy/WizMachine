@@ -1,5 +1,7 @@
 #include "pch.h"
+#include "base.h"
 #include "file_alone.h"
+#include "MemoryManager.h"
 
 IFile* g_OpenFile(const char* FileName, int ForceSingleFile/* = false*/, int ForWrite/* = false*/, int ForceCreate = false)
 {
@@ -37,7 +39,7 @@ IFile* g_OpenFile(const char* FileName, int ForceSingleFile/* = false*/, int For
 		}
 		else if (TryTurn[nTry] == 1)
 		{
-			AloneFile* alone = new AloneFile();
+			AloneFile* alone = MemoryManager::getInstance()->allocate<AloneFile>();
 			if (alone->open(FileName, ForWrite, ForceCreate))
 			{
 				return alone;

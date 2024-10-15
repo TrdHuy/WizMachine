@@ -6,6 +6,7 @@
 #include <string>
 #include <filesystem>
 #include "file.h"
+#include "MemoryManager.h"
 
 class AloneFile : public IFile
 {
@@ -117,7 +118,7 @@ public:
 
 	void release() {
 		close();  // Make sure the file is closed
-		delete this;  // Self-delete the object
+		MemoryManager::getInstance()->deallocate(this);
 	}
 
 	char* getFullPath() {
