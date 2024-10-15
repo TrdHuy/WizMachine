@@ -77,9 +77,6 @@ namespace WizMachine.Services.Utils
                 IntPtr frameData, int frameCount);
 
 
-            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
-            public static extern void createLeak(int id);
-
             #region PAK
             [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
             public struct CompressedFileInfo
@@ -254,10 +251,6 @@ namespace WizMachine.Services.Utils
         }
         #endregion
 
-        public static void createLeak(int id)
-        {
-            NativeEngine.createLeak(id);
-        }
 
         #region SPR
         public static bool LoadSPRFile(string filePath,

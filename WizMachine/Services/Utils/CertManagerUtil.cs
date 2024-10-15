@@ -40,16 +40,6 @@ namespace WizMachine.Utils
             CertInfo ci;
             ci = NativeAPIAdapter.GetSignedCertInfoFromFile(filePath);
             _certCache[filePath] = ci;
-            //if (_certCache.ContainsKey(filePath))
-            //{
-            //    ci = _certCache[filePath];
-            //}
-            //else
-            //{
-            //    ci = NativeAPIAdapter.GetSignedCertInfoFromFile(filePath);
-            //    _certCache[filePath] = ci;
-            //}
-
             NativeAPIAdapter.ForceCheckCertPermission(ci);
         }
     }
