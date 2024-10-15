@@ -1,5 +1,8 @@
 ﻿// dllmain.cpp : Defines the entry point for the DLL application.
+
 #include "pch.h"
+#include "MemoryManager.h"
+#include "base.h"
 
 #pragma comment (lib, "crypt32.lib")
 #pragma comment (lib, "wintrust.lib")
@@ -12,19 +15,21 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 	{
 	case DLL_PROCESS_ATTACH:
 	{
+		MemoryManager::getInstance();
 		wchar_t path[MAX_PATH];
 		if (GetModuleFileName(NULL, path, MAX_PATH) != 0)
 		{
 
-			CertInfo* certInfo = new CertInfo;
+			CertInfo* certInfo = MemoryManager::getInstance()->allocate<CertInfo>();
 			char* pathChar = Wchar_t2CharPtr(path);
 			if (GetCertificateInfo(pathChar, certInfo) == 0) {
 				ForceCheckCertPermissionInternal(*certInfo);
-				delete certInfo;
-				delete pathChar;
+				MemoryManager::getInstance()->deallocate(static_cast<char*>(pathChar));
+				MemoryManager::getInstance()->deallocate(certInfo);
 			}
 			else {
-				delete pathChar;
+				MemoryManager::getInstance()->deallocate(static_cast<char*>(pathChar));
+				MemoryManager::getInstance()->deallocate(certInfo);
 				throw std::exception("Security exception:Calling package's cert is invalid!");
 			}
 		}
@@ -36,14 +41,13 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 	}
 	case DLL_THREAD_ATTACH:
 	case DLL_THREAD_DETACH:
-	case DLL_PROCESS_DETACH:
+		break;
+	case DLL_PROCESS_DETACH: {
+		delete MemoryManager::getInstance();
 		break;
 	}
+	}
 	return TRUE;
-}
-
-void FreeArrData(unsigned char* data) {
-	delete[] data;
 }
 
 void LoadSPRFile(const char* filePath,
@@ -60,6 +64,18 @@ void LoadSPRFile(const char* filePath,
 		frameDataBeginPos,
 		frame,
 		frameCount);
+}
+
+void FreeSPRMemory(
+	Color* palette,
+	FrameData* frameData, int frameCount) {
+	MemoryManager::getInstance()->deallocate(palette);
+	palette = nullptr;
+	for (int i = 0; i < frameCount; i++) {
+		frameData[i].free();
+	}
+	MemoryManager::getInstance()->deallocate(frameData);
+	frameData = nullptr;
 }
 
 void ExportToSPRFile(const char* filePath,
@@ -122,5 +138,9 @@ void FreeCertInfo(CertInfo* certInfo) {
 		free((void*)certInfo->Issuer);
 		free((void*)certInfo->Thumbprint);
 		free((void*)certInfo->SerialNumber);
+		certInfo->Subject = nullptr;
+		certInfo->Issuer = nullptr;
+		certInfo->Thumbprint = nullptr;
+		certInfo->SerialNumber = nullptr;
 	}
 }

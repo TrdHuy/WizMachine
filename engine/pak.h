@@ -17,6 +17,7 @@
 #include "utils.h"
 #include "file.h"
 #include "pakpart.h"
+#include "MemoryManager.h"
 
 namespace fs = std::filesystem;
 
@@ -35,17 +36,19 @@ struct CompressedFileInfo {
 	char* crc;
 
 	void freeMem() {
+		MemoryManager* memoryManager = MemoryManager::getInstance();
+
 		if (id) {
-			free((void*)id);
+			memoryManager->deallocate(id);  // Giải phóng id
 		}
 		if (time) {
-			free((void*)time);
+			memoryManager->deallocate(time);  // Giải phóng time
 		}
 		if (fileName) {
-			free((void*)fileName);
+			memoryManager->deallocate(fileName);  // Giải phóng fileName
 		}
 		if (crc) {
-			free((void*)crc);
+			memoryManager->deallocate(crc);  // Giải phóng crc
 		}
 	}
 };
@@ -53,8 +56,7 @@ struct CompressedFileInfo {
 /// <summary>
 /// This struct for C# comunicating
 /// </summary>
-struct PakInfo
-{
+struct PakInfo {
 	int totalFiles;
 	char* pakTime;
 	char* pakTimeSave;
@@ -62,23 +64,35 @@ struct PakInfo
 
 	CompressedFileInfo* files; // Mảng các CompressedFileInfo
 	int fileCount;             // Số lượng file trong mảng
-	
+
 	void freeMem() {
+		MemoryManager* memoryManager = MemoryManager::getInstance();
+
 		if (pakTime) {
-			free((void*)pakTime);
+			memoryManager->deallocate(pakTime);  // Giải phóng pakTime
+			pakTime = nullptr;
 		}
 		if (pakTimeSave) {
-			free((void*)pakTimeSave);
+			memoryManager->deallocate(pakTimeSave);  // Giải phóng pakTimeSave
+			pakTimeSave = nullptr;
 		}
 		if (crc) {
-			free((void*)crc);
+			memoryManager->deallocate(crc);  // Giải phóng crc
+			crc = nullptr;
 		}
+
 		if (files) {
-			files->freeMem();
-			free((CompressedFileInfo*)files);
+			// Giải phóng từng phần tử của mảng files
+			for (int i = 0; i < fileCount; i++) {
+				files[i].freeMem();  // Gọi freeMem của từng CompressedFileInfo
+			}
+
+			memoryManager->deallocate(files);  // Giải phóng toàn bộ mảng files
+			files = nullptr;
 		}
 	}
 };
+
 
 struct CompressedFileInfoInternal {
 	int index;
@@ -118,13 +132,20 @@ struct PakInfoInternal {
 	void ConvertToPakInfo(PakInfo& external) {
 		// Sao chép các thông tin cơ bản
 		external.totalFiles = totalFiles;
-		external.pakTime = _strdup(pakTime.c_str());
-		external.pakTimeSave = _strdup(pakTimeSave.c_str());
-		external.crc = _strdup(crc.c_str());
+
+		size_t pakTimeLen = pakTime.length() + 1;
+		external.pakTime = MemoryManager::getInstance()->allocateArray<char>(pakTimeLen);
+		strcpy_s(external.pakTime, pakTimeLen, pakTime.c_str());
+		size_t pakTimeSaveLen = pakTimeSave.length() + 1;
+		external.pakTimeSave = MemoryManager::getInstance()->allocateArray<char>(pakTimeSaveLen);
+		strcpy_s(external.pakTimeSave, pakTimeSaveLen, pakTimeSave.c_str());
+		size_t crcLen = crc.length() + 1;
+		external.crc = MemoryManager::getInstance()->allocateArray<char>(crcLen);
+		strcpy_s(external.crc, crcLen, crc.c_str());
 
 		// Sao chép các file từ fileMap sang mảng files
 		external.fileCount = fileMap.size();
-		external.files = new CompressedFileInfo[external.fileCount]; // Cấp phát bộ nhớ cho mảng files
+		external.files = MemoryManager::getInstance()->allocateArray<CompressedFileInfo>(external.fileCount); // Cấp phát bộ nhớ cho mảng files
 
 		int i = 0;
 		for (const auto& pair : fileMap) {
@@ -132,14 +153,23 @@ struct PakInfoInternal {
 
 			// Sao chép các thuộc tính từ internalFile sang externalFile
 			external.files[i].index = internalFile.index;
-			external.files[i].id = _strdup(internalFile.id.c_str());
+			// Thay thế _strdup bằng MemoryManager
+			size_t idLen = internalFile.id.length() + 1;
+			external.files[i].id = MemoryManager::getInstance()->allocateArray<char>(idLen);
+			strcpy_s(external.files[i].id, idLen, internalFile.id.c_str());
 			external.files[i].idValue = internalFile.idValue;
-			external.files[i].time = _strdup(internalFile.time.c_str());
-			external.files[i].fileName = _strdup(internalFile.fileName.c_str());
+			size_t timeLen = internalFile.time.length() + 1;
+			external.files[i].time = MemoryManager::getInstance()->allocateArray<char>(timeLen);
+			strcpy_s(external.files[i].time, timeLen, internalFile.time.c_str());
+			size_t fileNameLen = internalFile.fileName.length() + 1;
+			external.files[i].fileName = MemoryManager::getInstance()->allocateArray<char>(fileNameLen);
+			strcpy_s(external.files[i].fileName, fileNameLen, internalFile.fileName.c_str());
 			external.files[i].size = internalFile.size;
 			external.files[i].inPakSize = internalFile.inPakSize;
 			external.files[i].comprFlag = internalFile.comprFlag;
-			external.files[i].crc = _strdup(internalFile.crc.c_str());
+			size_t crcLen = internalFile.crc.length() + 1;
+			external.files[i].crc = MemoryManager::getInstance()->allocateArray<char>(crcLen);
+			strcpy_s(external.files[i].crc, crcLen, internalFile.crc.c_str());
 			i++;
 		}
 	}

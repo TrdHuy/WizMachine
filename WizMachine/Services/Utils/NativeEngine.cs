@@ -60,21 +60,25 @@ namespace WizMachine.Services.Utils
                 int paletteSize,
                 NFrameData[] frame);
 
-            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
-            public static extern void LoadSPRFile(string filePath,
-                out NSPRFileHead fileHead,
-                [MarshalAs(UnmanagedType.LPArray,
-            ArraySubType = UnmanagedType.Struct,
-            SizeParamIndex = 3)] out NColor[] palette,
-                out int paletteLength,
-                out int frameDataBeginPos,
-                [MarshalAs(UnmanagedType.LPArray,
-            ArraySubType = UnmanagedType.Struct,
-            SizeParamIndex = 6)] out NFrameData[] frameData,
-                out int frameCount);
 
             [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
-            public static extern void FreeArrData(IntPtr arrPtr);
+            public static extern void LoadSPRFile(string filePath,
+                ref NSPRFileHead fileHead,
+                out IntPtr palette,
+                out int paletteLength,
+                out int frameDataBeginPos,
+                out IntPtr frame,
+                out int frameCount);
+
+
+            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            public static extern void FreeSPRMemory(
+            IntPtr palette,
+                IntPtr frameData, int frameCount);
+
+
+            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            public static extern void createLeak(int id);
 
             #region PAK
             [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
@@ -250,6 +254,11 @@ namespace WizMachine.Services.Utils
         }
         #endregion
 
+        public static void createLeak(int id)
+        {
+            NativeEngine.createLeak(id);
+        }
+
         #region SPR
         public static bool LoadSPRFile(string filePath,
             out SprFileHead sprFileHead,
@@ -257,28 +266,41 @@ namespace WizMachine.Services.Utils
             out int frameDataBeginPos,
             out FrameRGBA[] frameRGBA)
         {
-            NativeEngine.NColor[] nativePalette;
-            int nativePaletteLength;
-            NativeEngine.NFrameData[] nativeFrameData;
+            var nFileHead = new NativeEngine.NSPRFileHead();
+            IntPtr palettePtr, framePtr;
+            int nativePaletteLength, frameCount;
 
-            int frameCount;
+
             NativeEngine.LoadSPRFile(filePath,
-                out NativeEngine.NSPRFileHead nativeFileHead,
-                out nativePalette,
+                ref nFileHead, 
+                out palettePtr,
                 out nativePaletteLength,
                 out frameDataBeginPos,
-                out nativeFrameData,
+                out framePtr,
                 out frameCount);
 
-            frameRGBA = new FrameRGBA[frameCount];
+            NativeEngine.NColor[] nPalette = new NativeEngine.NColor[nativePaletteLength];
+            int structSize = Marshal.SizeOf(typeof(NativeEngine.NColor));
+            for (int i = 0; i < nativePaletteLength; i++)
+            {
+                IntPtr colorPtr = IntPtr.Add(palettePtr, i * structSize);
+                nPalette[i] = Marshal.PtrToStructure<NativeEngine.NColor>(colorPtr);
+            }
+            palette = ConvertNativeColorPaletteToAppData(nPalette, nativePaletteLength);
+            sprFileHead = ConvertNativeSprFileHeadToAppData(nFileHead);
 
+            NativeEngine.NFrameData[] nFrameData = new NativeEngine.NFrameData[frameCount];
+            structSize = Marshal.SizeOf(typeof(NativeEngine.NFrameData));
+            frameRGBA = new FrameRGBA[frameCount];
             for (int i = 0; i < frameCount; i++)
             {
-                frameRGBA[i] = ConvertAndFreeNativeFrameDataToAppData(nativeFrameData[i]);
+                IntPtr framDataPtr = IntPtr.Add(framePtr, i * structSize);
+                nFrameData[i] = Marshal.PtrToStructure<NativeEngine.NFrameData>(framDataPtr);
+                frameRGBA[i] = ConvertFrameDataToAppData(nFrameData[i]);
             }
 
-            sprFileHead = ConvertNativeSprFileHeadToAppData(nativeFileHead);
-            palette = ConvertNativeColorPaletteToAppData(nativePalette, nativePaletteLength);
+
+            NativeEngine.FreeSPRMemory(palettePtr, framePtr, frameCount);
 
             return true;
         }
@@ -311,7 +333,7 @@ namespace WizMachine.Services.Utils
             return new Palette(paletteAppData);
         }
 
-        private static FrameRGBA ConvertAndFreeNativeFrameDataToAppData(NativeEngine.NFrameData nativeData)
+        private static FrameRGBA ConvertFrameDataToAppData(NativeEngine.NFrameData nativeData)
         {
             var frameRawData = new byte[(int)nativeData.DecodedLength];
             Marshal.Copy(nativeData.DecodedFrameData,
@@ -319,8 +341,8 @@ namespace WizMachine.Services.Utils
                 0,
                 (int)nativeData.DecodedLength);
 
-            NativeEngine.FreeArrData(nativeData.DecodedFrameData);
-            nativeData.DecodedFrameData = IntPtr.Zero;
+            //NativeEngine.FreeArrData(nativeData.DecodedFrameData);
+            //nativeData.DecodedFrameData = IntPtr.Zero;
 
             var colorMap = new int[(int)nativeData.DecodedLength / 4];
             Marshal.Copy(nativeData.ColorMap,
@@ -341,8 +363,8 @@ namespace WizMachine.Services.Utils
                 }
             }
 
-            NativeEngine.FreeArrData(nativeData.ColorMap);
-            nativeData.ColorMap = IntPtr.Zero;
+            //NativeEngine.FreeArrData(nativeData.ColorMap);
+            //nativeData.ColorMap = IntPtr.Zero;
 
             var frameData = new FrameRGBA
             {

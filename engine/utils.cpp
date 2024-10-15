@@ -1,4 +1,6 @@
 #include "pch.h"
+#include "base.h"
+#include "MemoryManager.h"
 
 unsigned long long GetCurrentLocalTimeMillisecond() {
 	auto start = std::chrono::system_clock::now();
@@ -40,4 +42,32 @@ void GetLTimeFromSecond(tm* pFormatTime, unsigned int seconds) {
 void GetLTimeFromMillisecond(tm* pFormatTime, unsigned long long millisec) {
 	std::time_t time_t_format = GetTimeFromMillisecond(millisec);
 	localtime_s(pFormatTime, &time_t_format);
+}
+
+char* Wchar_t2CharPtr(wchar_t* str) {
+	const size_t length = wcslen(str);
+	//char* charString = new char[length + 1]; // +1 for null terminator
+	char* charString = MemoryManager::getInstance()->allocateArray<char>(length + 1);
+	size_t numConverted = 0;
+	wcstombs_s(&numConverted, charString, length + 1, str, length + 1);
+	return charString;
+}
+
+char* GetFileStreamBuffer(std::ifstream& fileStream) {
+	if (!fileStream.is_open()) {
+		return nullptr;
+	}
+	int fileSize = GetFileStreamSize(fileStream);
+
+	std::streampos currentPos = fileStream.tellg();
+	fileStream.seekg(0, std::ios::beg);
+	char* buffer = MemoryManager::getInstance()->allocateArray<char>(fileSize);
+	if (fileStream.read(buffer, fileSize)) {
+		fileStream.seekg(currentPos, std::ios::beg);
+	}
+	else {
+		MemoryManager::getInstance()->deallocate(buffer);
+		return nullptr;
+	}
+	return buffer;
 }

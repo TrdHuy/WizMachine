@@ -1,4 +1,5 @@
 ﻿#include "pch.h"
+#include "base.h"
 #include "pak.h"
 
 int ParsePakInfoFileInternal(const char* filename, PakInfoInternal& pakInfo) {

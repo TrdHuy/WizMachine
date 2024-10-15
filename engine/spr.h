@@ -4,6 +4,8 @@
 
 #define	SPR_COMMENT_FLAG				0x525053
 
+#include "MemoryManager.h"
+
 struct Color {
 	unsigned char R;
 	unsigned char G;
@@ -39,11 +41,24 @@ struct FrameInfo
 
 struct FrameData {
 	FrameInfo FrameInfo;
-	unsigned int EncyptedFrameDataOffset;
+	unsigned int EncryptedFrameDataOffset;
 	unsigned int EncryptedLength;
 	unsigned int DecodedLength;
 	unsigned char* DecodedFrameData;
 	int* ColorMap;
+
+	void initMemory(unsigned int decodedByteLength) {
+		DecodedLength = decodedByteLength;
+		DecodedFrameData = MemoryManager::getInstance()->allocateArray<unsigned char>(decodedByteLength * 4);
+		ColorMap = MemoryManager::getInstance()->allocateArray<int>(decodedByteLength);
+
+	}
+	void free() {
+		MemoryManager::getInstance()->deallocate(DecodedFrameData);
+		MemoryManager::getInstance()->deallocate(ColorMap);
+		DecodedFrameData = nullptr;
+		ColorMap = nullptr;
+	}
 };
 
 void LoadSPRFileInternal(const char* filePath,
