@@ -1,4 +1,5 @@
 ﻿#include "pch.h"
+#include "LogUtil.h"
 #include "base.h"
 #include "ucl/ucl.h"
 
@@ -138,6 +139,7 @@ void LoadSPRFileInternal(const char* filePath,
 	FrameData** frame,
 	int* frameCount)
 {
+	Log::I("SPR", "Start LoadSPRFileInternal");
 	std::ifstream file(filePath, std::ios::binary);
 	if (!file.is_open()) {
 		std::cerr << "Failed to open file." << std::endl;

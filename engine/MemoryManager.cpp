@@ -2,7 +2,7 @@
 
 #include "MemoryManager.h"
 #include <iostream>
-
+const std::string MemoryManager::TAG = "MemoryManager";
 MemoryManager* MemoryManager::instance = nullptr;
 std::mutex MemoryManager::mtx;
 
@@ -18,6 +18,8 @@ MemoryManager* MemoryManager::getInstance() {
 // Giải phóng tất cả bộ nhớ quản lý
 void MemoryManager::deallocateAll() {
     std::lock_guard<std::mutex> lock(mtx);
+    Log::I(TAG, "Deallocated all of declared memory! cache size: ", allocatedPointers.size());
+
     for (auto& entry : allocatedPointers) {
         if (entry.second.size > 0) {
             delete[] static_cast<char*>(entry.first);  // Giải phóng mảng
@@ -25,7 +27,7 @@ void MemoryManager::deallocateAll() {
         else {
             delete static_cast<char*>(entry.first);  // Giải phóng biến đơn
         }
-        std::cout << "Deallocated memory at: " << entry.first << " (type " << entry.second.type.name() << ", size " << entry.second.size << ")" << std::endl;
+        Log::D(TAG, "Deallocated memory at: ", static_cast<void*>(entry.first));
     }
     allocatedPointers.clear();
 }
