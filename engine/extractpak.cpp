@@ -139,7 +139,7 @@ std::unique_ptr<BYTE[]> ReadBlock(int block
 	if (!xPackIndexInfo->isBlockFragment())
 	{
 		unsigned int pakMethod = xPackIndexInfo->getPackMethod();
-		unsigned int storedSize = xPackIndexInfo->getStoredSize();	
+		unsigned int storedSize = xPackIndexInfo->getStoredSize();
 		bOk = ReadElemBufferFromPak(file, xPackIndexInfo->uOffset, storedSize,
 			pakMethod, (char*)decompressedBuffer.get(), xPackIndexInfo->uSize);
 		return decompressedBuffer;
@@ -236,6 +236,19 @@ int ExtractPakInternal(const char* pakfilePath,
 	return blockCount;
 }
 
+void ReadPakHeader(
+	std::unique_ptr<PakHeader>& header,
+	std::ifstream& file) {
+	file.seekg(0, std::ios::beg);
+	auto headerBuffer = std::make_unique<unsigned char[]>(sizeof(PakHeader));
+	file.read(reinterpret_cast<char*>(headerBuffer.get()), sizeof(PakHeader));
+	//Đọc dữ liệu từ file vào một mảng byte (unsigned char[]), sau đó chuyển dữ liệu đó thành 
+	// một cấu trúc cụ thể (PakHeader) và quản lý nó bằng con trỏ thông minh 
+	// std::unique_ptr<PakHeader>. Điều này giúp đảm bảo bộ nhớ được giải phóng đúng cách mà 
+	// không gây rò rỉ bộ nhớ.
+	header.reset(reinterpret_cast<PakHeader*>(headerBuffer.release()));
+}
+
 int ExtractPakInternal(const char* pakfilePath,
 	const char* outputRootPath,
 	std::unique_ptr<PakHeader>& header) {
@@ -244,10 +257,7 @@ int ExtractPakInternal(const char* pakfilePath,
 		return 0;
 	}
 
-	file.seekg(0, std::ios::beg);
-	auto headerBuffer = std::make_unique<unsigned char[]>(sizeof(PakHeader));
-	file.read(reinterpret_cast<char*>(headerBuffer.get()), sizeof(PakHeader));
-	header.reset(reinterpret_cast<PakHeader*>(headerBuffer.release()));
+	ReadPakHeader(header, file);
 
 	if (!file) {
 		return 0;
@@ -291,4 +301,43 @@ int ExtractPakInternal(const char* pakfilePath,
 
 	file.close();
 	return blockCount;
+}
+
+std::unique_ptr<std::unique_ptr<unsigned char[]>[]> ExtractPakInternalToMemory(
+	const char* pakfilePath, 
+	std::unique_ptr<PakHeader>& header, 
+	int& blockCount) {
+	std::ifstream file(pakfilePath, std::ios::binary | std::ios::ate);
+	if (!file.is_open()) {
+		return 0;
+	}
+
+	ReadPakHeader(header, file);
+
+	if (!file) {
+		return 0;
+	}
+
+	blockCount = header->Count;
+	auto extractedData = std::make_unique<std::unique_ptr<unsigned char[]>[]>(blockCount);
+
+
+	for (int block = 0; block < blockCount; ++block) {
+		int decrompressLenght;
+		CompressedFileInfoInternal compressInfo;
+		PakBlockHeader blockHeader;
+
+		auto extractedBuffer = ReadBlock(block, blockCount, header->Index, file, &decrompressLenght, [&blockHeader](PakBlockHeader header, XPackIndexInfo xPackHeader) {
+			blockHeader = header;
+			return true;
+			});
+
+		if (extractedBuffer) {
+			// Lưu dữ liệu đã giải nén vào mảng con trỏ
+			extractedData[block] = std::move(extractedBuffer);
+		}
+	}
+
+	file.close();
+	return extractedData;
 }

@@ -2,6 +2,7 @@
 
 #include "pch.h"
 #include "MemoryManager.h"
+#include "LogUtil.h"
 #include "base.h"
 
 #pragma comment (lib, "crypt32.lib")
@@ -15,13 +16,16 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 	{
 	case DLL_PROCESS_ATTACH:
 	{
+		Log::Init();
+
+		
 		MemoryManager::getInstance();
 		wchar_t path[MAX_PATH];
 		if (GetModuleFileName(NULL, path, MAX_PATH) != 0)
 		{
-
 			CertInfo* certInfo = MemoryManager::getInstance()->allocate<CertInfo>();
 			char* pathChar = Wchar_t2CharPtr(path);
+			Log::I("MAIN", "Start verify cert for path: " + std::string(pathChar));
 			if (GetCertificateInfo(pathChar, certInfo) == 0) {
 				ForceCheckCertPermissionInternal(*certInfo);
 				MemoryManager::getInstance()->deallocate(static_cast<char*>(pathChar));
@@ -30,11 +34,15 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 			else {
 				MemoryManager::getInstance()->deallocate(static_cast<char*>(pathChar));
 				MemoryManager::getInstance()->deallocate(certInfo);
+
+				
+				Log::E("MAIN", "Security exception: Path" + std::string(pathChar) + " cert is invalid! Package: ");
 				throw std::exception("Security exception:Calling package's cert is invalid!");
 			}
 		}
 		else
 		{
+			Log::E("MAIN", "Failed to get module file!");
 			throw std::exception("Security exception:Calling package's cert is invalid!");
 		}
 		break;
@@ -44,6 +52,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 		break;
 	case DLL_PROCESS_DETACH: {
 		delete MemoryManager::getInstance();
+		Log::Close();
 		break;
 	}
 	}

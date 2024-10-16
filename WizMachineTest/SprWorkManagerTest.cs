@@ -246,6 +246,7 @@ namespace SPRNetToolTest.Domain
                 outputRootPath: exeDirectory));
         }
 
+        // Memory leak
         [Test]
         public void test_CompressPakFile()
         {
