@@ -11,6 +11,21 @@ namespace WizMachine.Services.Impl
 {
     internal class PakWorkManager : IPakWorkManager
     {
+        bool IPakWorkManager.CompressFolderToPakFile(string pakFilePath, string outputRootPath)
+        {
+            return NativeAPIAdapter.CompressFolderToPakFile(pakFilePath, outputRootPath);
+        }
+
+        bool IPakWorkManager.ExtractPakFile(string pakFilePath, string pakInfoPath, string outputRootPath)
+        {
+            return NativeAPIAdapter.ExtractPakFile(pakFilePath, pakInfoPath, outputRootPath);
+        }
+
+        bool IPakWorkManager.ExtractPakFile(string pakFilePath, string outputRootPath)
+        {
+            return NativeAPIAdapter.ExtractPakFile(pakFilePath, outputRootPath);
+        }
+
         PakInfo IPakWorkManager.ParsePakInfoFile(string pakInfoPath)
         {
             return NativeAPIAdapter.ParsePakInfoFile(pakInfoPath);
