@@ -217,7 +217,7 @@ bool KPackFilePartner::Save(const char* pFileName, unsigned int uPackTime, unsig
 			bResult = false;
 	}
 
-	file->close();
+	file->release();
 
 	MemoryManager::getInstance()->deallocate(pFormatTime);
 	return bResult;

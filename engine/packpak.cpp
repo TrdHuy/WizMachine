@@ -365,6 +365,7 @@ bool AddFileToPak(PACK_ITEM& currentPackItem,
 		partnerInfo.AddElem(info);
 		assert(bOk);
 	}
+	MemoryManager::getInstance()->deallocate((char*)(pSrcBuffer));
 	return bOk;
 }
 

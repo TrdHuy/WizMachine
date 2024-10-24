@@ -27,7 +27,12 @@ void MemoryManager::deallocateAll() {
         else {
             delete static_cast<char*>(entry.first);  // Giải phóng biến đơn
         }
+
+#ifdef _DEBUG
+        Log::D(TAG, "Deallocated memory at: ", static_cast<void*>(entry.first), entry.second.formattedCallStack);
+#else
         Log::D(TAG, "Deallocated memory at: ", static_cast<void*>(entry.first));
+#endif
     }
     allocatedPointers.clear();
 }
