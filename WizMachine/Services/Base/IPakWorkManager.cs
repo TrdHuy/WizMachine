@@ -10,5 +10,15 @@ namespace WizMachine.Services.Base
     public interface IPakWorkManager
     {
         public PakInfo ParsePakInfoFile(string pakInfoPath);
+
+        public bool ExtractPakFile(string pakFilePath,
+            string pakInfoPath,
+            string outputRootPath);
+
+        public bool ExtractPakFile(string pakFilePath,
+            string outputRootPath);
+
+        public bool CompressFolderToPakFile(string pakFilePath,
+           string outputRootPath);
     }
 }
