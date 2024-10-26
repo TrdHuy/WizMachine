@@ -5,9 +5,6 @@ jobs:
 
   ReleaseAndPublishNuget:
     runs-on: windows-latest
-    strategy:
-     matrix:
-      platform: [x86, x64]
     env:
      ISLOCAL: false
      VERSION_UP_ID: 2
