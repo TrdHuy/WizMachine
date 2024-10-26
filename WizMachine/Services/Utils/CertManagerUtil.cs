@@ -17,17 +17,8 @@ namespace WizMachine.Utils
         static CertManagerUtil()
         {
             var assemblyPath = Assembly.GetExecutingAssembly().Location;
-            X509Certificate cert = X509Certificate.CreateFromSignedFile(assemblyPath);
-            X509Certificate2 cert2 = new X509Certificate2(cert);
-            AssemblySignedCert = new CertInfo
-            {
-                Subject = cert2.Subject,
-                Issuer = cert2.Issuer,
-                ValidFrom = cert2.NotBefore.Ticks,
-                ValidTo = cert2.NotAfter.Ticks,
-                Thumbprint = cert2.Thumbprint,
-                SerialNumber = cert2.SerialNumber
-            };
+            Logger.Raw.I($"CertManagerUtil:: assemblyPath={assemblyPath}");
+            AssemblySignedCert = NativeAPIAdapter.GetSignedCertInfoFromFile(assemblyPath);
         }
 
         public static void ForceCheckCurrentAssemblyCert()

@@ -39,6 +39,8 @@ namespace WizMachine
             if (_engineInstance == null) throw new Exception("Engine was not inited yet");
 
             var calling = Assembly.GetCallingAssembly().Location;
+            Logger.Raw.I($"EngineKeeper: Force check calling {calling}");
+
             CertManagerUtil.ForceCheckCert(calling);
         }
 
