@@ -98,7 +98,6 @@ public:
 #else
 		allocatedPointers[ptr] = PointerInfo(0, false);  // Release: không lưu type
 #endif
-		Log::D(TAG, "Allocated memory at: ", static_cast<void*>(ptr), " (single object). Stack call: ", allocatedPointers[ptr].formattedCallStack);
 		return ptr;
 	}
 
@@ -112,8 +111,6 @@ public:
 #else
 		allocatedPointers[ptr] = PointerInfo(size, true);  // Release: không lưu type
 #endif
-		Log::D(TAG, "Allocated memory at: ", static_cast<void*>(ptr), " (array of ", size, " elements).  Stack call: ", allocatedPointers[ptr].formattedCallStack);
-
 		return ptr;
 	}
 
