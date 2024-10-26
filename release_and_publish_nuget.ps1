@@ -418,8 +418,13 @@ else {
 		if ($lastCommitOnBranchVersion -gt $lastReleasedVersion) {
 			#Clean NugetPublish folder
 			$nugetPublishFolderPath = $scriptRoot + "\" + $NUGET_PUBLISH_DIR
-			Remove-Item -Path $nugetPublishFolderPath -Recurse -Force
-
+			if (Test-Path -Path $nugetPublishFolderPath) {
+				Remove-Item -Path $nugetPublishFolderPath -Recurse -Force
+				Write-Host "Directory '$nugetPublishFolderPath' has been deleted."
+			}
+			else {
+				Write-Host "Directory '$nugetPublishFolderPath' does not exist. No deletion needed."
+			}
 			$assetFiles = @()
 			$platform = "x64"
 			$buildConfig = "Release"
