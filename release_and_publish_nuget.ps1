@@ -1,5 +1,4 @@
 param (
-	[string]$PLATFORM
 )
 $psVersion = $PSVersionTable.PSVersion
 $scriptRoot = (Get-Location).Path
@@ -27,6 +26,7 @@ $NUGET_PUBLISH_DESCRIPTION_TITLE = $env:NUGET_PUBLISH_DESCRIPTION_TITLE
 $NUGET_PUBLISH_DIR = $env:NUGET_PUBLISH_DIR
 $RAW_NUSPEC_FILE_PATH = $env:RAW_NUSPEC_FILE_PATH
 $RAW_NUSPEC_FILE_NAME = $env:RAW_NUSPEC_FILE_NAME
+
 if ($ISLOCAL -eq $true) {
 	Write-Host "Assign local variable"
 
@@ -52,15 +52,11 @@ if ($ISLOCAL -eq $true) {
 	$RAW_NUSPEC_FILE_NAME = $localXmlDoc.configuration.RAW_NUSPEC_FILE_NAME
 	$PROJECT_NAME = $localXmlDoc.configuration.PROJECT_NAME
 	$PUBLISH_NAME_CONTAINER_FILE_PATH = $localXmlDoc.configuration.PUBLISH_NAME_CONTAINER_FILE_PATH
-	$PLATFORM = $localXmlDoc.configuration.PLATFORM
 }
 
 
 if (-not $PROJECT_NAME) {
 	throw "PROJECT_NAME must not be null "
-}
-if (-not $PLATFORM) {
-	throw "PLATFORM must not be null "
 }
 if (-not $TOKEN) {
 	throw "GITHUB_TOKEN must not be null "
@@ -212,7 +208,7 @@ function Extract-InfoFromMessage ($message) {
 	}
 }
 
-function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $AssetName) {
+function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetFiles) {
 	$uri = "https://api.github.com/repos/$OWNER/$REPO/releases"
 	$headers = @{
 		"Authorization" = "token $TOKEN"
@@ -238,13 +234,148 @@ function Create-NewRelease ($TagName, $ReleaseName, $ReleaseBody, $AssetPath, $A
 	$RELEASE_ID = $response.id
 
 	# Tải lên asset vào release
-	$url = "https://uploads.github.com/repos/$OWNER/$REPO/releases/$RELEASE_ID/assets?name=$AssetName"
-	$headers = @{
-		Authorization = "token $TOKEN"
-		Accept        = "application/vnd.github.v3+json"
+	foreach ($asset in $AssetFiles) {
+		$assetName = Split-Path -Leaf $asset
+		$url = "https://uploads.github.com/repos/$OWNER/$REPO/releases/$RELEASE_ID/assets?name=$assetName"
+		$headers = @{
+			Authorization = "token $TOKEN"
+			Accept        = "application/vnd.github.v3+json"
+		}
+		Invoke-RestMethod -Uri $url -Method Post -Headers $headers -InFile $asset -ContentType "application/zip"
+	}
+}
+
+function Publish-Nuget ($publishDir,
+	$releaseNote, 
+	$nuspecXMlString, 
+	$buildConfig, 
+	$projectName,
+	$platform,
+	$publishVersion) {
+	$filesToInclude = @(@{
+			extension = "dll"
+			target    = "lib\net6.0-windows7.0"
+		}, 
+		@{
+			extension = "md"
+			target    = "docs"
+		})
+
+	if ($buildConfig -eq "Debug") {
+		$filesToInclude += @(
+			@{
+				extension = "lib"
+				target    = "lib\net6.0-windows7.0"
+			},
+			@{
+				extension = "pdb"
+				target    = "lib\net6.0-windows7.0"
+			},
+			@{
+				extension = "json"
+				target    = "lib\net6.0-windows7.0"
+			}
+		)
+	}
+	# Tạo đối tượng XmlDocument và load chuỗi XML vào nó
+	$xmlDocument = New-Object System.Xml.XmlDocument
+	$xmlDocument.PreserveWhitespace = $true
+	$xmlDocument.LoadXml($nuspecXMlString)
+	
+	if ($buildConfig -eq "Debug") {
+		$xmlDocument.package.metadata.id = "$projectName$platform-Debug"
+	}
+	else {
+		$xmlDocument.package.metadata.id = "$projectName$platform"
+	}
+	$xmlDocument.package.metadata.version = $publishVersion.ToString()
+	$xmlDocument.package.metadata.releaseNotes = $releaseNote
+	$xmlDocument.package.metadata.description = $NUGET_PUBLISH_DESCRIPTION_TITLE + "`n" + $releaseNote
+	if ($xmlDocument.package.files.HasChildNodes -eq $true) {
+		$needRemoveNode = $xmlDocument.package.files.FirstChild.ParentNode
+		$xmlDocument.package.RemoveChild($needRemoveNode)
+		$newFilesElement = $xmlDocument.CreateElement("files", $null)
+		$xmlDocument.package.AppendChild($newFilesElement)
+	}
+	else {
+		$newFilesElement = $xmlDocument.package.files
+	}
+	foreach ($item in $filesToInclude) {
+		$newFileElement = $xmlDocument.CreateElement("file")
+		$newFileElement.SetAttribute("src", $publishDir + "\*." + $item.extension)
+		$newFileElement.SetAttribute("target", $item.target)
+		$newFilesElement.AppendChild($newFileElement)
 	}
 
-	Invoke-RestMethod -Uri $url -Method Post -Headers $headers -InFile $AssetPath -ContentType "application/zip"
+	$nupkgFileName = ($xmlDocument.package.metadata.id) + "." + (Convert-NupkgVersion -version $publishVersion.ToString()) + ".nupkg"
+	$nuspecFileName = ($xmlDocument.package.metadata.id) + "." + $publishVersion.ToString() + "." + $platform + ".nuspec"
+	$absoluteRawNuspecPath = Resolve-Path $RAW_NUSPEC_FILE_PATH
+	$absoluteRawNuspecParentPath = Split-Path $absoluteRawNuspecPath
+	$nupkgFilePath = $scriptRoot + "\" + $NUGET_PUBLISH_DIR + "\" + $nupkgFileName
+	$nuspecFilePath = $absoluteRawNuspecParentPath + "\" + $nuspecFileName
+		
+	Write-Host "scriptRoot: $scriptRoot"
+	Write-Host "nupkgFileName: $nupkgFileName"
+	Write-Host "nupkgFilePath: $nupkgFilePath"
+		
+	Write-Host "==================New .nuspec file content: ================="
+	Write-Host ($xmlDocument.OuterXml)
+	Write-Host "=============================================================`n`n`n"
+
+	$settings = New-Object System.Xml.XmlWriterSettings
+	$settings.Encoding = [System.Text.Encoding]::UTF8
+	$settings.Indent = $true
+	
+	# Thử ghi XML vào tệp tin với StreamWriter và mã hóa UTF-8
+	try {
+		New-Item -Path $nuspecFilePath -ItemType File -Force
+		$stream = New-Object System.IO.StreamWriter($nuspecFilePath, $false, [System.Text.Encoding]::UTF8)
+		$xmlWriter = [System.Xml.XmlWriter]::Create($stream, $settings)
+		$xmlDocument.Save($xmlWriter)
+	}
+	finally {
+		if ($xmlWriter) {
+			$xmlWriter.Close()
+		}
+		if ($stream) {
+			$stream.Close()
+		}
+	}
+			
+	Write-Host "`n`n`n"
+	Write-Host "==================Start publish project: ================="
+	msbuild /t:Restore
+
+	if ($buildConfig -eq "Debug") {
+		msbuild $PROJECT_PATH /t:Publish /p:IsFromDotnet=true /p:GitToken=$TOKEN `
+			/p:Configuration=$buildConfig /p:Platform=$platform /p:PublishDir=$publishDir
+	}
+	else {
+		msbuild $PROJECT_PATH /t:Publish /p:IsFromDotnet=true /p:GitToken=$TOKEN `
+			/p:Configuration=$buildConfig /p:Platform=$platform /p:PublishDir=$publishDir `
+			/p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false  
+	}
+			
+	Write-Host "==========================================================`n`n`n"
+			
+	Write-Host "==================Start packing project: ================="
+	try {
+		if ($ISLOCAL -eq $true) {
+			$cache = dotnet nuget remove source "github"
+			Write-Host $cache
+		}
+		$cache = dotnet nuget add source "https://nuget.pkg.github.com/TrdHuy/index.json" --name "github" --username "trdtranduchuy@gmail.com" --password $TOKEN
+		Write-Host $cache
+	}
+	catch {
+		Write-Host "An error occurred: $_.Exception.Message"
+	} 
+	finally {}
+	$cache = dotnet pack --configuration $buildConfig $PROJECT_PATH -p:NuspecFile=$nuspecFilePath --no-build -o $NUGET_PUBLISH_DIR
+	Write-Host $cache
+	dotnet nuget push $nupkgFilePath --api-key $TOKEN --source "github"
+	Write-Host "==========================================================`n`n`n"
+		
 }
 
 # Sử dụng GitHub API để lấy thông tin về commit cuối cùng trên nhánh
@@ -285,116 +416,81 @@ else {
 		$lastReleasedVersion = [version]$lastReleasedInfo.Version
 		$lastCommitOnBranchVersion = [version]$lastCommitOnBranchInfo.Version
 		if ($lastCommitOnBranchVersion -gt $lastReleasedVersion) {
-			$publishDir = $scriptRoot + "\" + $NUGET_PUBLISH_DIR + "\" + $PUBLISH_DIR + $PLATFORM
+			#Clean NugetPublish folder
+			$nugetPublishFolderPath = $scriptRoot + "\" + $NUGET_PUBLISH_DIR
+			Remove-Item -Path $nugetPublishFolderPath -Recurse -Force
+
+			$assetFiles = @()
+			$platform = "x64"
+			$buildConfig = "Release"
+			$publishDir = $nugetPublishFolderPath + "\" + $PUBLISH_DIR + $platform + $buildConfig
 			$releaseNote = Create-ReleaseNote $lastReleasedCommitSha $lastCommitOnBranchSha 
 			$xmlString = Get-Content -Raw -Path $RAW_NUSPEC_FILE_PATH
-			$filesToInclude = @(@{
-					extension = "dll"
-					target    = "lib\net6.0-windows7.0"
-				}, 
-				@{
-					extension = "md"
-					target    = "docs"
-				})
-			# Tạo đối tượng XmlDocument và load chuỗi XML vào nó
-			$xmlDocument = New-Object System.Xml.XmlDocument
-			$xmlDocument.PreserveWhitespace = $true
-			$xmlDocument.LoadXml($xmlString)
-	
-			$xmlDocument.package.metadata.id = "$PROJECT_NAME$PLATFORM"
-			$xmlDocument.package.metadata.version = $lastCommitOnBranchVersion.ToString()
-			$xmlDocument.package.metadata.releaseNotes = $releaseNote
-			$xmlDocument.package.metadata.description = $NUGET_PUBLISH_DESCRIPTION_TITLE + "`n" + $releaseNote
-			if ($xmlDocument.package.files.HasChildNodes -eq $true) {
-				$needRemoveNode = $xmlDocument.package.files.FirstChild.ParentNode
-				$xmlDocument.package.RemoveChild($needRemoveNode)
-				$newFilesElement = $xmlDocument.CreateElement("files", $null)
-				$xmlDocument.package.AppendChild($newFilesElement)
-			}
-			else {
-				$newFilesElement = $xmlDocument.package.files
-			}
-			foreach ($item in $filesToInclude) {
-				$newFileElement = $xmlDocument.CreateElement("file")
-				$newFileElement.SetAttribute("src", $publishDir + "\*." + $item.extension)
-				$newFileElement.SetAttribute("target", $item.target)
-				$newFilesElement.AppendChild($newFileElement)
-			}
 
-			$nupkgFileName = ($xmlDocument.package.metadata.id) + "." + (Convert-NupkgVersion -version $lastCommitOnBranchVersion.ToString()) + ".nupkg"
-			$nuspecFileName = ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString() + "." + $PLATFORM + ".nuspec"
-			$absoluteRawNuspecPath = Resolve-Path $RAW_NUSPEC_FILE_PATH
-			$absoluteRawNuspecParentPath = Split-Path $absoluteRawNuspecPath
-			$nupkgFilePath = $scriptRoot + "\" + $NUGET_PUBLISH_DIR + "\" + $nupkgFileName
-			$nuspecFilePath = $absoluteRawNuspecParentPath + "\" + $nuspecFileName
-		
-			Write-Host "scriptRoot: $scriptRoot"
-			Write-Host "nupkgFileName: $nupkgFileName"
-			Write-Host "nupkgFilePath: $nupkgFilePath"
-		
-			Write-Host "==================New .nuspec file content: ================="
-			Write-Host ($xmlDocument.OuterXml)
-			Write-Host "=============================================================`n`n`n"
+			Publish-Nuget -publishDir $publishDir `
+				-releaseNote $releaseNote `
+				-nuspecXMlString $xmlString `
+				-buildConfig $buildConfig `
+				-projectName $PROJECT_NAME `
+				-platform $platform `
+				-publishVersion $lastCommitOnBranchVersion
+			$zipFileName = "$PROJECT_NAME.$platform.$buildConfig" + ".zip"
+			$zipFilePath = Join-Path $nugetPublishFolderPath $zipFileName
+			Compress-Archive -Path $publishDir -DestinationPath $zipFilePath -Force
+			$assetFiles += $zipFilePath
 
-			$settings = New-Object System.Xml.XmlWriterSettings
-			$settings.Encoding = [System.Text.Encoding]::UTF8
-			$settings.Indent = $true
-	
-			# Thử ghi XML vào tệp tin với StreamWriter và mã hóa UTF-8
-			try {
-				New-Item -Path $nuspecFilePath -ItemType File -Force
-				$stream = New-Object System.IO.StreamWriter($nuspecFilePath, $false, [System.Text.Encoding]::UTF8)
-				$xmlWriter = [System.Xml.XmlWriter]::Create($stream, $settings)
-				$xmlDocument.Save($xmlWriter)
-			}
-			finally {
-				if ($xmlWriter) {
-					$xmlWriter.Close()
-				}
-				if ($stream) {
-					$stream.Close()
-				}
-			}
-			
-			Write-Host "`n`n`n"
-			Write-Host "==================Start publish project: ================="
-			msbuild /t:Restore
-			msbuild $PROJECT_PATH /t:Publish /p:IsFromDotnet=true /p:GitToken=$TOKEN `
-				/p:Configuration=Release /p:Platform=$PLATFORM /p:PublishDir=$publishDir `
-				/p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false  
-			Write-Host "==========================================================`n`n`n"
+			$platform = "x86"
+			$buildConfig = "Release"
+			$publishDir = $scriptRoot + "\" + $NUGET_PUBLISH_DIR + "\" + $PUBLISH_DIR + $platform + $buildConfig
+			Publish-Nuget -publishDir $publishDir `
+				-releaseNote $releaseNote `
+				-nuspecXMlString $xmlString `
+				-buildConfig $buildConfig `
+				-projectName $PROJECT_NAME `
+				-platform $platform `
+				-publishVersion $lastCommitOnBranchVersion
+			$zipFileName = "$PROJECT_NAME.$platform.$buildConfig" + ".zip"
+			$zipFilePath = Join-Path $nugetPublishFolderPath $zipFileName
+			Compress-Archive -Path $publishDir -DestinationPath $zipFilePath -Force
+			$assetFiles += $zipFilePath
+
+			$platform = "x64"
+			$buildConfig = "Debug"
+			$publishDir = $scriptRoot + "\" + $NUGET_PUBLISH_DIR + "\" + $PUBLISH_DIR + $platform + $buildConfig
+			Publish-Nuget -publishDir $publishDir `
+				-releaseNote $releaseNote `
+				-nuspecXMlString $xmlString `
+				-buildConfig $buildConfig `
+				-projectName $PROJECT_NAME `
+				-platform $platform `
+				-publishVersion $lastCommitOnBranchVersion
+			$zipFileName = "$PROJECT_NAME.$platform.$buildConfig" + ".zip"
+			$zipFilePath = Join-Path $nugetPublishFolderPath $zipFileName
+			Compress-Archive -Path $publishDir -DestinationPath $zipFilePath -Force
+			$assetFiles += $zipFilePath
+
+			$platform = "x86"
+			$buildConfig = "Debug"
+			$publishDir = $scriptRoot + "\" + $NUGET_PUBLISH_DIR + "\" + $PUBLISH_DIR + $platform + $buildConfig
+			Publish-Nuget -publishDir $publishDir `
+				-releaseNote $releaseNote `
+				-nuspecXMlString $xmlString `
+				-buildConfig $buildConfig `
+				-projectName $PROJECT_NAME `
+				-platform $platform `
+				-publishVersion $lastCommitOnBranchVersion
+			$zipFileName = "$PROJECT_NAME.$platform.$buildConfig" + ".zip"
+			$zipFilePath = Join-Path $nugetPublishFolderPath $zipFileName
+			Compress-Archive -Path $publishDir -DestinationPath $zipFilePath -Force
+			$assetFiles += $zipFilePath
 
 			Write-Host "==================Start create new release : ================="
-			$assetFilePath = Get-Content -Raw -Path "$PUBLISH_NAME_CONTAINER_FILE_PATH$PLATFORM"
-			$assetFilePath = $assetFilePath.Trim()
-			$assetName = Split-Path $assetFilePath -Leaf
-			$tagName = ($xmlDocument.package.metadata.id) + "." + $lastCommitOnBranchVersion.ToString()
-			Write-Host assetFilePath=$assetFilePath
-			Write-Host assetName=$assetName
+			$tagName = $PROJECT_NAME + "." + $lastCommitOnBranchVersion.ToString()
 			Write-Host tagName=$tagName
 			$releaseBody = "# " + $NUGET_PUBLISH_DESCRIPTION_TITLE + "`n" + $releaseNote
-			Create-NewRelease $tagName $tagName $releaseBody $assetFilePath $assetName
+			Create-NewRelease $tagName $tagName $releaseBody $assetFiles
 			Write-Host "==========================================================`n`n`n"
 
-			Write-Host "==================Start packing project: ================="
-			try {
-				if ($ISLOCAL -eq $true) {
-					$cache = dotnet nuget remove source "github"
-					Write-Host $cache
-				}
-				$cache = dotnet nuget add source "https://nuget.pkg.github.com/TrdHuy/index.json" --name "github" --username "trdtranduchuy@gmail.com" --password $TOKEN
-				Write-Host $cache
-			}
-			catch {
-				Write-Host "An error occurred: $_.Exception.Message"
-			} 
-			finally {}
-			$cache = dotnet pack --configuration Release $PROJECT_PATH -p:NuspecFile=$nuspecFilePath --no-build -o $NUGET_PUBLISH_DIR
-			Write-Host $cache
-			dotnet nuget push $nupkgFilePath --api-key $TOKEN --source "github"
-			Write-Host "==========================================================`n`n`n"
-		
-		
 			return "SUCCESS"
 		}
 		else {

@@ -42,7 +42,7 @@ jobs:
       shell: pwsh
       run: |
         msbuild --version
-        $result = & .\release_and_publish_nuget.ps1 -PLATFORM ${{ matrix.platform }}
+        $result = & .\release_and_publish_nuget.ps1
         echo result=$result
     #- name: Set outputs
     #  id: vars
