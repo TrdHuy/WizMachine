@@ -27,7 +27,7 @@ namespace fs = std::filesystem;
 struct CompressedFileInfo {
 	int index;
 	char* id;
-	unsigned long idValue;
+	unsigned long long idValue;
 	char* time;
 	char* fileName;
 	int size;
