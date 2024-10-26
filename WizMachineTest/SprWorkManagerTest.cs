@@ -11,6 +11,8 @@ namespace SPRNetToolTest.Domain
     internal class SprWorkManagerTest
     {
         private const string LOG_FOLDER = "temp\\logs";
+        private FileStream logFS;
+        private StreamWriter logSW;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -28,9 +30,18 @@ namespace SPRNetToolTest.Domain
             }
 
             var filePath = LOG_FOLDER + @"\" + logFileName;
-            var fs = new FileStream(filePath, FileMode.Append, FileAccess.Write);
-            var wr = new StreamWriter(fs);
-            EngineKeeper.Init(wr);
+            logFS = new FileStream(filePath, FileMode.Append, FileAccess.Write);
+            logSW = new StreamWriter(logFS);
+            EngineKeeper.Init(logSW);
+        }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            logSW.Close();
+            logSW.Dispose();
+            logFS.Close();
+            logFS.Dispose();
         }
 
         private class SprWorkManagerTestObject : SprWorkManagerAdvance
