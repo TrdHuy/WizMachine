@@ -33,7 +33,7 @@ if (-not $_TOKEN) {
      $localXmlDoc = New-Object System.Xml.XmlDocument
      $localXmlDoc.PreserveWhitespace = $true
      $localXmlDoc.LoadXml($localXmlString)
-     $_TOKEN = $localXmlDoc.configuration.GITHUB_TOKEN
+     $_TOKEN = $localXmlDoc.configuration.SIGINING_TOKEN
 
 }
 
