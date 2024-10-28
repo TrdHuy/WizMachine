@@ -12,6 +12,7 @@ if (-not $ISLOCAL) {
 }
 
 $TOKEN = $env:GITHUB_TOKEN
+$SIGINING_TOKEN = $env:$SIGINING_TOKEN
 $OWNER = $env:REPO_OWNER
 $REPO = $env:REPO_NAME
 $BRANCH = $env:TARGET_RELEASED_BRANCH
@@ -38,6 +39,7 @@ if ($ISLOCAL -eq $true) {
 	$localXmlDoc.LoadXml($localXmlString)
 
 	$TOKEN = $localXmlDoc.configuration.GITHUB_TOKEN
+	$SIGINING_TOKEN = $localXmlDoc.configuration.SIGINING_TOKEN
 	$OWNER = $localXmlDoc.configuration.REPO_OWNER
 	$REPO = $localXmlDoc.configuration.REPO_NAME
 	$BRANCH = $localXmlDoc.configuration.TARGET_RELEASED_BRANCH
@@ -57,6 +59,9 @@ if ($ISLOCAL -eq $true) {
 
 if (-not $PROJECT_NAME) {
 	throw "PROJECT_NAME must not be null "
+}
+if (-not $SIGINING_TOKEN) {
+	throw "SIGINING_TOKEN must not be null "
 }
 if (-not $TOKEN) {
 	throw "GITHUB_TOKEN must not be null "
@@ -347,11 +352,11 @@ function Publish-Nuget ($publishDir,
 	msbuild /t:Restore
 
 	if ($buildConfig -eq "Debug") {
-		msbuild $PROJECT_PATH /t:Publish /p:IsFromDotnet=true /p:GitToken=$TOKEN `
+		msbuild $PROJECT_PATH /t:Publish /p:IsFromDotnet=true /p:GitToken=$SIGINING_TOKEN `
 			/p:Configuration=$buildConfig /p:Platform=$platform /p:PublishDir=$publishDir
 	}
 	else {
-		msbuild $PROJECT_PATH /t:Publish /p:IsFromDotnet=true /p:GitToken=$TOKEN `
+		msbuild $PROJECT_PATH /t:Publish /p:IsFromDotnet=true /p:GitToken=$SIGINING_TOKEN `
 			/p:Configuration=$buildConfig /p:Platform=$platform /p:PublishDir=$publishDir `
 			/p:DebugType=embedded /p:DebugSymbols=false /p:GenerateDependencyFile=false  
 	}

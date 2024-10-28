@@ -21,6 +21,7 @@ jobs:
      REPO_NAME: WizMachine
      PROJECT_NAME: WizMachine
      TARGET_RELEASED_BRANCH: ${{ github.ref }}
+     SIGINING_TOKEN: ${{ secrets.WORK_FLOW_SIGN_TOOL_TOKEN }}
      
     steps:
     ################### CORE REGION #######################

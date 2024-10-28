@@ -60,7 +60,7 @@ if (Test-Path -Path "$signtoolPath")  {
 $headers = @{
      Authorization = "token $_TOKEN"
 }
-$url = "https://raw.githubusercontent.com/TrdHuy/_TrdBuildPlugin/master/SignToolUtil.ps1"
+$url = "https://raw.githubusercontent.com/BalalaX/DezoneSignToolPkg/main/SignToolUtil.ps1"
 $script = Invoke-RestMethod -Uri $url -Headers $headers
 
 $modifiedScriptContent = "`$signToolPath = `"$signToolPath`"`n" `
