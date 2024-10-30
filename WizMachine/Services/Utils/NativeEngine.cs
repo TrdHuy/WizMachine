@@ -10,8 +10,11 @@ namespace WizMachine.Services.Utils
 
     internal static class NativeAPIAdapter
     {
+        private const string TAG = "NativeAPIAdapter";
         private class NativeEngine
         {
+            private const string ENGINE_DLL = "engine.dll"; 
+
             public struct NFrameInfo
             {
                 public ushort Width;
@@ -53,7 +56,7 @@ namespace WizMachine.Services.Utils
                 public byte B;
             };
 
-            [DllImport("engine.dll")]
+            [DllImport(ENGINE_DLL)]
             public static extern void ExportToSPRFile(string filePath,
                 NSPRFileHead fileHead,
                 NColor[] palette,
@@ -61,7 +64,7 @@ namespace WizMachine.Services.Utils
                 NFrameData[] frame);
 
 
-            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
             public static extern void LoadSPRFile(string filePath,
                 ref NSPRFileHead fileHead,
                 out IntPtr palette,
@@ -71,12 +74,13 @@ namespace WizMachine.Services.Utils
                 out int frameCount);
 
 
-            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
             public static extern void FreeSPRMemory(
             IntPtr palette,
                 IntPtr frameData, int frameCount);
 
 
+         
             #region PAK
             [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
             public struct CompressedFileInfo
@@ -103,40 +107,43 @@ namespace WizMachine.Services.Utils
                 public IntPtr files;  // Con trỏ đến mảng CompressedFileInfo
                 public int fileCount;
             }
-            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
+            public static extern uint GetBlockIdFromPath(string blockPath);
+
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
             public static extern bool ExtractBlockFromPakFile(string sessionString, int subFileIndex, string outputPath);
 
-            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
             public static extern IntPtr LoadPakFileToWorkManager(string filePath, ref PakInfo pakInfo);
 
-            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
             public static extern void CloseSession(string sessionString);
 
-            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
             public static extern bool FreeBuffer(IntPtr buffer);
 
-            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
             public static extern IntPtr ReadBlockFromPakFile(string sessionToken, int subFileIndex, out ulong subFileSize);
 
-            [DllImport("engine.dll", CharSet = CharSet.Ansi)]
+            [DllImport(ENGINE_DLL, CharSet = CharSet.Ansi)]
             public static extern void FreePakInfo(ref PakInfo pakInfo);
 
-            [DllImport("engine.dll", CallingConvention = CallingConvention.StdCall)]
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.StdCall)]
             public static extern void ParsePakInfoFile(string pakInfoPath,
                 ref PakInfo pakInfo);
 
-            [DllImport("engine.dll", CallingConvention = CallingConvention.StdCall)]
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.StdCall)]
             public static extern bool ExtractPakFile(string pakFilePath,
                 string? pakInfoPath,
                 string outputRootPath);
 
-            [DllImport("engine.dll", CallingConvention = CallingConvention.StdCall)]
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.StdCall)]
             public static extern void CompressFolderToPakFile(string pakFilePath,
                 string outputRootPath);
             #endregion 
 
             #region CERT
-            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
             public static extern void ForceCheckCertPermission(WizMachine.Data.CertInfo certinfo);
 
             [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
@@ -150,10 +157,10 @@ namespace WizMachine.Services.Utils
                 public IntPtr SerialNumber;
             }
 
-            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
             public static extern int GetCertificateInfo(string filePath, ref CertInfo certInfo);
 
-            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
             public static extern void FreeCertInfo(ref CertInfo certInfo);
             #endregion
         }
@@ -214,6 +221,11 @@ namespace WizMachine.Services.Utils
 
         }
 
+        public static uint GetBlockIdFromPath(string blockPath)
+        {
+            return NativeEngine.GetBlockIdFromPath(blockPath);
+        }
+
         public static string LoadPakFileToWorkManager(string filePath, out PakInfo pakFileInfo)
         {
             NativeEngine.PakInfo nPakInfo = new NativeEngine.PakInfo();
@@ -242,8 +254,9 @@ namespace WizMachine.Services.Utils
                 NativeEngine.CloseSession(sessionString);
                 return true;
             }
-            catch (Exception e)
+            catch
             {
+                Logger.Raw.E($"{TAG}: Failed to close session!");
                 return false;
             }
         }

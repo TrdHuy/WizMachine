@@ -60,4 +60,6 @@ extern "C" {
 	DLL_API bool ExtractBlockFromPakFile(const char* sessionString, int subFileIndex, const char* outputPath);
 	DLL_API bool FreeBuffer(void* buffer);
 	DLL_API unsigned char* ReadBlockFromPakFile(const char* sessionToken, int subFileIndex, size_t* subFileSize);
+	DLL_API unsigned int GetBlockIdFromPath(const char* blockPath);
+	
 }

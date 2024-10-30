@@ -40,6 +40,6 @@ char* Wchar_t2CharPtr(wchar_t* str);
 std::string GetTempFilePath(const std::string& fileName, bool useAppData);
 std::string intToHexString(int number);
 std::string formatTimeToString(int time);
-
+void MakeDirFromFilePathIfNotExisted(const std::string& filePath);
 
 #endif

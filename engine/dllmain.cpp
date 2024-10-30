@@ -200,3 +200,7 @@ unsigned char* ReadBlockFromPakFile(const char* sessionToken, int subFileIndex, 
 	manager->ReadSubFileData(sessionToken, subFileIndex, buffer, subFileSize);
 	return buffer;
 }
+
+unsigned int GetBlockIdFromPath(const char* blockPath) {
+	return g_FileNameHash(blockPath);
+}
