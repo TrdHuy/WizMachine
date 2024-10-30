@@ -1,11 +1,12 @@
 ﻿#include "pch.h"
 #include "base.h"
 #include "pak.h"
+#include "BigAloneFile.h"
 
 int ParsePakInfoFileInternal(const char* filename, PakInfoInternal& pakInfo) {
 	std::ifstream file(filename);
 	if (!file.is_open()) {
-		std::cerr << "Error opening file." << std::endl;
+		Log::E("Error opening file: ", std::string(filename));
 		return -1;
 	}
 
@@ -95,12 +96,30 @@ bool ReadElemBufferFromPak(std::ifstream& pakFile, unsigned int offset, unsigned
 	return false;
 }
 
+bool ReadElemBufferFromPak(BigAloneFile& pakFile, unsigned int offset, unsigned int storedSize,
+	unsigned int pakMethod, char* buffer, unsigned int size) {
+	pakFile.seek(offset, std::ios::beg);
+
+	if (pakMethod == XPACK_METHOD_NONE) {
+		assert(storedSize == size);
+		pakFile.read(buffer, size);
+		return true;
+	}
+	else if (storedSize <= 4194304 && pakMethod == XPACK_METHOD_UCL) { // 4MB
+		std::unique_ptr<char[]> compressBuffer(new char[storedSize]);
+		pakFile.read(compressBuffer.get(), storedSize);
+		return DecompressData(compressBuffer.get(), storedSize, reinterpret_cast<unsigned char*>(buffer), size);
+	}
+	return false;
+}
+
 std::unique_ptr<BYTE[]> ReadBlock(int block
 	, int blockCount
 	, int blockHeaderIndex
 	, std::ifstream& file
 	, int* decompressLenght
-	, std::function<bool(PakBlockHeader, XPackIndexInfo)> blockHeaderPredicate = nullptr) {
+	, std::function<bool(PakBlockHeader, XPackIndexInfo)> blockHeaderPredicate) {
+
 	if (!file.is_open() || block < 0 || block >= blockCount) {
 		return nullptr;
 	}
@@ -169,6 +188,80 @@ std::unique_ptr<BYTE[]> ReadBlock(int block
 		}
 		uSize += fragment.uSize;
 	}
+	return decompressedBuffer;
+}
+
+std::unique_ptr<BYTE[]> ReadBlock(int block,
+	int blockCount,
+	int blockHeaderIndex,
+	BigAloneFile& file,
+	int* decompressLength,
+	std::function<bool(PakBlockHeader, XPackIndexInfo)> blockHeaderPredicate) {
+
+	if (!file.isOpen() || block < 0 || block >= blockCount) {
+		return nullptr;
+	}
+
+	auto blockHeaderBuffer = std::make_unique<unsigned char[]>(sizeof(PakBlockHeader));
+	int blockHeaderOffset = blockHeaderIndex + block * sizeof(PakBlockHeader);
+
+	file.seek(blockHeaderOffset, std::ios::beg);
+	file.read(reinterpret_cast<char*>(blockHeaderBuffer.get()), sizeof(PakBlockHeader));
+
+	auto* pBlockHeader = reinterpret_cast<PakBlockHeader*>(blockHeaderBuffer.get());
+	auto* xPackIndexInfo = reinterpret_cast<XPackIndexInfo*>(pBlockHeader);
+
+	if (pBlockHeader->ID <= 0 || pBlockHeader->RealLength <= 0 || pBlockHeader->Offset <= 0) {
+		return nullptr;
+	}
+
+	if (blockHeaderPredicate != nullptr && !blockHeaderPredicate(*pBlockHeader, *xPackIndexInfo)) {
+		return nullptr;
+	}
+
+	*decompressLength = pBlockHeader->RealLength;
+
+	unsigned long size = GetCompressSize(pBlockHeader);
+	auto blockBuffer = std::make_unique<unsigned char[]>(size);
+
+	file.seek(pBlockHeader->Offset, std::ios::beg);
+	file.read(reinterpret_cast<char*>(blockBuffer.get()), size);
+
+	bool bOk = true;
+	auto decompressedBuffer = std::make_unique<unsigned char[]>(xPackIndexInfo->uSize);
+
+	// Nếu không chứa cờ FRAGMENT
+	if (!xPackIndexInfo->isBlockFragment()) {
+		unsigned int pakMethod = xPackIndexInfo->getPackMethod();
+		unsigned int storedSize = xPackIndexInfo->getStoredSize();
+		bOk = ReadElemBufferFromPak(file, xPackIndexInfo->uOffset, storedSize,
+			pakMethod, (char*)decompressedBuffer.get(), xPackIndexInfo->uSize);
+		return decompressedBuffer;
+	}
+
+	XPackFileFragmentElemHeader header;
+	if (!ReadElemBufferFromPak(file, xPackIndexInfo->uOffset,
+		sizeof(header), XPACK_METHOD_NONE, (char*)&header, sizeof(header))) {
+		bOk = false;
+		return nullptr;
+	}
+
+	unsigned uSize = 0;
+	for (int i = 0; i < header.nNumFragment; i++) {
+		XPackFileFragmentInfo fragment;
+		if (!ReadElemBufferFromPak(file, xPackIndexInfo->uOffset + header.nFragmentInfoOffset + sizeof(fragment) * i,
+			sizeof(fragment), XPACK_METHOD_NONE, (char*)&fragment, sizeof(fragment))) {
+			bOk = false;
+			break;
+		}
+		if (!ReadElemBufferFromPak(file, xPackIndexInfo->uOffset + fragment.uOffset, fragment.getStoredSize(),
+			fragment.getPackMethod(), (char*)decompressedBuffer.get() + uSize, fragment.uSize)) {
+			bOk = false;
+			break;
+		}
+		uSize += fragment.uSize;
+	}
+
 	return decompressedBuffer;
 }
 
@@ -249,6 +342,15 @@ void ReadPakHeader(
 	header.reset(reinterpret_cast<PakHeader*>(headerBuffer.release()));
 }
 
+void ReadPakHeader(
+	std::unique_ptr<PakHeader>& header,
+	BigAloneFile& file) {
+	auto headerBuffer = std::make_unique<unsigned char[]>(sizeof(PakHeader));
+	file.readFrom(0, reinterpret_cast<char*>(headerBuffer.get()), sizeof(PakHeader)); // Đọc header vào buffer
+	header.reset(reinterpret_cast<PakHeader*>(headerBuffer.release())); // Đặt lại header
+}
+
+
 int ExtractPakInternal(const char* pakfilePath,
 	const char* outputRootPath,
 	std::unique_ptr<PakHeader>& header) {
@@ -304,8 +406,8 @@ int ExtractPakInternal(const char* pakfilePath,
 }
 
 std::unique_ptr<std::unique_ptr<unsigned char[]>[]> ExtractPakInternalToMemory(
-	const char* pakfilePath, 
-	std::unique_ptr<PakHeader>& header, 
+	const char* pakfilePath,
+	std::unique_ptr<PakHeader>& header,
 	int& blockCount) {
 	std::ifstream file(pakfilePath, std::ios::binary | std::ios::ate);
 	if (!file.is_open()) {

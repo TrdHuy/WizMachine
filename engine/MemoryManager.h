@@ -115,7 +115,7 @@ public:
 	}
 
 	template<typename T>
-	void deallocate(T* ptr) {
+	bool deallocate(T* ptr) {
 		std::lock_guard<std::mutex> lock(mtx);
 		auto it = allocatedPointers.find(static_cast<void*>(ptr));
 		if (it != allocatedPointers.end()) {
@@ -125,24 +125,27 @@ public:
 
 			if (it->second.type == std::type_index(typeid(T))) {  // Debug: kiểm tra type
 #endif
-				if (it->second.isArray) {
-					Log::D(TAG, "Deallocated memory at: ", static_cast<void*>(ptr), " (array of ", it->second.size, ")");
-					delete[] ptr;
-				}
-				else {
-					Log::D(TAG, "Deallocated memory at: ", static_cast<void*>(ptr), " (single object)");
-					delete ptr;
-				}
-				allocatedPointers.erase(it);  // Xóa con trỏ khỏi cache
+				Log::I(TAG, "Type match.");
 #ifdef _DEBUG
 			}
 			else {
-				Log::E(TAG, "Type mismatch. Cannot deallocate.");
+				Log::E(TAG, "Type mismatch. Deallocate void*.");
 			}
 #endif
+			if (it->second.isArray) {
+				Log::D(TAG, "Deallocated memory at: ", static_cast<void*>(ptr), " (array of ", it->second.size, ")");
+				delete[] ptr;
+			}
+			else {
+				Log::D(TAG, "Deallocated memory at: ", static_cast<void*>(ptr), " (single object)");
+				delete ptr;
+			}
+			allocatedPointers.erase(it);  // Xóa con trỏ khỏi cache
+			return true;
 		}
 		else {
 			Log::E(TAG, "Pointer not found in cache. Cannot deallocate.");
+			return false;
 		}
 	}
 

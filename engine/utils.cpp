@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "base.h"
 #include "MemoryManager.h"
 
@@ -70,4 +70,58 @@ char* GetFileStreamBuffer(std::ifstream& fileStream) {
 		return nullptr;
 	}
 	return buffer;
+}
+
+
+std::string GetTempFilePath(const std::string& fileName, bool useAppData) {
+	char tempPath[MAX_PATH];
+
+	if (useAppData) {
+		// Lấy đường dẫn tới thư mục AppData\Local\Temp
+		PWSTR appDataPath = NULL;
+		if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &appDataPath))) {
+			std::string appDataTempPath = std::filesystem::path(appDataPath).string() + "\\Temp\\";
+			CoTaskMemFree(appDataPath); // Giải phóng bộ nhớ được cấp phát bởi SHGetKnownFolderPath
+
+			// Tạo thư mục nếu chưa tồn tại
+			std::filesystem::create_directories(appDataTempPath);
+			return appDataTempPath + fileName;
+		}
+	}
+	else {
+		// Lấy đường dẫn tới thư mục tạm của thư viện DLL hiện tại
+		HMODULE hModule = GetModuleHandle(NULL);
+		if (hModule != NULL) {
+			GetModuleFileNameA(hModule, tempPath, MAX_PATH);
+			std::string dllDirectory = std::filesystem::path(tempPath).parent_path().string();
+			std::string dllTempPath = dllDirectory + "\\Temp\\";
+
+			// Tạo thư mục nếu chưa tồn tại
+			std::filesystem::create_directories(dllTempPath);
+			return dllTempPath + fileName;
+		}
+	}
+
+	// Nếu không thể lấy đường dẫn, trả về chuỗi rỗng
+	return "";
+}
+
+std::string intToHexString(int number) {
+	std::stringstream ss;
+	ss << std::hex << std::uppercase << number; // Định dạng thành hexa với chữ in hoa
+	return ss.str(); // Trả về chuỗi hexa
+}
+
+std::string formatTimeToString(int time) {
+	std::stringstream ss;
+	tm* pFormatTime = MemoryManager::getInstance()->allocate<tm>();
+	GetLTimeFromSecond(pFormatTime, time);
+	ss << std::setw(2) << std::setfill('0') << (pFormatTime->tm_mday) << '-' // Ngày
+		<< std::setw(2) << std::setfill('0') << (pFormatTime->tm_mon + 1) << '-' // Tháng (cộng thêm 1)
+		<< (pFormatTime->tm_year + 1900) << ' ' // Năm (cộng thêm 1900)
+		<< std::setw(2) << std::setfill('0') << (pFormatTime->tm_hour) << ':' // Giờ
+		<< std::setw(2) << std::setfill('0') << (pFormatTime->tm_min) << ':' // Phút
+		<< std::setw(2) << std::setfill('0') << (pFormatTime->tm_sec); // Giây
+	MemoryManager::getInstance()->deallocate(pFormatTime);
+	return ss.str(); // Trả về chuỗi định dạng
 }

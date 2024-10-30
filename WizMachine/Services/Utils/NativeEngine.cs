@@ -103,6 +103,20 @@ namespace WizMachine.Services.Utils
                 public IntPtr files;  // Con trỏ đến mảng CompressedFileInfo
                 public int fileCount;
             }
+            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            public static extern bool ExtractBlockFromPakFile(string sessionString, int subFileIndex, string outputPath);
+
+            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            public static extern IntPtr LoadPakFileToWorkManager(string filePath, ref PakInfo pakInfo);
+
+            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            public static extern void CloseSession(string sessionString);
+
+            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            public static extern bool FreeBuffer(IntPtr buffer);
+
+            [DllImport("engine.dll", CallingConvention = CallingConvention.Cdecl)]
+            public static extern IntPtr ReadBlockFromPakFile(string sessionToken, int subFileIndex, out ulong subFileSize);
 
             [DllImport("engine.dll", CharSet = CharSet.Ansi)]
             public static extern void FreePakInfo(ref PakInfo pakInfo);
@@ -112,7 +126,7 @@ namespace WizMachine.Services.Utils
                 ref PakInfo pakInfo);
 
             [DllImport("engine.dll", CallingConvention = CallingConvention.StdCall)]
-            public static extern void ExtractPakFile(string pakFilePath,
+            public static extern bool ExtractPakFile(string pakFilePath,
                 string? pakInfoPath,
                 string outputRootPath);
 
@@ -177,6 +191,64 @@ namespace WizMachine.Services.Utils
         #endregion
 
         #region PAK
+
+        public static byte[] ReadBlockFromPak(string sessionToken, int blockIndex)
+        {
+            ulong blockSize;
+            IntPtr bufferPtr = NativeEngine.ReadBlockFromPakFile(sessionToken, blockIndex, out blockSize);
+
+            if (bufferPtr == IntPtr.Zero)
+            {
+                throw new Exception("Failed to read sub-file data.");
+            }
+
+
+            // Chuyển đổi IntPtr thành mảng byte
+            byte[] buffer = ConvertPointerToSharpBuffer(blockSize, bufferPtr);
+
+            // Giải phóng bộ nhớ trong C++
+            NativeEngine.FreeBuffer(bufferPtr);
+
+            return buffer;
+
+
+        }
+
+        public static string LoadPakFileToWorkManager(string filePath, out PakInfo pakFileInfo)
+        {
+            NativeEngine.PakInfo nPakInfo = new NativeEngine.PakInfo();
+            IntPtr sessionPtr = NativeEngine.LoadPakFileToWorkManager(filePath, ref nPakInfo);
+            if (sessionPtr == IntPtr.Zero)
+            {
+                throw new InvalidOperationException("Failed to load .pak file.");
+            }
+            pakFileInfo = ConvertNativePakInfo(nPakInfo);
+
+            string sessionToken = Marshal.PtrToStringAnsi(sessionPtr) ?? "";
+            NativeEngine.FreePakInfo(ref nPakInfo);
+            NativeEngine.FreeBuffer(sessionPtr);
+            return sessionToken;
+        }
+
+        public static bool ExtractFileFromPak(string sessionToken, int subFileIndex, string outputPath)
+        {
+            return NativeEngine.ExtractBlockFromPakFile(sessionToken, subFileIndex, outputPath);
+        }
+
+        public static bool CloseSession(string sessionString)
+        {
+            try
+            {
+                NativeEngine.CloseSession(sessionString);
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+
+
         public static PakInfo ParsePakInfoFile(string pakInfoPath)
         {
             NativeEngine.PakInfo nPakInfo = new NativeEngine.PakInfo();
@@ -194,8 +266,7 @@ namespace WizMachine.Services.Utils
             string pakInfoPath,
             string outputRootPath)
         {
-            NativeEngine.ExtractPakFile(pakFilePath, pakInfoPath, outputRootPath);
-            return true;
+            return NativeEngine.ExtractPakFile(pakFilePath, pakInfoPath, outputRootPath);
         }
 
         public static bool ExtractPakFile(string pakFilePath,
@@ -251,7 +322,6 @@ namespace WizMachine.Services.Utils
         }
         #endregion
 
-
         #region SPR
         public static bool LoadSPRFile(string filePath,
             out SprFileHead sprFileHead,
@@ -265,7 +335,7 @@ namespace WizMachine.Services.Utils
 
 
             NativeEngine.LoadSPRFile(filePath,
-                ref nFileHead, 
+                ref nFileHead,
                 out palettePtr,
                 out nativePaletteLength,
                 out frameDataBeginPos,
@@ -371,5 +441,27 @@ namespace WizMachine.Services.Utils
             return frameData;
         }
         #endregion
+
+        private static byte[] ConvertPointerToSharpBuffer(ulong bufferSize, IntPtr bufferPtr)
+        {
+            // Xử lý trường hợp nếu buffer size quá lớn (lớn hơn int MaxValue)
+            // Cần phải chia nhỏ buffer ra để copy.
+            byte[] buffer = new byte[bufferSize];
+            ulong remainingSize = bufferSize;
+            const int chunkSize = int.MaxValue;
+            ulong offset = 0;
+
+            while (remainingSize > 0)
+            {
+                int bytesToCopy = (int)Math.Min(chunkSize, remainingSize); // Lấy số byte để sao chép trong lần này
+                IntPtr currentPointer = IntPtr.Add(bufferPtr, (int)offset); // Calculate the current pointer position
+
+                Marshal.Copy(currentPointer, buffer, (int)offset, bytesToCopy); // Copy to buffer
+                offset += (ulong)bytesToCopy;
+                remainingSize -= (ulong)bytesToCopy;
+            }
+
+            return buffer;
+        }
     }
 }

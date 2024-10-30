@@ -72,6 +72,12 @@
     <ClInclude Include="LogUtil.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
+    <ClInclude Include="PakWorkManager.h">
+      <Filter>Header Files\Domain</Filter>
+    </ClInclude>
+    <ClInclude Include="BigAloneFile.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -106,6 +112,9 @@
     </ClCompile>
     <ClCompile Include="LogUtil.cpp">
       <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="PakWorkManager.cpp">
+      <Filter>Source Files\Domain</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
