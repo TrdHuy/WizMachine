@@ -230,6 +230,8 @@ bool PakWorkManager::ExtractSubFile(const std::string& sessionToken, int subFile
 	unsigned char* buffer = nullptr; // Khai báo con trỏ buffer
 	ReadSubFileData(sessionToken, subFileIndex, buffer, &subFileSize);
 
+	MakeDirFromFilePathIfNotExisted(outputPath);
+
 	std::ofstream outputFile(outputPath, std::ios::binary);
 	if (!outputFile.is_open()) {
 		Log::E(TAG, "Failed to create output file: ", outputPath);

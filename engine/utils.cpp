@@ -125,3 +125,11 @@ std::string formatTimeToString(int time) {
 	MemoryManager::getInstance()->deallocate(pFormatTime);
 	return ss.str(); // Trả về chuỗi định dạng
 }
+
+void MakeDirFromFilePathIfNotExisted(const std::string& filePath) {
+	std::filesystem::path outputDir = std::filesystem::path(filePath).parent_path();
+
+	if (!std::filesystem::exists(outputDir)) {
+		std::filesystem::create_directories(outputDir);
+	}
+}

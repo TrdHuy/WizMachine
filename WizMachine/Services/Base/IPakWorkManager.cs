@@ -20,5 +20,14 @@ namespace WizMachine.Services.Base
 
         public bool CompressFolderToPakFile(string pakFilePath,
            string outputRootPath);
+
+
+        #region WorkManager
+        public bool LoadPakFileToWorkManager(string pakFilePath);
+        public void ResetPakWorkManager();
+        public bool RemovePakFileFromWorkManager(string pakFilePath);
+        public bool IsBlockExistByPath(string blockPath);
+        public bool ExtractBlockByPath(string blockPath, string outputPath);
+        #endregion
     }
 }
