@@ -10,7 +10,7 @@ namespace WizMachine
     public class EngineKeeper
     {
         private static EngineKeeper? _engineInstance;
-        public static StreamWriter? LogWriter { get; private set; }
+        public StreamWriter? LogWriter { get; private set; }
 
         public static ISprWorkManagerAdvance GetSprWorkManagerService()
         {
@@ -47,9 +47,9 @@ namespace WizMachine
         public static void Init(StreamWriter logWriter)
         {
             if (_engineInstance != null) throw new Exception("Engine has already inited!");
-
-            LogWriter = logWriter;
             _engineInstance = new EngineKeeper();
+            _engineInstance.LogWriter = logWriter;
+            Logger.Init(logWriter);
         }
 
         private ISprWorkManagerAdvance? sprWorkManagerAdvanceInstance = null;
