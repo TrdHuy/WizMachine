@@ -2,6 +2,7 @@
 
 #include "pch.h"
 #include "MemoryManager.h"
+#include "PakWorkManager.h"
 #include "LogUtil.h"
 #include "base.h"
 
@@ -18,7 +19,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 	{
 		Log::Init();
 
-		
+
 		MemoryManager::getInstance();
 		wchar_t path[MAX_PATH];
 		if (GetModuleFileName(NULL, path, MAX_PATH) != 0)
@@ -35,7 +36,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 				MemoryManager::getInstance()->deallocate(static_cast<char*>(pathChar));
 				MemoryManager::getInstance()->deallocate(certInfo);
 
-				
+
 				Log::E("MAIN", "Security exception: Path" + std::string(pathChar) + " cert is invalid! Package: ");
 				throw std::exception("Security exception:Calling package's cert is invalid!");
 			}
@@ -117,15 +118,17 @@ void FreePakInfo(PakInfo* pakInfo) {
 }
 
 
-void ExtractPakFile(const char* pakFilePath, const char* pakInfoFilePath, const char* outputRootPath) {
+bool ExtractPakFile(const char* pakFilePath, const char* pakInfoFilePath, const char* outputRootPath) {
 	std::unique_ptr<PakHeader> header;
 	if (pakInfoFilePath != nullptr) {
 		PakInfoInternal pakInfo;
-		int p = ParsePakInfoFileInternal(pakInfoFilePath, pakInfo);
-		ExtractPakInternal(pakFilePath, outputRootPath, pakInfo, header);
+		if (ParsePakInfoFileInternal(pakInfoFilePath, pakInfo) == -1) {
+			return false;
+		}
+		return ExtractPakInternal(pakFilePath, outputRootPath, pakInfo, header) > 0;
 	}
 	else {
-		ExtractPakInternal(pakFilePath, outputRootPath, header);
+		return ExtractPakInternal(pakFilePath, outputRootPath, header) > 0;
 	}
 }
 
@@ -152,4 +155,48 @@ void FreeCertInfo(CertInfo* certInfo) {
 		certInfo->Thumbprint = nullptr;
 		certInfo->SerialNumber = nullptr;
 	}
+}
+
+const char* LoadPakFileToWorkManager(const char* filePath, PakInfo* pakInfo) {
+	// Lấy instance duy nhất của PakWorkManager
+	PakWorkManager* manager = PakWorkManager::GetInstance();
+	PakInfoInternal pakInfoInternal;
+
+	// Gọi hàm LoadPakFile nội bộ và trả về token phiên
+	std::string sessionToken = manager->LoadPakFile(filePath, pakInfoInternal);
+
+	// Nếu không tạo được token, trả về null
+	if (sessionToken.empty()) {
+		return nullptr;
+	}
+
+	// Lấy instance của MemoryManager để cấp phát bộ nhớ cho chuỗi kết quả
+	MemoryManager* memManager = MemoryManager::getInstance();
+	char* result = memManager->allocateArray<char>(sessionToken.size() + 1);
+	strcpy_s(result, sessionToken.size() + 1, sessionToken.c_str());
+
+	pakInfoInternal.ConvertToPakInfo(*pakInfo);
+	return result;
+}
+
+void CloseSession(const char* sessionString) {
+	PakWorkManager* manager = PakWorkManager::GetInstance();
+	manager->CloseSession(sessionString);
+}
+
+bool ExtractBlockFromPakFile(const char* sessionString, int subFileIndex, const char* outputPath) {
+	PakWorkManager* manager = PakWorkManager::GetInstance();
+	return manager->ExtractSubFile(sessionString, subFileIndex, outputPath);
+}
+
+bool FreeBuffer(void* buffer) {
+	MemoryManager* memManager = MemoryManager::getInstance();
+	return memManager->deallocate(buffer);
+}
+
+unsigned char* ReadBlockFromPakFile(const char* sessionToken, int subFileIndex, size_t* subFileSize) {
+	unsigned char* buffer = nullptr; 
+	PakWorkManager* manager = PakWorkManager::GetInstance();
+	manager->ReadSubFileData(sessionToken, subFileIndex, buffer, subFileSize);
+	return buffer;
 }

@@ -74,8 +74,9 @@ namespace SPRNetToolTest.Domain
         private string _dataWithSprPakPath = "data.pak";
         private string _dataForCompressPakPath = "Resources\\dataForCompressTest.pak";
         private string _output_daPakTxtPath = "data.pak.txt";
+        private string _input_daPakPath = "Resources\\dataWithSpr.pak";
         private string _input_daPakTxtPath = "Resources\\dataWithSpr.pak.txt";
-        private string _dataFolderForCompressPath = "Resources\\dataForCompressTest\\data";
+        private string _input_dataFolderForCompressPath = "Resources\\dataForCompressTest\\data";
         private ISprWorkManagerAdvance sprWorkManager;
         private SprWorkManagerTestObject sprWorkManagerTestObject;
 
@@ -215,17 +216,24 @@ namespace SPRNetToolTest.Domain
             }
         }
 
+
+        [Test]
+        public void test_CertUtil()
+        {
+            EngineKeeper.ForceCheckCallingSignature();
+        }
+
         [Test]
         public void test_ExtractPakFile()
         {
             string exePath = Assembly.GetExecutingAssembly().Location;
             string exeDirectory = Path.GetDirectoryName(exePath) ?? "";
 
-
-            Assert.IsTrue(NativeAPIAdapter.ExtractPakFile(_dataWithSprPakPath,
-                _output_daPakTxtPath,
-                outputRootPath: exeDirectory));
-            using (FileStream fs = new FileStream("data\\12345.spr", FileMode.Open, FileAccess.Read))
+            string outputRootPath = exeDirectory + "\\test_ExtractPakFile_output";
+            Assert.IsTrue(NativeAPIAdapter.ExtractPakFile(_input_daPakPath,
+                _input_daPakTxtPath,
+                outputRootPath: outputRootPath));
+            using (FileStream fs = new FileStream($"{outputRootPath}\\data\\12345.spr", FileMode.Open, FileAccess.Read))
             {
                 var initResult = sprWorkManager.InitWorkManagerFromSprFile(fs);
                 Assert.That(initResult);
@@ -237,35 +245,73 @@ namespace SPRNetToolTest.Domain
             }
 
             // Kiểm tra nội dung file test.txt
-            string testTxtPath = Path.Combine(exeDirectory, "data", "test.txt");
+            string testTxtPath = Path.Combine(outputRootPath, "data", "test.txt");
             string testTxtContent = File.ReadAllText(testTxtPath);
             Assert.That(testTxtContent.Trim(), Is.EqualTo("12345"), "Nội dung file test.txt không đúng.");
 
             // Kiểm tra nội dung file test.xml
-            string testXmlPath = Path.Combine(exeDirectory, "data", "test.xml");
+            string testXmlPath = Path.Combine(outputRootPath, "data", "test.xml");
             string testXmlContent = File.ReadAllText(testXmlPath);
             Assert.That(testXmlContent.Trim(), Is.EqualTo("<config></config>"), "Nội dung file test.xml không đúng.");
         }
 
         [Test]
-        public void test_ExtractPakFile2()
+        public void test_ExtractPakFile_WithoutPakInfo()
         {
             string exePath = Assembly.GetExecutingAssembly().Location;
             string exeDirectory = Path.GetDirectoryName(exePath) ?? "";
+            string outputRootPath = Path.Combine(exeDirectory, "test_ExtractPakFile_WithoutPakInfo_output");
 
-            Assert.IsTrue(NativeAPIAdapter.ExtractPakFile(_dataWithSprPakPath,
-                outputRootPath: exeDirectory));
+            // Thực hiện extract
+            Assert.IsTrue(NativeAPIAdapter.ExtractPakFile(_input_daPakPath, outputRootPath: outputRootPath));
+
+            // Kiểm tra số lượng file trong thư mục
+            string[] extractedFiles = Directory.GetFiles(outputRootPath);
+            Assert.AreEqual(3, extractedFiles.Length, "Tổng số file không đúng!");
+
+            // Kiểm tra tên các file
+            Assert.IsTrue(extractedFiles.Any(f => Path.GetFileName(f) == "extracted_block_0.bin"), "File extracted_block_0.bin không tồn tại!");
+            Assert.IsTrue(extractedFiles.Any(f => Path.GetFileName(f) == "extracted_block_1.bin"), "File extracted_block_1.bin không tồn tại!");
+            Assert.IsTrue(extractedFiles.Any(f => Path.GetFileName(f) == "extracted_block_2.spr"), "File extracted_block_2.spr không tồn tại!");
+
+            // Kiểm tra nội dung của extracted_block_0.bin
+            string contentBlock0 = File.ReadAllText(Path.Combine(outputRootPath, "extracted_block_0.bin"));
+            Assert.AreEqual("<config></config>", contentBlock0, "Nội dung của extracted_block_0.bin không đúng!");
+
+            // Kiểm tra nội dung của extracted_block_1.bin
+            string contentBlock1 = File.ReadAllText(Path.Combine(outputRootPath, "extracted_block_1.bin"));
+            Assert.AreEqual("12345", contentBlock1, "Nội dung của extracted_block_1.bin không đúng!");
         }
 
-        // Memory leak
         [Test]
         public void test_CompressPakFile()
         {
             string exePath = Assembly.GetExecutingAssembly().Location;
             string exeDirectory = Path.GetDirectoryName(exePath) ?? "";
+            string outputRootPath = Path.Combine(exeDirectory, "test_CompressPakFile_output");
 
-            var initResult = NativeAPIAdapter.CompressFolderToPakFile(_dataFolderForCompressPath,
-                outputRootPath: exeDirectory);
+            // Thực hiện nén folder vào file .pak
+            var initResult = NativeAPIAdapter.CompressFolderToPakFile(_input_dataFolderForCompressPath, outputRootPath: outputRootPath);
+
+            // Assert để kiểm tra kết quả nén
+            Assert.IsTrue(initResult, "Compress operation failed!");
+
+            // Kiểm tra số lượng file trong thư mục
+            string[] compressedFiles = Directory.GetFiles(outputRootPath);
+            Assert.AreEqual(2, compressedFiles.Length, "Tổng số file không đúng!");
+
+            // Kiểm tra tên các file
+            Assert.IsTrue(compressedFiles.Any(f => Path.GetFileName(f) == "data.pak"), "File data.pak không tồn tại!");
+            Assert.IsTrue(compressedFiles.Any(f => Path.GetFileName(f) == "data.pak.txt"), "File data.pak.txt không tồn tại!");
+            
+            string pakInfoOutput = Path.Combine(outputRootPath, "data.pak.txt");
+            var pakInfo = NativeAPIAdapter.ParsePakInfoFile(pakInfoOutput);
+            Assert.That(pakInfo.fileMap.Count, Is.EqualTo(3), "Tổng số file trong pak phải là 3!");
+            Assert.That(pakInfo.fileMap.Values.ElementAt(0).id, Is.EqualTo("95a1ffa3"));
+            Assert.That(pakInfo.fileMap.Values.ElementAt(1).id, Is.EqualTo("95ad8b72"));
+            Assert.That(pakInfo.fileMap.Values.ElementAt(2).id, Is.EqualTo("a9c272ec"));
+
+            Assert.That(pakInfo.crc, Is.EqualTo("49bc4c3a"));
         }
 
         [Test]
@@ -283,11 +329,16 @@ namespace SPRNetToolTest.Domain
             Assert.That(pakInfo.crc, Is.EqualTo("49bc4c3a"));
         }
 
-
         [Test]
-        public void test_CertUtil()
+        public void test_LoadPakToWorkManager()
         {
-            EngineKeeper.ForceCheckCallingSignature();
+            Assert.That(!NativeAPIAdapter.CloseSession("test_token"));
+            var sessionToken = NativeAPIAdapter.LoadPakFileToWorkManager(_input_daPakPath, out PakInfo pakFileInfo);
+            NativeAPIAdapter.ExtractFileFromPak(sessionToken, 0, "testExtractFileFromPak1");
+
+            var blockData = NativeAPIAdapter.ReadBlockFromPak(sessionToken, 0);
+
+            Assert.That(NativeAPIAdapter.CloseSession(sessionToken));
         }
 
         //TODO: Add unittest for MemoryManager native code

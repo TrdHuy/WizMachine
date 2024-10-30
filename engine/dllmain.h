@@ -41,14 +41,7 @@ extern "C" {
 		int paletteSize,
 		FrameData frame[]);
 
-	DLL_API void ParsePakInfoFile(const char* pakInfoPath,
-		PakInfo* pakInfo);
 
-	DLL_API void FreePakInfo(PakInfo* pakInfo);
-
-	DLL_API void ExtractPakFile(const char* pakFilePath,
-		const char* pakInfoPath,
-		const char* outputRootPath);
 
 	DLL_API void CompressFolderToPakFile(const char* folderPath,
 		const char* outputPath,
@@ -58,4 +51,13 @@ extern "C" {
 	DLL_API int		GetCertificateInfo(const char* filePath, CertInfo* certInfo);
 	DLL_API void	FreeCertInfo(CertInfo* certInfo);
 
+
+	DLL_API const char* LoadPakFileToWorkManager(const char* filePath, PakInfo* pakInfo);
+	DLL_API void FreePakInfo(PakInfo* pakInfo);
+	DLL_API void ParsePakInfoFile(const char* pakInfoPath, PakInfo* pakInfo);
+	DLL_API bool ExtractPakFile(const char* pakFilePath, const char* pakInfoPath, const char* outputRootPath);
+	DLL_API void CloseSession(const char* sessionString);
+	DLL_API bool ExtractBlockFromPakFile(const char* sessionString, int subFileIndex, const char* outputPath);
+	DLL_API bool FreeBuffer(void* buffer);
+	DLL_API unsigned char* ReadBlockFromPakFile(const char* sessionToken, int subFileIndex, size_t* subFileSize);
 }

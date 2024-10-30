@@ -18,6 +18,7 @@
 #include "file.h"
 #include "pakpart.h"
 #include "MemoryManager.h"
+#include "BigAloneFile.h"
 
 namespace fs = std::filesystem;
 
@@ -305,6 +306,25 @@ bool AddFileToPak(PACK_ITEM& currentPackItem,
 void CompressFolderToPakFileInternal(const char* inputFolderPath,
 	const char* outputFolderPath,
 	bool bExcludeOfCheckId);
+// TODO: Refactor ifstream -> BigAloneFile
+void ReadPakHeader(
+	std::unique_ptr<PakHeader>& header,
+	std::ifstream& file);
+void ReadPakHeader(
+	std::unique_ptr<PakHeader>& header,
+	BigAloneFile& file);
+std::unique_ptr<BYTE[]> ReadBlock(int block
+	, int blockCount
+	, int blockHeaderIndex
+	, std::ifstream& file
+	, int* decompressLenght
+	, std::function<bool(PakBlockHeader, XPackIndexInfo)> blockHeaderPredicate = nullptr);
+std::unique_ptr<BYTE[]> ReadBlock(int block
+	, int blockCount
+	, int blockHeaderIndex
+	, BigAloneFile& file
+	, int* decompressLenght
+	, std::function<bool(PakBlockHeader, XPackIndexInfo)> blockHeaderPredicate = nullptr);
 
 //Lowercase a string and then convert it into a hash value
 inline unsigned int g_FileNameHash(const char* pString)

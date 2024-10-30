@@ -5,6 +5,10 @@
 #include <iostream>
 #include <fstream>
 #include "MemoryManager.h"
+#include <string>
+#include <windows.h>
+#include <shlobj.h> // Dành cho SHGetKnownFolderPath
+#include <filesystem>
 
 #define SAFE_FREE(a)	if (a) {free(a); (a)=NULL;}
 
@@ -33,4 +37,9 @@ void GetLTimeFromSecond(tm* pFormatTime, unsigned int seconds);
 void GetLTimeFromMillisecond(tm* pFormatTime, unsigned long long millisec);
 
 char* Wchar_t2CharPtr(wchar_t* str);
+std::string GetTempFilePath(const std::string& fileName, bool useAppData);
+std::string intToHexString(int number);
+std::string formatTimeToString(int time);
+
+
 #endif
