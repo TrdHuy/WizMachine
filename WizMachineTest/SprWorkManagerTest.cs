@@ -1,49 +1,18 @@
 ﻿using System.Reflection;
+using System.Text;
 using WizMachine;
 using WizMachine.Data;
 using WizMachine.Services.Base;
 using WizMachine.Services.Impl;
 using WizMachine.Services.Utils;
 using WizMachineTest.Utils;
+using static FileLockManager.TestAsset;
 
 namespace SPRNetToolTest.Domain
 {
+    [TestFixture]
     internal class SprWorkManagerTest
     {
-        private const string LOG_FOLDER = "temp\\logs";
-        private FileStream logFS;
-        private StreamWriter logSW;
-
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
-        {
-            // Khởi tạo biến global A ở đây
-            var dateTimeNow = DateTime.Now.ToString("ddMMyyHHmmss");
-            var logFileName =
-                Assembly.GetCallingAssembly().GetName().Name + "_" +
-                Assembly.GetCallingAssembly().GetName().Version + "_" +
-                dateTimeNow + ".txt";
-
-            if (!Directory.Exists(LOG_FOLDER))
-            {
-                Directory.CreateDirectory(LOG_FOLDER);
-            }
-
-            var filePath = LOG_FOLDER + @"\" + logFileName;
-            logFS = new FileStream(filePath, FileMode.Append, FileAccess.Write);
-            logSW = new StreamWriter(logFS);
-            EngineKeeper.Init(logSW);
-        }
-
-        [OneTimeTearDown]
-        public void OneTimeTearDown()
-        {
-            logSW.Close();
-            logSW.Dispose();
-            logFS.Close();
-            logFS.Dispose();
-        }
-
         private class SprWorkManagerTestObject : SprWorkManagerAdvance
         {
             public long GetFrameDataBegPosCache()
@@ -58,25 +27,7 @@ namespace SPRNetToolTest.Domain
         }
 
 
-        private string _sprFilePath = "Resources\\test.spr";
-        private string _binFilePath = "Resources\\test.bin";
-        private string _pngFilePath = "Resources\\test.png";
-        private string _12345sprFilePath = "Resources\\12345.spr";
-        private string _alphaFilePath = "Resources\\alpha.spr";
-        private string _1binFilePath = "Resources\\1.bin";
-        private string _1_319x319binFilePath = "Resources\\1_319x319.bin";
-        private string _2binFilePath = "Resources\\2.bin";
-        private string _3binFilePath = "Resources\\3.bin";
-        private string _4binFilePath = "Resources\\4.bin";
-        private string _5binFilePath = "Resources\\5.bin";
-        private string _testTxtPakPath = "Resources\\testTxtFile.pak";
-        private string _testTxtPakTxtPath = "Resources\\testTxtFile.pak.txt";
-        private string _dataWithSprPakPath = "data.pak";
-        private string _dataForCompressPakPath = "Resources\\dataForCompressTest.pak";
-        private string _output_daPakTxtPath = "data.pak.txt";
-        private string _input_daPakPath = "Resources\\dataWithSpr.pak";
-        private string _input_daPakTxtPath = "Resources\\dataWithSpr.pak.txt";
-        private string _input_dataFolderForCompressPath = "Resources\\dataForCompressTest\\data";
+
         private ISprWorkManagerAdvance sprWorkManager;
         private SprWorkManagerTestObject sprWorkManagerTestObject;
 
@@ -96,7 +47,8 @@ namespace SPRNetToolTest.Domain
         [Test]
         public void test_SaveCurrentWorkToSpr()
         {
-            using (FileStream fs = new FileStream(_12345sprFilePath, FileMode.Open, FileAccess.Read))
+            FileLockManager.AcquireFiles(_12345SprFile, BinFile319x319);
+            using (FileStream fs = new FileStream(_12345SprFile.AssetPath, FileMode.Open, FileAccess.Read))
             {
                 var initResult = sprWorkManager.InitWorkManagerFromSprFile(fs);
                 Assert.That(initResult);
@@ -117,16 +69,19 @@ namespace SPRNetToolTest.Domain
                 Assert.That(initResult);
 
                 var frameData1Byte = sprWorkManagerTestObject.GetFrameDataCache()![0].originDecodedBGRAData;
-                var frameData1FromFile = TestUtil.ReadBytesFromFile(_1_319x319binFilePath);
+                var frameData1FromFile = TestUtil.ReadBytesFromFile(BinFile319x319.AssetPath);
                 Assert.That(TestUtil.AreByteArraysEqual(frameData1Byte, frameData1FromFile!));
             }
+            FileLockManager.ReleaseFiles(_12345SprFile, BinFile319x319);
         }
 
         [Test]
         public void test_SaveCurrentWorkToSpr_AlphaFile()
         {
+            FileLockManager.AcquireFiles(AlphaFile);
+
             var cacheFrameData = new byte[0];
-            using (FileStream fs = new FileStream(_alphaFilePath, FileMode.Open, FileAccess.Read))
+            using (FileStream fs = new FileStream(AlphaFile.AssetPath, FileMode.Open, FileAccess.Read))
             {
                 var initResult = sprWorkManager.InitWorkManagerFromSprFile(fs);
                 Assert.That(initResult);
@@ -149,12 +104,15 @@ namespace SPRNetToolTest.Domain
                 Assert.That(TestUtil.AreByteArraysEqual(cacheFrameData, sprWorkManagerTestObject
                     .GetFrameDataCache()![0].originDecodedBGRAData));
             }
+            FileLockManager.ReleaseFiles(AlphaFile);
         }
 
         [Test]
         public void test_SaveBitmapSourceToSprFile()
         {
-            string imagePath = _pngFilePath.FullPath();
+            FileLockManager.AcquireFiles(PngFile, BinFile);
+
+            string imagePath = PngFile.AssetPath.FullPath();
             var bmpSource = TestUtil.LoadBitmapFromFile(imagePath);
             Assert.NotNull(bmpSource);
             sprWorkManager.SaveBitmapSourceToSprFile(bmpSource, "Resources\\test_SaveBitmapSourceToSprOutput.spr");
@@ -166,54 +124,63 @@ namespace SPRNetToolTest.Domain
                 Assert.That(sprWorkManager.FileHead.GlobalHeight * sprWorkManager.FileHead.GlobalWidth == 90000);
 
                 var frameData1Byte = sprWorkManagerTestObject.GetFrameDataCache()![0].originDecodedBGRAData;
-                var frameData1FromFile = TestUtil.ReadBytesFromFile(_binFilePath);
+                var frameData1FromFile = TestUtil.ReadBytesFromFile(BinFile.AssetPath);
                 Assert.That(TestUtil.AreByteArraysEqual(frameData1Byte, frameData1FromFile!));
             }
+
+            FileLockManager.ReleaseFiles(PngFile, BinFile);
         }
 
 
         [Test]
         public void test_InitWorkManagerFromSprFile_file12345()
         {
-            var initResult = sprWorkManager.InitWorkManagerFromSprFile(_12345sprFilePath);
+            FileLockManager.AcquireFiles(_12345SprFile, BinFile1, BinFile2, BinFile3, BinFile4, BinFile5);
+
+            var initResult = sprWorkManager.InitWorkManagerFromSprFile(_12345SprFile.AssetPath);
             Assert.That(initResult);
             Assert.That(sprWorkManager.FileHead.GlobalHeight * sprWorkManager.FileHead.GlobalWidth == 90000);
 
 
             var frameData1Byte = sprWorkManagerTestObject.GetFrameDataCache()![0].originDecodedBGRAData;
-            var frameData1FromFile = TestUtil.ReadBytesFromFile(_1binFilePath);
+            var frameData1FromFile = TestUtil.ReadBytesFromFile(BinFile1.AssetPath);
             Assert.That(TestUtil.AreByteArraysEqual(frameData1Byte, frameData1FromFile!));
 
 
             var frameData2Byte = sprWorkManagerTestObject.GetFrameDataCache()![1].originDecodedBGRAData;
-            var frameData2FromFile = TestUtil.ReadBytesFromFile(_2binFilePath);
+            var frameData2FromFile = TestUtil.ReadBytesFromFile(BinFile2.AssetPath);
             Assert.That(TestUtil.AreByteArraysEqual(frameData2Byte, frameData2FromFile!));
 
 
             var frameData3Byte = sprWorkManagerTestObject.GetFrameDataCache()![2].originDecodedBGRAData;
-            var frameData3FromFile = TestUtil.ReadBytesFromFile(_3binFilePath);
+            var frameData3FromFile = TestUtil.ReadBytesFromFile(BinFile3.AssetPath);
             Assert.That(TestUtil.AreByteArraysEqual(frameData3Byte, frameData3FromFile!));
 
 
             var frameData4Byte = sprWorkManagerTestObject.GetFrameDataCache()![3].originDecodedBGRAData;
-            var frameData4FromFile = TestUtil.ReadBytesFromFile(_4binFilePath);
+            var frameData4FromFile = TestUtil.ReadBytesFromFile(BinFile4.AssetPath);
             Assert.That(TestUtil.AreByteArraysEqual(frameData4Byte, frameData4FromFile!));
 
 
             var frameData5Byte = sprWorkManagerTestObject.GetFrameDataCache()![4].originDecodedBGRAData;
-            var frameData5FromFile = TestUtil.ReadBytesFromFile(_5binFilePath);
+            var frameData5FromFile = TestUtil.ReadBytesFromFile(BinFile5.AssetPath);
             Assert.That(TestUtil.AreByteArraysEqual(frameData5Byte, frameData5FromFile!));
+            FileLockManager.ReleaseFiles(_12345SprFile, BinFile1, BinFile2, BinFile3, BinFile4, BinFile5);
         }
 
         [Test]
         public void test_InitWorkManagerFromSprFile()
         {
-            using (FileStream fs = new FileStream(_sprFilePath, FileMode.Open, FileAccess.Read))
+            FileLockManager.AcquireFiles(SprFile);
+
+            using (FileStream fs = new FileStream(SprFile.AssetPath, FileMode.Open, FileAccess.Read))
             {
                 var initResult = sprWorkManager.InitWorkManagerFromSprFile(fs);
                 Assert.That(initResult);
                 Assert.That(sprWorkManager.FileHead.GlobalHeight * sprWorkManager.FileHead.GlobalWidth == 90000);
             }
+            FileLockManager.ReleaseFiles(SprFile);
+
         }
 
 
@@ -226,12 +193,14 @@ namespace SPRNetToolTest.Domain
         [Test]
         public void test_ExtractPakFile()
         {
+            FileLockManager.AcquireFiles(InputDaPak, InputDaPakTxt, BinFile1);
+
             string exePath = Assembly.GetExecutingAssembly().Location;
             string exeDirectory = Path.GetDirectoryName(exePath) ?? "";
 
             string outputRootPath = exeDirectory + "\\test_ExtractPakFile_output";
-            Assert.IsTrue(NativeAPIAdapter.ExtractPakFile(_input_daPakPath,
-                _input_daPakTxtPath,
+            Assert.IsTrue(NativeAPIAdapter.ExtractPakFile(InputDaPak.AssetPath,
+                InputDaPakTxt.AssetPath,
                 outputRootPath: outputRootPath));
             using (FileStream fs = new FileStream($"{outputRootPath}\\data\\12345.spr", FileMode.Open, FileAccess.Read))
             {
@@ -240,7 +209,7 @@ namespace SPRNetToolTest.Domain
                 Assert.That(sprWorkManager.FileHead.GlobalHeight * sprWorkManager.FileHead.GlobalWidth == 90000);
 
                 var frameData1Byte = sprWorkManagerTestObject.GetFrameDataCache()![0].originDecodedBGRAData;
-                var frameData1FromFile = TestUtil.ReadBytesFromFile(_1binFilePath);
+                var frameData1FromFile = TestUtil.ReadBytesFromFile(BinFile1.AssetPath);
                 Assert.That(TestUtil.AreByteArraysEqual(frameData1Byte, frameData1FromFile!));
             }
 
@@ -253,17 +222,20 @@ namespace SPRNetToolTest.Domain
             string testXmlPath = Path.Combine(outputRootPath, "data", "test.xml");
             string testXmlContent = File.ReadAllText(testXmlPath);
             Assert.That(testXmlContent.Trim(), Is.EqualTo("<config></config>"), "Nội dung file test.xml không đúng.");
+            FileLockManager.ReleaseFiles(InputDaPak, InputDaPakTxt, BinFile1);
         }
 
         [Test]
         public void test_ExtractPakFile_WithoutPakInfo()
         {
+            FileLockManager.AcquireFiles(InputDaPak);
+
             string exePath = Assembly.GetExecutingAssembly().Location;
             string exeDirectory = Path.GetDirectoryName(exePath) ?? "";
             string outputRootPath = Path.Combine(exeDirectory, "test_ExtractPakFile_WithoutPakInfo_output");
 
             // Thực hiện extract
-            Assert.IsTrue(NativeAPIAdapter.ExtractPakFile(_input_daPakPath, outputRootPath: outputRootPath));
+            Assert.IsTrue(NativeAPIAdapter.ExtractPakFile(InputDaPak.AssetPath, outputRootPath: outputRootPath));
 
             // Kiểm tra số lượng file trong thư mục
             string[] extractedFiles = Directory.GetFiles(outputRootPath);
@@ -281,17 +253,20 @@ namespace SPRNetToolTest.Domain
             // Kiểm tra nội dung của extracted_block_1.bin
             string contentBlock1 = File.ReadAllText(Path.Combine(outputRootPath, "extracted_block_1.bin"));
             Assert.AreEqual("12345", contentBlock1, "Nội dung của extracted_block_1.bin không đúng!");
+            FileLockManager.ReleaseFiles(InputDaPak);
         }
 
         [Test]
         public void test_CompressPakFile()
         {
+            FileLockManager.AcquireFiles(InputDataFolderForCompress);
+
             string exePath = Assembly.GetExecutingAssembly().Location;
             string exeDirectory = Path.GetDirectoryName(exePath) ?? "";
             string outputRootPath = Path.Combine(exeDirectory, "test_CompressPakFile_output");
 
             // Thực hiện nén folder vào file .pak
-            var initResult = NativeAPIAdapter.CompressFolderToPakFile(_input_dataFolderForCompressPath, outputRootPath: outputRootPath);
+            var initResult = NativeAPIAdapter.CompressFolderToPakFile(InputDataFolderForCompress.AssetPath, outputRootPath: outputRootPath);
 
             // Assert để kiểm tra kết quả nén
             Assert.IsTrue(initResult, "Compress operation failed!");
@@ -303,7 +278,7 @@ namespace SPRNetToolTest.Domain
             // Kiểm tra tên các file
             Assert.IsTrue(compressedFiles.Any(f => Path.GetFileName(f) == "data.pak"), "File data.pak không tồn tại!");
             Assert.IsTrue(compressedFiles.Any(f => Path.GetFileName(f) == "data.pak.txt"), "File data.pak.txt không tồn tại!");
-            
+
             string pakInfoOutput = Path.Combine(outputRootPath, "data.pak.txt");
             var pakInfo = NativeAPIAdapter.ParsePakInfoFile(pakInfoOutput);
             Assert.That(pakInfo.fileMap.Count, Is.EqualTo(3), "Tổng số file trong pak phải là 3!");
@@ -312,12 +287,15 @@ namespace SPRNetToolTest.Domain
             Assert.That(pakInfo.fileMap.Values.ElementAt(2).id, Is.EqualTo("a9c272ec"));
 
             Assert.That(pakInfo.crc, Is.EqualTo("49bc4c3a"));
+            FileLockManager.ReleaseFiles(InputDataFolderForCompress);
         }
 
         [Test]
         public void test_ParsePakInfo()
         {
-            var pakInfo = NativeAPIAdapter.ParsePakInfoFile(_input_daPakTxtPath);
+            FileLockManager.AcquireFiles(InputDaPakTxt);
+
+            var pakInfo = NativeAPIAdapter.ParsePakInfoFile(InputDaPakTxt.AssetPath);
 
             Assert.That(pakInfo.fileMap.Count, Is.EqualTo(3), "Tổng số file trong pak phải là 3!");
             Assert.That(pakInfo.fileMap.Values.ElementAt(0).id, Is.EqualTo("95a1ffa3"));
@@ -327,18 +305,36 @@ namespace SPRNetToolTest.Domain
             Assert.That(pakInfo.pakTime, Is.EqualTo("2024-7-6 14:16:4"));
             Assert.That(pakInfo.pakTimeSave, Is.EqualTo("6688ef34"));
             Assert.That(pakInfo.crc, Is.EqualTo("49bc4c3a"));
+
+            FileLockManager.ReleaseFiles(InputDaPakTxt);
         }
 
         [Test]
         public void test_LoadPakToWorkManager()
         {
+            FileLockManager.AcquireFiles(InputDaPak);
+
+            string exePath = Assembly.GetExecutingAssembly().Location;
+            string exeDirectory = Path.GetDirectoryName(exePath) ?? "";
+            string outputRootPath = Path.Combine(exeDirectory, "test_LoadPakToWorkManager");
+            string extractedFilePath = outputRootPath + "\\testExtractFileFromPak1";
+
             Assert.That(!NativeAPIAdapter.CloseSession("test_token"));
-            var sessionToken = NativeAPIAdapter.LoadPakFileToWorkManager(_input_daPakPath, out PakInfo pakFileInfo);
-            NativeAPIAdapter.ExtractFileFromPak(sessionToken, 0, "testExtractFileFromPak1");
+            var sessionToken = NativeAPIAdapter.LoadPakFileToWorkManager(InputDaPak.AssetPath, out PakInfo pakFileInfo);
+            NativeAPIAdapter.ExtractFileFromPak(sessionToken, 0, extractedFilePath);
+
+            string fileContent = File.ReadAllText(extractedFilePath);
+
+            // Kiểm tra nội dung file có bằng "<config></config>"
+            Assert.AreEqual("<config></config>", fileContent);
 
             var blockData = NativeAPIAdapter.ReadBlockFromPak(sessionToken, 0);
+            string blockContent = Encoding.UTF8.GetString(blockData);
+            Assert.AreEqual("<config></config>", blockContent);
 
             Assert.That(NativeAPIAdapter.CloseSession(sessionToken));
+            FileLockManager.ReleaseFiles(InputDaPak);
+
         }
 
         //TODO: Add unittest for MemoryManager native code

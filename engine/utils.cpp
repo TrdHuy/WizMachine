@@ -129,7 +129,22 @@ std::string formatTimeToString(int time) {
 void MakeDirFromFilePathIfNotExisted(const std::string& filePath) {
 	std::filesystem::path outputDir = std::filesystem::path(filePath).parent_path();
 
-	if (!std::filesystem::exists(outputDir)) {
-		std::filesystem::create_directories(outputDir);
+	// Nếu outputDir là chuỗi rỗng, thay thế bằng thư mục hiện tại (".")
+	if (outputDir.empty())
+	{
+		outputDir = std::filesystem::current_path();
+	}
+
+	// Nếu thư mục không tồn tại, tạo thư mục
+	if (!std::filesystem::exists(outputDir))
+	{
+		try
+		{
+			std::filesystem::create_directories(outputDir);
+		}
+		catch (const std::filesystem::filesystem_error& e)
+		{
+			Log::E("Error creating directories: ", e.what());
+		}
 	}
 }

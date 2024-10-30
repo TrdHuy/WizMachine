@@ -13,10 +13,13 @@ namespace WizMachine.Utils
 
         static Logger()
         {
-            _logWriter = EngineKeeper.LogWriter ?? throw new Exception("Engine was not inited");
-
             AppDomain.CurrentDomain.UnhandledException -= CurrentDomain_UnhandledException;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+        }
+
+        public static void Init(StreamWriter streamWriter)
+        {
+            _logWriter = streamWriter;
         }
 
         public Logger(string tag)
