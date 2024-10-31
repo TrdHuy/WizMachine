@@ -76,6 +76,26 @@ void LoadSPRFile(const char* filePath,
 		frameCount);
 }
 
+void LoadSPRMemory(
+	const uint8_t* data,           // Mảng byte chứa dữ liệu SPR
+	size_t dataLength,             // Độ dài của mảng byte
+	SPRFileHead* fileHead,         // Con trỏ đến cấu trúc SPRFileHead để lưu thông tin
+	Color** palette,               // Con trỏ đến bảng màu sẽ được khởi tạo và lưu trữ
+	int* paletteLength,            // Con trỏ đến độ dài bảng màu
+	int* frameDataBeginPos,        // Con trỏ đến vị trí bắt đầu dữ liệu frame
+	FrameData** frame,             // Con trỏ đến mảng chứa dữ liệu frame sẽ được khởi tạo
+	int* frameCount                // Con trỏ đến số lượng khung hình
+) {
+	LoadSPRMemoryInternal(data,
+		dataLength,
+		fileHead,
+		palette,
+		paletteLength,
+		frameDataBeginPos,
+		frame,
+		frameCount);
+}
+
 void FreeSPRMemory(
 	Color* palette,
 	FrameData* frameData, int frameCount) {
@@ -195,7 +215,7 @@ bool FreeBuffer(void* buffer) {
 }
 
 unsigned char* ReadBlockFromPakFile(const char* sessionToken, int subFileIndex, size_t* subFileSize) {
-	unsigned char* buffer = nullptr; 
+	unsigned char* buffer = nullptr;
 	PakWorkManager* manager = PakWorkManager::GetInstance();
 	manager->ReadSubFileData(sessionToken, subFileIndex, buffer, subFileSize);
 	return buffer;

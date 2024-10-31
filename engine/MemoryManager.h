@@ -151,7 +151,6 @@ public:
 
 	// Lấy instance của singleton
 	static MemoryManager* getInstance();
-
 	// Giải phóng toàn bộ bộ nhớ quản lý
 	void deallocateAll();
 

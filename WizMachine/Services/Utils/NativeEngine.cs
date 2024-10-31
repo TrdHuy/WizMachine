@@ -63,7 +63,20 @@ namespace WizMachine.Services.Utils
                 int paletteSize,
                 NFrameData[] frame);
 
-
+            /// <summary>
+            /// Tải dữ liệu SPR (sprite) từ một file và khởi tạo thông tin metadata cùng dữ liệu khung hình liên quan.
+            /// </summary>
+            /// <param name="filePath">Đường dẫn tới file chứa dữ liệu SPR cần tải.</param>
+            /// <param name="fileHead">Tham chiếu đến cấu trúc <see cref="NSPRFileHead"/> để lưu thông tin tiêu đề của file SPR.</param>
+            /// <param name="palette">Con trỏ đầu ra tới mảng bảng màu, được cấp phát dựa trên dữ liệu trong file SPR.</param>
+            /// <param name="paletteLength">Giá trị đầu ra cho biết số lượng màu trong mảng bảng màu.</param>
+            /// <param name="frameDataBeginPos">Giá trị đầu ra cho biết vị trí bắt đầu của dữ liệu khung hình trong file SPR.</param>
+            /// <param name="frame">Con trỏ đầu ra tới mảng <see cref="FrameData"/> đại diện cho dữ liệu của từng khung hình.</param>
+            /// <param name="frameCount">Giá trị đầu ra chỉ định số lượng khung hình trong dữ liệu SPR.</param>
+            /// <remarks>
+            /// Hàm này đọc dữ liệu từ file SPR trên ổ đĩa, cấp phát bộ nhớ cho bảng màu và dữ liệu khung hình tương ứng.
+            /// Đảm bảo giải phóng bộ nhớ đã cấp phát cho <paramref name="palette"/> và <paramref name="frame"/> sau khi sử dụng để tránh rò rỉ bộ nhớ.
+            /// </remarks>
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
             public static extern void LoadSPRFile(string filePath,
                 ref NSPRFileHead fileHead,
@@ -73,6 +86,32 @@ namespace WizMachine.Services.Utils
                 out IntPtr frame,
                 out int frameCount);
 
+            /// <summary>
+            /// Tải dữ liệu SPR (sprite) từ bộ nhớ và khởi tạo thông tin metadata cùng dữ liệu khung hình liên quan.
+            /// </summary>
+            /// <param name="data">Mảng byte chứa dữ liệu thô của SPR.</param>
+            /// <param name="dataLength">Độ dài của mảng byte dữ liệu SPR.</param>
+            /// <param name="fileHead">Tham chiếu đến cấu trúc <see cref="NSPRFileHead"/> để lưu thông tin tiêu đề của file SPR.</param>
+            /// <param name="palette">Con trỏ đầu ra tới mảng bảng màu, được cấp phát dựa trên dữ liệu SPR.</param>
+            /// <param name="paletteLength">Giá trị đầu ra cho biết số lượng màu trong mảng bảng màu.</param>
+            /// <param name="frameDataBeginPos">Giá trị đầu ra cho biết vị trí bắt đầu của dữ liệu khung hình trong dữ liệu SPR.</param>
+            /// <param name="frame">Con trỏ đầu ra tới mảng <see cref="FrameData"/> đại diện cho dữ liệu của từng khung hình.</param>
+            /// <param name="frameCount">Giá trị đầu ra chỉ định số lượng khung hình trong dữ liệu SPR.</param>
+            /// <remarks>
+            /// Hàm này giao tiếp trực tiếp với dữ liệu SPR ở cấp độ hệ thống, và cấp phát bộ nhớ cho bảng màu và dữ liệu khung hình.
+            /// Đảm bảo giải phóng bộ nhớ đã cấp phát cho <paramref name="palette"/> và <paramref name="frame"/> sau khi sử dụng để tránh rò rỉ bộ nhớ.
+            /// </remarks>
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
+            public static extern void LoadSPRMemory(
+                byte[] data,
+                int dataLength,
+                ref NSPRFileHead fileHead,
+                out IntPtr palette,
+                out int paletteLength,
+                out int frameDataBeginPos,
+                out IntPtr frame,
+                out int frameCount
+            );
 
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
             public static extern void FreeSPRMemory(
@@ -103,7 +142,6 @@ namespace WizMachine.Services.Utils
                 public IntPtr pakTime;
                 public IntPtr pakTimeSave;
                 public IntPtr crc;
-
                 public IntPtr files;  // Con trỏ đến mảng CompressedFileInfo
                 public int fileCount;
             }
@@ -348,6 +386,52 @@ namespace WizMachine.Services.Utils
 
 
             NativeEngine.LoadSPRFile(filePath,
+                ref nFileHead,
+                out palettePtr,
+                out nativePaletteLength,
+                out frameDataBeginPos,
+                out framePtr,
+                out frameCount);
+
+            NativeEngine.NColor[] nPalette = new NativeEngine.NColor[nativePaletteLength];
+            int structSize = Marshal.SizeOf(typeof(NativeEngine.NColor));
+            for (int i = 0; i < nativePaletteLength; i++)
+            {
+                IntPtr colorPtr = IntPtr.Add(palettePtr, i * structSize);
+                nPalette[i] = Marshal.PtrToStructure<NativeEngine.NColor>(colorPtr);
+            }
+            palette = ConvertNativeColorPaletteToAppData(nPalette, nativePaletteLength);
+            sprFileHead = ConvertNativeSprFileHeadToAppData(nFileHead);
+
+            NativeEngine.NFrameData[] nFrameData = new NativeEngine.NFrameData[frameCount];
+            structSize = Marshal.SizeOf(typeof(NativeEngine.NFrameData));
+            frameRGBA = new FrameRGBA[frameCount];
+            for (int i = 0; i < frameCount; i++)
+            {
+                IntPtr framDataPtr = IntPtr.Add(framePtr, i * structSize);
+                nFrameData[i] = Marshal.PtrToStructure<NativeEngine.NFrameData>(framDataPtr);
+                frameRGBA[i] = ConvertFrameDataToAppData(nFrameData[i]);
+            }
+
+
+            NativeEngine.FreeSPRMemory(palettePtr, framePtr, frameCount);
+
+            return true;
+        }
+
+        public static bool LoadSPRFromMemory(byte[] sprData,
+            out SprFileHead sprFileHead,
+            out Palette palette,
+            out int frameDataBeginPos,
+            out FrameRGBA[] frameRGBA)
+        {
+            var nFileHead = new NativeEngine.NSPRFileHead();
+            IntPtr palettePtr, framePtr;
+            int nativePaletteLength, frameCount;
+
+
+            NativeEngine.LoadSPRMemory(sprData,
+                sprData.Length,
                 ref nFileHead,
                 out palettePtr,
                 out nativePaletteLength,
