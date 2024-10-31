@@ -447,5 +447,5 @@ void CompressFolderToPakFileInternal(const char* inputFolderPath, const char* ou
 	SAFE_FREE(currentPakItem.pIndexList);
 	filePartner.Clear();
 
-	std::cout << "Hoàn thành việc ghi danh sách file vào " << outputFileName << std::endl;
+	Log::I("Hoàn thành việc ghi danh sách file vào ", outputFileName);
 }

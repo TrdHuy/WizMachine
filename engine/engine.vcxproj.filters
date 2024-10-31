@@ -122,4 +122,9 @@
       <Filter>Source Files\Common</Filter>
     </CustomBuild>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="crc64 explain">
+      <Filter>Source Files\Common</Filter>
+    </None>
+  </ItemGroup>
 </Project>

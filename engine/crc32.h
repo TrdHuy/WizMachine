@@ -1,8 +1,8 @@
-
+﻿
 #ifndef __ENGINE_CRC32_H__
 #define __ENGINE_CRC32_H__
 // most CRC first value is 0
-
+#include "LogUtil.h"
 typedef unsigned int CRC_UINT32;
 typedef unsigned char  CRC_BYTE;
 
@@ -62,7 +62,22 @@ static const CRC_UINT32 CRC_Table[256] = {
 };
 
 #ifdef x64
-extern "C" int compute_crc32(unsigned CRC, const void* pvBuf, unsigned nLen);  // Khai b�o h�m assembly
+extern "C" int compute_crc32(unsigned CRC, const void* pvBuf, unsigned nLen);  // Khai báo hàm assembly
+
+extern "C" __declspec(dllexport) inline unsigned int compute_crc32_cpp(unsigned CRC, const void* pvBuf, unsigned nLen) {
+	const uint8_t* data = static_cast<const uint8_t*>(pvBuf);  // Cast buffer về uint8_t*
+	CRC = ~CRC;  // Khởi tạo CRC với giá trị đảo bit.
+
+	// Xử lý từng byte trong buffer.
+	for (unsigned i = 0; i < nLen; ++i) {
+		uint8_t byte = data[i];
+		uint8_t tableIndex = (CRC ^ byte) & 0xFF;  // Lấy chỉ số bảng tra cứu.
+		CRC = (CRC >> 8) ^ CRC_Table[tableIndex]; // Cập nhật CRC.
+	}
+
+	return ~CRC;  // Đảo lại kết quả để hoàn thành CRC32.
+}
+
 #endif
 
 extern "C" __declspec(dllexport) inline unsigned int Misc_CRC32(unsigned CRC, const void* pvBuf, unsigned nLen) {
@@ -182,7 +197,16 @@ extern "C" __declspec(dllexport) inline unsigned int Misc_CRC32(unsigned CRC, co
 #endif
 
 #ifdef x64
-	return compute_crc32(CRC, pvBuf, nLen);
+	try {
+		return compute_crc32_cpp(CRC, pvBuf, nLen);
+	}
+	catch (const std::exception& e) {
+		Log::E("Misc_CRC32 ", e.what());
+	}
+	catch (...) {
+		Log::E("Failed to get Misc_CRC32");
+	}
+	return 0;
 #endif
 
 	return 0;
