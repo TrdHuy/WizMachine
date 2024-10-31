@@ -1,0 +1,230 @@
+; File: CRC64.asm
+.data
+CRC_Table32 dd 000000000h, 077073096h, 0ee0e612ch, 0990951bah, 0076dc419h
+dd 0706af48fh, 0e963a535h, 09e6495a3h, 00edb8832h, 079dcb8a4h
+dd 0e0d5e91eh, 097d2d988h, 009b64c2bh, 07eb17cbdh, 0e7b82d07h
+dd 090bf1d91h, 01db71064h, 06ab020f2h, 0f3b97148h, 084be41deh
+dd 01adad47dh, 06ddde4ebh, 0f4d4b551h, 083d385c7h, 0136c9856h
+dd 0646ba8c0h, 0fd62f97ah, 08a65c9ech, 014015c4fh, 063066cd9h
+dd 0fa0f3d63h, 08d080df5h, 03b6e20c8h, 04c69105eh, 0d56041e4h
+dd 0a2677172h, 03c03e4d1h, 04b04d447h, 0d20d85fdh, 0a50ab56bh
+dd 035b5a8fah, 042b2986ch, 0dbbbc9d6h, 0acbcf940h, 032d86ce3h
+dd 045df5c75h, 0dcd60dcfh, 0abd13d59h, 026d930ach, 051de003ah
+dd 0c8d75180h, 0bfd06116h, 021b4f4b5h, 056b3c423h, 0cfba9599h
+dd 0b8bda50fh, 02802b89eh, 05f058808h, 0c60cd9b2h, 0b10be924h
+dd 02f6f7c87h, 058684c11h, 0c1611dabh, 0b6662d3dh, 076dc4190h
+dd 001db7106h, 098d220bch, 0efd5102ah, 071b18589h, 006b6b51fh
+dd 09fbfe4a5h, 0e8b8d433h, 07807c9a2h, 00f00f934h, 09609a88eh
+dd 0e10e9818h, 07f6a0dbbh, 0086d3d2dh, 091646c97h, 0e6635c01h
+dd 06b6b51f4h, 01c6c6162h, 0856530d8h, 0f262004eh, 06c0695edh
+dd 01b01a57bh, 08208f4c1h, 0f50fc457h, 065b0d9c6h, 012b7e950h
+dd 08bbeb8eah, 0fcb9887ch, 062dd1ddfh, 015da2d49h, 08cd37cf3h
+dd 0fbd44c65h, 04db26158h, 03ab551ceh, 0a3bc0074h, 0d4bb30e2h
+dd 04adfa541h, 03dd895d7h, 0a4d1c46dh, 0d3d6f4fbh, 04369e96ah
+dd 0346ed9fch, 0ad678846h, 0da60b8d0h, 044042d73h, 033031de5h
+dd 0aa0a4c5fh, 0dd0d7cc9h, 05005713ch, 0270241aah, 0be0b1010h
+dd 0c90c2086h, 05768b525h, 0206f85b3h, 0b966d409h, 0ce61e49fh
+dd 05edef90eh, 029d9c998h, 0b0d09822h, 0c7d7a8b4h, 059b33d17h
+dd 02eb40d81h, 0b7bd5c3bh, 0c0ba6cadh, 0edb88320h, 09abfb3b6h
+dd 003b6e20ch, 074b1d29ah, 0ead54739h, 09dd277afh, 004db2615h
+dd 073dc1683h, 0e3630b12h, 094643b84h, 00d6d6a3eh, 07a6a5aa8h
+dd 0e40ecf0bh, 09309ff9dh, 00a00ae27h, 07d079eb1h, 0f00f9344h
+dd 08708a3d2h, 01e01f268h, 06906c2feh, 0f762575dh, 0806567cbh
+dd 0196c3671h, 06e6b06e7h, 0fed41b76h, 089d32be0h, 010da7a5ah
+dd 067dd4acch, 0f9b9df6fh, 08ebeeff9h, 017b7be43h, 060b08ed5h
+dd 0d6d6a3e8h, 0a1d1937eh, 038d8c2c4h, 04fdff252h, 0d1bb67f1h
+dd 0a6bc5767h, 03fb506ddh, 048b2364bh, 0d80d2bdah, 0af0a1b4ch
+dd 036034af6h, 041047a60h, 0df60efc3h, 0a867df55h, 0316e8eefh
+dd 04669be79h, 0cb61b38ch, 0bc66831ah, 0256fd2a0h, 05268e236h
+dd 0cc0c7795h, 0bb0b4703h, 0220216b9h, 05505262fh, 0c5ba3bbeh
+dd 0b2bd0b28h, 02bb45a92h, 05cb36a04h, 0c2d7ffa7h, 0b5d0cf31h
+dd 02cd99e8bh, 05bdeae1dh, 09b64c2b0h, 0ec63f226h, 0756aa39ch
+dd 0026d930ah, 09c0906a9h, 0eb0e363fh, 072076785h, 005005713h
+dd 095bf4a82h, 0e2b87a14h, 07bb12baeh, 00cb61b38h, 092d28e9bh
+dd 0e5d5be0dh, 07cdcefb7h, 00bdbdf21h, 086d3d2d4h, 0f1d4e242h
+dd 068ddb3f8h, 01fda836eh, 081be16cdh, 0f6b9265bh, 06fb077e1h
+dd 018b74777h, 088085ae6h, 0ff0f6a70h, 066063bcah, 011010b5ch
+dd 08f659effh, 0f862ae69h, 0616bffd3h, 0166ccf45h, 0a00ae278h
+dd 0d70dd2eeh, 04e048354h, 03903b3c2h, 0a7672661h, 0d06016f7h
+dd 04969474dh, 03e6e77dbh, 0aed16a4ah, 0d9d65adch, 040df0b66h
+dd 037d83bf0h, 0a9bcae53h, 0debb9ec5h, 047b2cf7fh, 030b5ffe9h
+dd 0bdbdf21ch, 0cabac28ah, 053b39330h, 024b4a3a6h, 0bad03605h
+dd 0cdd70693h, 054de5729h, 023d967bfh, 0b3667a2eh, 0c4614ab8h
+dd 05d681b02h, 02a6f2b94h, 0b40bbe37h, 0c30c8ea1h, 05a05df1bh
+dd 02d02ef8dh
+
+
+.code
+compute_crc32 proc
+    push rdx            ; L?u tham s? pvBuf ???c truy?n vào
+    push rcx            ; L?u tham s? CRC ???c truy?n vào
+    push r8             ; L?u tham s? nLen ???c truy?n vào
+
+    push r15            ; L?u các thanh ghi callee-saved
+    mov r15, rsp        ; L?u ??a ch? hi?n t?i c?a stack vào r15
+    push rbp            ; L?u rbp
+    push rbx            ; L?u rbx
+    push r12            ; L?u r12
+    push r13            ; L?u r13
+    push r14            ; L?u r14
+
+    lea r14, [CRC_Table32]   ; L?u ??a ch? c?a b?ng CRC vào r14
+    mov rsi, [r15 + 24]      ; Gán rsi b?ng pvBuf (con tr? d? li?u ??u vào)
+    mov rcx, [r15 + 8]       ; Gán rcx b?ng nLen (?? dài d? li?u)
+    mov rax, [r15 + 16]      ; Gán rax b?ng CRC (giá tr? CRC ban ??u)
+    shr ecx, 3               ; Chia ecx cho 8 ?? tính s? l??ng 8 byte c?n x? lý
+    xor eax, 0ffffffffh      ; ??o ng??c các bit trong rax (giá tr? CRC)
+
+    test ecx, ecx            ; Ki?m tra n?u ecx = 0 (n?u nLen nh? h?n 8 byte)
+    jz CRC_Last7Bytes        ; N?u ecx = 0, nh?y ??n CRC_Last7Bytes ?? x? lý ph?n còn l?i
+
+    mov ebp, ecx             ; L?u s? l??ng kh?i c?n x? lý vào ebp
+
+    xor edx, edx             ; Xóa edx (s? l?u ch? m?c ??u tiên c?a b?ng CRC)
+    xor ecx, ecx             ; Xóa ecx (s? l?u ch? m?c th? hai c?a b?ng CRC)
+
+    align 8                  ; Canh ch?nh b? nh? ?? t?ng hi?u n?ng
+
+CRC_Loop1:
+    mov ebx, [rsi]           ; ??c 4 byte t? pvBuf
+    add rsi, 4               ; Di chuy?n con tr? pvBuf t?i 4 byte ti?p theo
+
+    mov dl, bl               ; ??t ch? m?c ??u tiên b?ng byte ??u tiên trong ebx
+    mov cl, bh               ; ??t ch? m?c th? hai b?ng byte th? hai trong ebx
+    xor dl, al               ; XOR ch? m?c ??u tiên v?i byte th?p nh?t c?a rax
+    shr eax, 8               ; D?ch rax sang ph?i 8 bit
+    mov edi, [r14 + rdx * 4] ; L?y giá tr? t? b?ng CRC theo ch? m?c ??u tiên
+    shr ebx, 16              ; D?ch ebx sang ph?i 16 bit (l?y 2 byte ti?p theo)
+    xor eax, edi             ; XOR rax v?i giá tr? v?a l?y t? b?ng CRC
+
+    xor cl, al               ; XOR ch? m?c th? hai v?i byte th?p nh?t c?a rax
+    shr eax, 8               ; D?ch rax sang ph?i 8 bit
+    mov edi, [r14 + rcx * 4] ; L?y giá tr? t? b?ng CRC theo ch? m?c th? hai
+    mov dl, bl               ; ??t ch? m?c ??u tiên b?ng byte th? ba trong ebx
+    xor eax, edi             ; XOR rax v?i giá tr? v?a l?y t? b?ng CRC
+
+    xor dl, al               ; XOR ch? m?c ??u tiên v?i byte th?p nh?t c?a rax
+    shr eax, 8               ; D?ch rax sang ph?i 8 bit
+    mov edi, [r14 + rdx * 4] ; L?y giá tr? t? b?ng CRC theo ch? m?c ??u tiên
+    mov cl, bh               ; ??t ch? m?c th? hai b?ng byte th? t? trong ebx
+    xor eax, edi             ; XOR rax v?i giá tr? v?a l?y t? b?ng CRC
+
+    mov ebx, [rsi]           ; ??c 4 byte ti?p theo t? pvBuf
+    xor cl, al               ; XOR ch? m?c th? hai v?i byte th?p nh?t c?a rax
+    shr eax, 8               ; D?ch rax sang ph?i 8 bit
+    mov edi, [r14 + rcx * 4] ; L?y giá tr? t? b?ng CRC theo ch? m?c th? hai
+    add rsi, 4               ; Di chuy?n con tr? pvBuf t?i 4 byte ti?p theo
+    xor eax, edi             ; XOR rax v?i giá tr? v?a l?y t? b?ng CRC
+
+    mov dl, bl               ; ??t ch? m?c ??u tiên b?ng byte ??u tiên trong ebx
+    mov cl, bh               ; ??t ch? m?c th? hai b?ng byte th? hai trong ebx
+    xor dl, al               ; XOR ch? m?c ??u tiên v?i byte th?p nh?t c?a rax
+    shr eax, 8               ; D?ch rax sang ph?i 8 bit
+    mov edi, [r14 + rdx * 4] ; L?y giá tr? t? b?ng CRC theo ch? m?c ??u tiên
+    shr ebx, 16              ; D?ch ebx sang ph?i 16 bit
+    xor eax, edi             ; XOR rax v?i giá tr? v?a l?y t? b?ng CRC
+
+    xor cl, al               ; XOR ch? m?c th? hai v?i byte th?p nh?t c?a rax
+    shr eax, 8               ; D?ch rax sang ph?i 8 bit
+    mov edi, [r14 + rcx * 4] ; L?y giá tr? t? b?ng CRC theo ch? m?c th? hai
+    mov dl, bl               ; ??t ch? m?c ??u tiên b?ng byte th? ba trong ebx
+    xor eax, edi             ; XOR rax v?i giá tr? v?a l?y t? b?ng CRC
+
+    xor dl, al               ; XOR ch? m?c ??u tiên v?i byte th?p nh?t c?a rax
+    shr eax, 8               ; D?ch rax sang ph?i 8 bit
+    mov edi, [r14 + rdx * 4] ; L?y giá tr? t? b?ng CRC theo ch? m?c ??u tiên
+    mov cl, bh               ; ??t ch? m?c th? hai b?ng byte th? t? trong ebx
+    xor eax, edi             ; XOR rax v?i giá tr? v?a l?y t? b?ng CRC
+
+    xor cl, al               ; XOR ch? m?c th? hai v?i byte th?p nh?t c?a rax
+    shr eax, 8               ; D?ch rax sang ph?i 8 bit
+    xor eax, [r14 + rcx * 4] ; XOR rax v?i giá tr? t? b?ng CRC theo ch? m?c th? hai
+
+    dec ebp                  ; Gi?m s? kh?i c?n x? lý
+    jnz CRC_Loop1            ; N?u còn kh?i c?n x? lý, quay l?i CRC_Loop1
+
+CRC_Last7Bytes:
+    mov rcx, [r15 + 8]       ; ??t rcx b?ng nLen
+    xor edx, edx             ; Xóa edx
+    and ecx, 07h             ; L?y s? byte còn l?i (nLen mod 8)
+    jz CRC_Exit              ; N?u không còn byte nào, nh?y ??n CRC_Exit
+
+CRC_Loop2:
+    mov dl, [rsi]            ; ??c 1 byte t? pvBuf
+    inc rsi                  ; Di chuy?n con tr? pvBuf t?i byte ti?p theo
+    xor dl, al               ; XOR ch? m?c v?i byte th?p nh?t c?a rax
+    shr eax, 8               ; D?ch rax sang ph?i 8 bit
+    xor eax, [r14 + rdx * 4] ; XOR rax v?i giá tr? t? b?ng CRC theo ch? m?c
+
+    dec ecx                  ; Gi?m s? byte c?n x? lý
+    jnz CRC_Loop2            ; N?u còn byte c?n x? lý, quay l?i CRC_Loop2
+
+CRC_Exit:
+    xor eax, 0ffffffffh      ; ??o ng??c các bit trong rax
+
+    pop r14                  ; Khôi ph?c giá tr? cho thanh ghi callee-saved
+    pop r13                  ; Khôi ph?c r13
+    pop r12                  ; Khôi ph?c r12
+    pop rbx                  ; Khôi ph?c rbx
+    pop rbp                  ; Khôi ph?c rbp
+    pop r15                  ; Khôi ph?c r15
+
+    pop r8                   ; Khôi ph?c r8
+    pop rcx                  ; Khôi ph?c rcx
+	pop rdx
+    ret                   
+compute_crc32 endp
+
+end
+
+
+
+
+===================
+Trong x86 và x86-64 assembly, các thanh ghi có th? ???c chia thành các c?p b?c ?? truy c?p m?t ph?n c?a thanh ghi l?n h?n. C?u trúc c?a các thanh ghi 64-bit (nh? RAX, RBX, RCX, ...) bao g?m các thành ph?n có kích th??c nh? h?n:
+
+64-bit: Các thanh ghi 64-bit, nh? RAX, RBX, RCX, … ch? có trên h? th?ng 64-bit.
+
+32-bit: Ph?n th?p c?a các thanh ghi 64-bit là các thanh ghi 32-bit (ví d? EAX, EBX, ECX, …).
+
+16-bit: Ph?n th?p c?a các thanh ghi 32-bit là các thanh ghi 16-bit (ví d? AX, BX, CX, …).
+
+8-bit: Ph?n th?p c?a các thanh ghi 16-bit ???c chia thành 8-bit cao và 8-bit th?p:
+
+8-bit th?p: Thanh ghi 8-bit th?p c?a 16-bit, ví d? AL, BL, CL, DL.
+
+8-bit cao: Thanh ghi 8-bit cao c?a 16-bit, ví d? AH, BH, CH, DH.
+
+
+
+Chi ti?t thanh ghi RDX và các c?p b?c:
+
+RDX: Thanh ghi 64-bit.
+
+EDX: Ph?n 32-bit th?p c?a RDX.
+
+DX: Ph?n 16-bit th?p c?a EDX.
+
+DH: Ph?n 8-bit cao c?a DX.
+
+DL: Ph?n 8-bit th?p c?a DX.
+
+
+Ví d? v? cách truy c?p các c?p b?c c?a RDX:
+
+N?u b?n có giá tr? 0x123456789ABCDEF0 trong RDX:
+
+EDX s? ch?a 0x9ABCDEF0.
+
+DX s? ch?a 0xDEF0.
+
+DH s? ch?a 0xDE.
+
+DL s? ch?a 0xF0.
+
+
+S? d?ng trong mã assembly:
+
+DL và DH th??ng ???c dùng khi ch? c?n thao tác trên các byte riêng l? trong ph?n 8-bit c?a DX.
+
+
