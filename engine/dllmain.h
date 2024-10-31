@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <comdef.h>
 #include <iostream>
@@ -22,7 +22,7 @@ extern "C" {
 		int* frameDataBeginPos,
 		FrameData** frame,
 		int* frameCount);*/
-
+	
 	DLL_API void LoadSPRFile(const char* filePath,
 		SPRFileHead* fileHead,
 		Color** palette,
@@ -30,6 +30,16 @@ extern "C" {
 		int* frameDataBeginPos,
 		FrameData** frameData,
 		int* frameCount);
+	DLL_API void LoadSPRMemory(
+		const uint8_t* data,           // Mảng byte chứa dữ liệu SPR
+		size_t dataLength,             // Độ dài của mảng byte
+		SPRFileHead* fileHead,         // Con trỏ đến cấu trúc SPRFileHead để lưu thông tin
+		Color** palette,               // Con trỏ đến bảng màu sẽ được khởi tạo và lưu trữ
+		int* paletteLength,            // Con trỏ đến độ dài bảng màu
+		int* frameDataBeginPos,        // Con trỏ đến vị trí bắt đầu dữ liệu frame
+		FrameData** frame,             // Con trỏ đến mảng chứa dữ liệu frame sẽ được khởi tạo
+		int* frameCount                // Con trỏ đến số lượng khung hình
+	);
 
 	DLL_API void FreeSPRMemory(
 		Color* palette,

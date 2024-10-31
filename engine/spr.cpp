@@ -131,86 +131,83 @@ void ExportToSPRFileInternal(const char* filePath,
 	}
 }
 
-void LoadSPRFileInternal(const char* filePath,
-	SPRFileHead* fileHead,
-	Color** palette,
-	int* paletteLength,
-	int* frameDataBeginPos,
-	FrameData** frame,
-	int* frameCount)
-{
-	Log::I("SPR", "Start LoadSPRFileInternal");
-	std::ifstream file(filePath, std::ios::binary);
-	if (!file.is_open()) {
-		std::cerr << "Failed to open file." << std::endl;
-		palette = nullptr;
+void LoadSPRMemoryInternal(
+	const uint8_t* data,           // Mảng byte chứa dữ liệu SPR
+	size_t dataLength,             // Độ dài của mảng byte
+	SPRFileHead* fileHead,         // Con trỏ đến cấu trúc SPRFileHead để lưu thông tin
+	Color** palette,               // Con trỏ đến bảng màu sẽ được khởi tạo và lưu trữ
+	int* paletteLength,            // Con trỏ đến độ dài bảng màu
+	int* frameDataBeginPos,        // Con trỏ đến vị trí bắt đầu dữ liệu frame
+	FrameData** frame,             // Con trỏ đến mảng chứa dữ liệu frame sẽ được khởi tạo
+	int* frameCount                // Con trỏ đến số lượng khung hình
+) {
+	Log::I("SPR", "Start LoadSPRMemoryInternal");
+
+	// Kiểm tra dữ liệu truyền vào để đảm bảo không có giá trị null
+	if (!data || !palette || !paletteLength || !frameDataBeginPos || !frame || !frameCount) {
+		Log::E("Invalid arguments passed to LoadSPRMemoryInternal.");
 		return;
 	}
 
-	file.read(reinterpret_cast<char*>(fileHead), sizeof(SPRFileHead));
+	// Đọc thông tin file header từ bộ nhớ
+	std::memcpy(fileHead, data, sizeof(SPRFileHead));
 
-	// CoTaskMemAlloc Là hàm của COM API trong Windows, 
-	// chủ yếu được sử dụng trong các ngữ cảnh COM hoặc khi bạn 
-	// cần tương tác với các hàm cấp phát bộ nhớ tương thích với hệ thống COM.
-	//*palette = (Color*)::CoTaskMemAlloc(sizeof(Color) * fileHead->ColorCounts);
-	//*palette = new Color[fileHead->ColorCounts];
+	// Khởi tạo bảng màu
 	*palette = MemoryManager::getInstance()->allocateArray<Color>(fileHead->ColorCounts);
-	::memset(*palette, 0, sizeof(Color) * fileHead->ColorCounts);
+	std::memset(*palette, 0, sizeof(Color) * fileHead->ColorCounts);
+	size_t paletteOffset = sizeof(SPRFileHead);
 	for (int i = 0; i < fileHead->ColorCounts; i++) {
-		(*palette)[i].R = file.get();
-		(*palette)[i].G = file.get();
-		(*palette)[i].B = file.get();
+		(*palette)[i].R = data[paletteOffset + i * 3];
+		(*palette)[i].G = data[paletteOffset + i * 3 + 1];
+		(*palette)[i].B = data[paletteOffset + i * 3 + 2];
 	}
 	*paletteLength = fileHead->ColorCounts;
-	*frameDataBeginPos = sizeof(SPRFileHead) + fileHead->ColorCounts * sizeof(Color);
+	*frameDataBeginPos = paletteOffset + fileHead->ColorCounts * sizeof(Color);
 
-	//*frame = (FrameData*)::CoTaskMemAlloc(sizeof(FrameData) * fileHead->FrameCounts);
+	// Khởi tạo và đọc dữ liệu frame
 	*frame = MemoryManager::getInstance()->allocateArray<FrameData>(fileHead->FrameCounts);
 	*frameCount = fileHead->FrameCounts;
 	for (int frameIndex = 0; frameIndex < fileHead->FrameCounts; frameIndex++) {
-		// Frame offset
-		file.seekg(*frameDataBeginPos + sizeof(FrameOffsetInfo) * frameIndex, std::ios::beg);
-		FrameOffsetInfo* offsetInfo = MemoryManager::getInstance()->allocate<FrameOffsetInfo>();
-		file.read(reinterpret_cast<char*>(offsetInfo), sizeof(FrameOffsetInfo));
+		// Đọc thông tin offset cho từng frame
+		FrameOffsetInfo offsetInfo;
+		size_t offsetPos = *frameDataBeginPos + sizeof(FrameOffsetInfo) * frameIndex;
+		std::memcpy(&offsetInfo, data + offsetPos, sizeof(FrameOffsetInfo));
 
 		unsigned int frameBeginPos = *frameDataBeginPos +
 			sizeof(FrameOffsetInfo) * fileHead->FrameCounts +
-			offsetInfo->FrameOffset;
-		unsigned int dataLength = offsetInfo->DataLength;
-		(*frame)[frameIndex].EncryptedFrameDataOffset = offsetInfo->FrameOffset;
-		(*frame)[frameIndex].EncryptedLength = offsetInfo->DataLength;
-		if (dataLength == 0)
-		{
+			offsetInfo.FrameOffset;
+		unsigned int dataLength = offsetInfo.DataLength;
+		(*frame)[frameIndex].EncryptedFrameDataOffset = offsetInfo.FrameOffset;
+		(*frame)[frameIndex].EncryptedLength = offsetInfo.DataLength;
+
+		if (dataLength == 0) {
 			continue;
 		}
 
-		file.seekg(frameBeginPos, std::ios::beg);
-		file.read(reinterpret_cast<char*>(&(*frame)[frameIndex].FrameInfo),
-			sizeof(FrameInfo));
+		// Đọc thông tin frame
+		std::memcpy(&(*frame)[frameIndex].FrameInfo, data + frameBeginPos, sizeof(FrameInfo));
 		long decDataLength = (*frame)[frameIndex].FrameInfo.Height * (*frame)[frameIndex].FrameInfo.Width;
-		if (decDataLength == 0)
-		{
+		if (decDataLength == 0) {
 			continue;
 		}
 		(*frame)[frameIndex].initMemory(decDataLength * 4);
 
+		// Đọc dữ liệu giải mã cho frame
 		long frameDataPos = frameBeginPos + sizeof(FrameInfo);
-		file.seekg(frameDataPos, std::ios::beg);
 		long curDecPos = 0;
 		for (int i = 0; i < dataLength - 8;) {
 			if (curDecPos > decDataLength) {
-				throw std::exception("Failed to decrypt, somethings wrong!");
+				throw std::runtime_error("Failed to decrypt, something's wrong!");
 			}
-			int size = file.get();
-			int alpha = file.get();
+			int size = data[frameDataPos + i];
+			int alpha = data[frameDataPos + i + 1];
 
 			if (size == -1 || alpha == -1) {
-				throw std::exception("Failed to decrypt, somethings wrong!");
+				throw std::runtime_error("Failed to decrypt, something's wrong!");
 			}
 
 			if (alpha == 0x00) {
-				for (int j = 0; j < size; j++)
-				{
+				for (int j = 0; j < size; j++) {
 					(*frame)[frameIndex].DecodedFrameData[curDecPos * 4] = 0;
 					(*frame)[frameIndex].DecodedFrameData[curDecPos * 4 + 1] = 0;
 					(*frame)[frameIndex].DecodedFrameData[curDecPos * 4 + 2] = 0;
@@ -220,14 +217,11 @@ void LoadSPRFileInternal(const char* filePath,
 				}
 			}
 			else {
-				for (int j = 0; j < size; j++)
-				{
-					int colorIndex = (int)file.get();
-					if (colorIndex == -1)
-					{
-						throw std::exception("Failed to decrypt, colorIndex must greater than -1!");
+				for (int j = 0; j < size; j++) {
+					int colorIndex = data[frameDataPos + i + 2 + j];
+					if (colorIndex == -1) {
+						throw std::runtime_error("Failed to decrypt, colorIndex must be greater than -1!");
 					}
-					i++;
 
 					(*frame)[frameIndex].DecodedFrameData[curDecPos * 4] = (*palette)[colorIndex].B;
 					(*frame)[frameIndex].DecodedFrameData[curDecPos * 4 + 1] = (*palette)[colorIndex].G;
@@ -237,14 +231,46 @@ void LoadSPRFileInternal(const char* filePath,
 					curDecPos++;
 				}
 			}
-			i += 2;
+			i += 2 + size;
 		}
-		MemoryManager::getInstance()->deallocate(offsetInfo);
 	}
-
-	file.close();
 }
 
+void LoadSPRFileInternal(const char* filePath,
+	SPRFileHead* fileHead,
+	Color** palette,
+	int* paletteLength,
+	int* frameDataBeginPos,
+	FrameData** frame,
+	int* frameCount)
+{
+	Log::I("SPR", "Start LoadSPRFileInternal");
+
+	// Mở file và kiểm tra xem có mở thành công không
+	std::ifstream file(filePath, std::ios::binary | std::ios::ate);
+	if (!file.is_open()) {
+		std::cerr << "Failed to open file." << std::endl;
+		*palette = nullptr;
+		return;
+	}
+	std::streamsize fileSize = GetFileStreamSize(file);
+	char* fileData = GetFileStreamBuffer(file);
+	file.close();
+
+	// Gọi hàm LoadSPRMemoryInternal để xử lý dữ liệu từ mảng byte trong bộ nhớ
+	LoadSPRMemoryInternal(
+		reinterpret_cast<uint8_t*>(fileData),
+		fileSize,
+		fileHead,
+		palette,
+		paletteLength,
+		frameDataBeginPos,
+		frame,
+		frameCount
+	);
+
+	MemoryManager::getInstance()->deallocate(fileData);
+}
 
 static void intToHexString(int value, char* output)
 {
