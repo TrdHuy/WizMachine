@@ -8,6 +8,8 @@ using WizMachine.Utils;
 namespace WizMachine.Services.Utils
 {
 
+    // Cần attr này để truyền callback xuống c++ không bị lỗi memory access violation 
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void ProgressChangedCallback(int progress, string message);
 
 
