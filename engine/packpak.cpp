@@ -1,6 +1,5 @@
 ﻿#include "pch.h"
 #include "base.h"
-#include "MemoryManager.h"
 
 bool CompressData(const unsigned char* pSrcBuffer, unsigned int nSrcLen,
 	unsigned char* pDestBuffer, unsigned int* pDestLen, int nCompressLevel)
@@ -69,8 +68,8 @@ bool GenerateElemIndexAndHashId(
 }
 
 static bool AddBufferToFile(PACK_ITEM& currentPackItem,
-	unsigned char* pSrcBuffer, 
-	int nSrcSize, 
+	unsigned char* pSrcBuffer,
+	int nSrcSize,
 	unsigned int uCompressType,
 	unsigned int& uDestSize,
 	unsigned int& uDestCompressType)
@@ -137,7 +136,7 @@ bool AddElemToPakFragment(PACK_ITEM& currentPackItem,
 
 	XPackFileFragmentElemHeader fragmentHeader = { 0, 0 };
 
-	 //Step 1: [XPackFileFragmentElem Header] Reserve position
+	//Step 1: [XPackFileFragmentElem Header] Reserve position
 	{
 		if (currentPackItem.pIOFile->write(&fragmentHeader, sizeof(XPackFileFragmentElemHeader))
 			!= sizeof(XPackFileFragmentElemHeader))
@@ -173,7 +172,7 @@ bool AddElemToPakFragment(PACK_ITEM& currentPackItem,
 		}
 	}
 
-	 //Step 3: [nFragment¸öXPackFileFragmentInfoµÄÊý×é]
+	//Step 3: [nFragment¸öXPackFileFragmentInfoµÄÊý×é]
 	{
 		if (currentPackItem.pIOFile->write(pFragmentInfoList, nFragmentInfoListSize) != nFragmentInfoListSize)
 		{
@@ -182,7 +181,7 @@ bool AddElemToPakFragment(PACK_ITEM& currentPackItem,
 		}
 	}
 
-	 //Step 4: [XPackFileFragmentElemHeader] ÖØÐÂÐ´Èë
+	//Step 4: [XPackFileFragmentElemHeader] ÖØÐÂÐ´Èë
 	currentPackItem.pIOFile->seek(lItemFileBegin, SEEK_SET);
 	fragmentHeader.nNumFragment = nNumFragment;
 	if (currentPackItem.pIOFile->write(&fragmentHeader, sizeof(XPackFileFragmentElemHeader))
@@ -242,9 +241,9 @@ bool AddElemToPakFragmentSPR(PACK_ITEM& currentPackItem,
 }
 
 bool AddElemToPakCommon(PACK_ITEM& currentPackItem,
-	unsigned char* pSrcBuffer, 
-	int nSrcSize, 
-	unsigned int& uCompressType, 
+	unsigned char* pSrcBuffer,
+	int nSrcSize,
+	unsigned int& uCompressType,
 	unsigned int& uCompressSize)
 {
 	if (nSrcSize <= COMMON_FILE_SPLIT_SIZE)
@@ -273,7 +272,7 @@ bool AddElemToPakCommon(PACK_ITEM& currentPackItem,
 
 /**
  * Add 1 file vào tệp pak.
- * 
+ *
  * @param currentPackItem
  * @param partnerInfo
  * @param fullFolderFilePath
@@ -322,7 +321,7 @@ bool AddFileToPak(PACK_ITEM& currentPackItem,
 
 	const char* fileExtension = strrchr(fullFolderFilePath, '.');
 
-	 //Kiểm tra có phải file SPR hay không
+	//Kiểm tra có phải file SPR hay không
 	if (fileExtension && !_stricmp(fileExtension + 1, "spr"))
 	{
 		if ((unsigned int)nSrcSize >= packFileShellOptionSprSplitFrameBalance)
@@ -340,7 +339,7 @@ bool AddFileToPak(PACK_ITEM& currentPackItem,
 	else
 		bOk = AddElemToPakCommon(currentPackItem, pSrcBuffer, nSrcSize, uCompressType, uCompressSize);
 
-	uCRC = Misc_CRC32(0, pSrcBuffer, nSrcSize); 
+	uCRC = Misc_CRC32(0, pSrcBuffer, nSrcSize);
 	srcFile.close();
 	if (bOk)
 	{
@@ -370,7 +369,12 @@ bool AddFileToPak(PACK_ITEM& currentPackItem,
 }
 
 
-void CompressFolderToPakFileInternal(const char* inputFolderPath, const char* outputFolderPath, bool bExcludeOfCheckId) {
+void CompressFolderToPakFileInternal(const char* inputFolderPath,
+	const char* outputFolderPath, 
+	bool bExcludeOfCheckId, 
+	ProgressCallbackInternal progressCallback) {
+	double progress = 0;
+
 	fs::path inputPath = fs::absolute(inputFolderPath);
 	fs::path outputPath = fs::absolute(outputFolderPath);
 
@@ -383,8 +387,8 @@ void CompressFolderToPakFileInternal(const char* inputFolderPath, const char* ou
 	std::string outputFileName = outputPath.string() + "/" + folderName + ".pak";
 	std::string outputPartnerFileName = outputPath.string() + "/" + folderName + ".pak.txt";
 
-
 	// Create new pak item
+	progressCallback(progress, "Start creating new pak item!");
 	PACK_ITEM currentPakItem = PACK_ITEM();
 	*(int*)(&(currentPakItem.Header.Signature)) = IPACK_FILE_SIGNATURE_FLAG;
 	currentPakItem.pIOFile = g_OpenFile(outputFileName.c_str(), false, true, true);
@@ -411,7 +415,12 @@ void CompressFolderToPakFileInternal(const char* inputFolderPath, const char* ou
 		throw std::runtime_error("Can not open file: '" + outputFileName + "' for writing objects!");
 	}
 
+	progress = 5;
+	size_t fileCount = countRegualarFilesInFolder(inputPath);
+	double progressPerFileAdded = (1.0 / fileCount) * 80;
+	progressCallback(progress, "Start creating new pak item!");
 
+	double totalAddFileProgress = 80;
 	for (const auto& entry : fs::recursive_directory_iterator(inputPath)) {
 		if (fs::is_regular_file(entry)) {
 			std::string relativePath = fs::relative(entry.path(), inputPath.parent_path()).string();
@@ -424,9 +433,12 @@ void CompressFolderToPakFileInternal(const char* inputFolderPath, const char* ou
 				ulen,
 				IPACK_FILE_SHELL_OPTION_SPR_SPLIT_FRAME_BALANCE_DEF
 			);
+			progress += progressPerFileAdded;
+			progressCallback(progress, "Added an item to pak.");
 		}
 	}
 
+	progressCallback(progress, "Saving to pak...");
 	// Write block header 
 	if (currentPakItem.pIOFile) {
 		if (currentPakItem.bModified && currentPakItem.pIndexList) {
@@ -446,6 +458,9 @@ void CompressFolderToPakFileInternal(const char* inputFolderPath, const char* ou
 	currentPakItem.pIOFile->release();
 	SAFE_FREE(currentPakItem.pIndexList);
 	filePartner.Clear();
+
+	progress = 100;
+	progressCallback(progress, "Done");
 
 	Log::I("Hoàn thành việc ghi danh sách file vào ", outputFileName);
 }

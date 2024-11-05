@@ -180,6 +180,7 @@
   <ItemGroup>
     <ClInclude Include="base.h" />
     <ClInclude Include="BigAloneFile.h" />
+    <ClInclude Include="Callback_Internal.h" />
     <ClInclude Include="cert.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="file_alone.h" />
@@ -187,6 +188,7 @@
     <ClInclude Include="MemoryManager.h" />
     <ClInclude Include="PakWorkManager.h" />
     <ClInclude Include="sha256.h" />
+    <ClInclude Include="Callback_ForSharp.h" />
     <ClInclude Include="spr.h" />
     <ClInclude Include="crc32.h" />
     <ClInclude Include="framework.h" />

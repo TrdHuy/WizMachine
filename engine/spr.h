@@ -4,7 +4,8 @@
 
 #define	SPR_COMMENT_FLAG				0x525053
 
-#include "MemoryManager.h"
+#include "base.h"
+#include "ucl/ucl.h"
 
 struct Color {
 	unsigned char R;
