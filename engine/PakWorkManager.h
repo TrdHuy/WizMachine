@@ -7,8 +7,9 @@
 #include <fstream>
 #include <random>
 #include <iostream>
-#include "pak.h"
-#include "LogUtil.h"
+#include <format>
+
+#include "base.h"
 #include "BigAloneFile.h"
 
 class PakWorkManager {
@@ -16,7 +17,7 @@ public:
     static PakWorkManager* GetInstance();
 
     // API: Load file .pak và tạo file tạm, trả về token phiên và thông tin file Pak nội bộ
-    std::string LoadPakFile(const std::string& filePath, PakInfoInternal& pakInfoInternal);
+    std::string LoadPakFile(const std::string& filePath, PakInfoInternal& pakInfoInternal, ProgressCallback progressCallback);
 
     // API: Đọc một đoạn byte từ file con
     bool ReadSubFileData(const std::string& sessionToken, int subFileIndex, unsigned char*& buffer, size_t* subFileSize);

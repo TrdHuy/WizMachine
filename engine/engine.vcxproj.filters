@@ -25,6 +25,24 @@
     <Filter Include="Source Files\Domain">
       <UniqueIdentifier>{95ebcb52-0025-4caa-8229-fd1bd149fc54}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Common\Callback">
+      <UniqueIdentifier>{c2dd033e-65d0-47d1-a092-0b5bb387b03b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Common\Log">
+      <UniqueIdentifier>{07f39587-604c-4c2d-87f8-9e1bff77b82e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Common\Crypto">
+      <UniqueIdentifier>{33ef9627-a834-496a-9179-4c560b41c47c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Common\File">
+      <UniqueIdentifier>{366330fd-343d-474a-943e-825316f147a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Common\Crypto">
+      <UniqueIdentifier>{9672ba05-d766-40a3-add2-d7b4a4711d1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Common\Log">
+      <UniqueIdentifier>{da318183-adc0-47f9-9c85-b562ed8a3d5b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -42,26 +60,14 @@
     <ClInclude Include="cert.h">
       <Filter>Header Files\Domain</Filter>
     </ClInclude>
-    <ClInclude Include="file.h">
-      <Filter>Header Files\Domain</Filter>
-    </ClInclude>
-    <ClInclude Include="file_alone.h">
-      <Filter>Header Files\Domain</Filter>
-    </ClInclude>
     <ClInclude Include="pak.h">
       <Filter>Header Files\Domain</Filter>
     </ClInclude>
     <ClInclude Include="framework.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
-    <ClInclude Include="crc32.h">
-      <Filter>Header Files\Domain</Filter>
-    </ClInclude>
     <ClInclude Include="pakpart.h">
       <Filter>Header Files\Domain</Filter>
-    </ClInclude>
-    <ClInclude Include="sha256.h">
-      <Filter>Header Files\Common</Filter>
     </ClInclude>
     <ClInclude Include="spr.h">
       <Filter>Header Files\Domain</Filter>
@@ -69,14 +75,32 @@
     <ClInclude Include="utils.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
-    <ClInclude Include="LogUtil.h">
-      <Filter>Header Files\Common</Filter>
-    </ClInclude>
     <ClInclude Include="PakWorkManager.h">
       <Filter>Header Files\Domain</Filter>
     </ClInclude>
+    <ClInclude Include="Callback_Internal.h">
+      <Filter>Header Files\Common\Callback</Filter>
+    </ClInclude>
+    <ClInclude Include="Callback_ForSharp.h">
+      <Filter>Header Files\Common\Callback</Filter>
+    </ClInclude>
+    <ClInclude Include="LogUtil.h">
+      <Filter>Header Files\Common\Log</Filter>
+    </ClInclude>
+    <ClInclude Include="sha256.h">
+      <Filter>Header Files\Common\Crypto</Filter>
+    </ClInclude>
     <ClInclude Include="BigAloneFile.h">
-      <Filter>Header Files\Common</Filter>
+      <Filter>Header Files\Common\File</Filter>
+    </ClInclude>
+    <ClInclude Include="file.h">
+      <Filter>Header Files\Common\File</Filter>
+    </ClInclude>
+    <ClInclude Include="file_alone.h">
+      <Filter>Header Files\Common\File</Filter>
+    </ClInclude>
+    <ClInclude Include="crc32.h">
+      <Filter>Header Files\Common\Crypto</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -110,21 +134,21 @@
     <ClCompile Include="utils.cpp">
       <Filter>Source Files\Common</Filter>
     </ClCompile>
-    <ClCompile Include="LogUtil.cpp">
-      <Filter>Source Files\Common</Filter>
-    </ClCompile>
     <ClCompile Include="PakWorkManager.cpp">
       <Filter>Source Files\Domain</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <CustomBuild Include="crc64.asm">
-      <Filter>Source Files\Common</Filter>
-    </CustomBuild>
+    <ClCompile Include="LogUtil.cpp">
+      <Filter>Source Files\Common\Log</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="crc64 explain">
-      <Filter>Source Files\Common</Filter>
+      <Filter>Source Files\Common\Crypto</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="crc64.asm">
+      <Filter>Source Files\Common\Crypto</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

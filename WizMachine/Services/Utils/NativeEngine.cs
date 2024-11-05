@@ -8,12 +8,16 @@ using WizMachine.Utils;
 namespace WizMachine.Services.Utils
 {
 
+    public delegate void ProgressChangedCallback(int progress, string message);
+
+
     internal static class NativeAPIAdapter
     {
         private const string TAG = "NativeAPIAdapter";
+
         private class NativeEngine
         {
-            private const string ENGINE_DLL = "engine.dll"; 
+            private const string ENGINE_DLL = "engine.dll";
 
             public struct NFrameInfo
             {
@@ -119,8 +123,9 @@ namespace WizMachine.Services.Utils
                 IntPtr frameData, int frameCount);
 
 
-         
+
             #region PAK
+
             [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
             public struct CompressedFileInfo
             {
@@ -152,10 +157,10 @@ namespace WizMachine.Services.Utils
             public static extern bool ExtractBlockFromPakFile(string sessionString, int subFileIndex, string outputPath);
 
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
-            public static extern IntPtr LoadPakFileToWorkManager(string filePath, ref PakInfo pakInfo);
+            public static extern IntPtr LoadPakFileToWorkManager(string filePath, ref PakInfo pakInfo, ProgressChangedCallback progressChangedCallback);
 
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
-            public static extern void CloseSession(string sessionString);
+            public static extern void ClosePakFileSession(string sessionString);
 
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
             public static extern bool FreeBuffer(IntPtr buffer);
@@ -173,12 +178,15 @@ namespace WizMachine.Services.Utils
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.StdCall)]
             public static extern bool ExtractPakFile(string pakFilePath,
                 string? pakInfoPath,
-                string outputRootPath);
+                string outputRootPath,
+                ProgressChangedCallback progressChangedCallback);
 
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.StdCall)]
             public static extern void CompressFolderToPakFile(string pakFilePath,
-                string outputRootPath);
-            #endregion 
+                string outputRootPath,
+                bool bExcludeOfCheckId,
+                ProgressChangedCallback progressChangedCallback);
+            #endregion
 
             #region CERT
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -264,10 +272,15 @@ namespace WizMachine.Services.Utils
             return NativeEngine.GetBlockIdFromPath(blockPath);
         }
 
-        public static string LoadPakFileToWorkManager(string filePath, out PakInfo pakFileInfo)
+        public static string LoadPakFileToWorkManager(string filePath,
+            out PakInfo pakFileInfo,
+            ProgressChangedCallback? progressChangedCallback = null)
         {
             NativeEngine.PakInfo nPakInfo = new NativeEngine.PakInfo();
-            IntPtr sessionPtr = NativeEngine.LoadPakFileToWorkManager(filePath, ref nPakInfo);
+            IntPtr sessionPtr = NativeEngine.LoadPakFileToWorkManager(filePath, ref nPakInfo, progressChangedCallback: (progress, message) =>
+            {
+                progressChangedCallback?.Invoke(progress, message);
+            });
             if (sessionPtr == IntPtr.Zero)
             {
                 throw new InvalidOperationException("Failed to load .pak file.");
@@ -289,7 +302,7 @@ namespace WizMachine.Services.Utils
         {
             try
             {
-                NativeEngine.CloseSession(sessionString);
+                NativeEngine.ClosePakFileSession(sessionString);
                 return true;
             }
             catch
@@ -315,22 +328,34 @@ namespace WizMachine.Services.Utils
 
         public static bool ExtractPakFile(string pakFilePath,
             string pakInfoPath,
-            string outputRootPath)
+            string outputRootPath,
+            ProgressChangedCallback? progressChangedCallback = null)
         {
-            return NativeEngine.ExtractPakFile(pakFilePath, pakInfoPath, outputRootPath);
+            return NativeEngine.ExtractPakFile(pakFilePath, pakInfoPath, outputRootPath, (p, m) =>
+            {
+                progressChangedCallback?.Invoke(p, m);
+            });
         }
 
         public static bool ExtractPakFile(string pakFilePath,
-           string outputRootPath)
+           string outputRootPath,
+           ProgressChangedCallback? progressChangedCallback = null)
         {
-            NativeEngine.ExtractPakFile(pakFilePath, null, outputRootPath);
+            NativeEngine.ExtractPakFile(pakFilePath, null, outputRootPath, (p, m) =>
+            {
+                progressChangedCallback?.Invoke(p, m);
+            });
             return true;
         }
 
         public static bool CompressFolderToPakFile(string pakFilePath,
-           string outputRootPath)
+           string outputRootPath,
+           ProgressChangedCallback? progressChangedCallback = null)
         {
-            NativeEngine.CompressFolderToPakFile(pakFilePath, outputRootPath);
+            NativeEngine.CompressFolderToPakFile(pakFilePath, outputRootPath, false,  (p, m) =>
+            {
+                progressChangedCallback?.Invoke(p, m);
+            });
             return true;
         }
 

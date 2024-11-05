@@ -268,7 +268,13 @@ std::unique_ptr<BYTE[]> ReadBlock(int block,
 int ExtractPakInternal(const char* pakfilePath,
 	const char* outputRootPath,
 	PakInfoInternal pakInfo,
-	std::unique_ptr<PakHeader>& header) {
+	std::unique_ptr<PakHeader>& header, 
+	ProgressCallbackInternal progressCallback) {
+
+	double progress = 0;
+	if (progressCallback != nullptr)
+		progressCallback(progress, "Extracting block...");
+
 	std::ifstream file(pakfilePath, std::ios::binary | std::ios::ate);
 	if (!file.is_open()) {
 		return 0;
@@ -284,6 +290,8 @@ int ExtractPakInternal(const char* pakfilePath,
 	}
 
 	int blockCount = header->Count;
+	double progressEachBlockCount = 100 / blockCount;
+
 	for (int block = 0; block < blockCount; ++block) {
 		int decrompressLenght;
 		CompressedFileInfoInternal compressInfo;
@@ -322,6 +330,10 @@ int ExtractPakInternal(const char* pakfilePath,
 			}
 			outFile.write(reinterpret_cast<const char*>(extractedBuffer.get()), decrompressLenght);
 			outFile.close();
+
+			progress += progressEachBlockCount;
+			if (progressCallback != nullptr)
+				progressCallback(progress, "Extracting block...");
 		}
 	}
 
@@ -353,7 +365,13 @@ void ReadPakHeader(
 
 int ExtractPakInternal(const char* pakfilePath,
 	const char* outputRootPath,
-	std::unique_ptr<PakHeader>& header) {
+	std::unique_ptr<PakHeader>& header, 
+	ProgressCallbackInternal progressCallback) {
+
+	double progress = 0;
+	if (progressCallback != nullptr)
+		progressCallback(progress, "Extracting block...");
+
 	std::ifstream file(pakfilePath, std::ios::binary | std::ios::ate);
 	if (!file.is_open()) {
 		return 0;
@@ -366,6 +384,8 @@ int ExtractPakInternal(const char* pakfilePath,
 	}
 
 	int blockCount = header->Count;
+	double progressEachBlockCount = 100 / blockCount;
+
 	for (int block = 0; block < blockCount; ++block) {
 		int decrompressLenght;
 		CompressedFileInfoInternal compressInfo;
@@ -398,6 +418,10 @@ int ExtractPakInternal(const char* pakfilePath,
 			}
 			outFile.write(reinterpret_cast<const char*>(extractedBuffer.get()), decrompressLenght);
 			outFile.close();
+
+			progress += progressEachBlockCount;
+			if (progressCallback != nullptr)
+				progressCallback(progress, "Extracting block...");
 		}
 	}
 

@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "base.h"
 #include "file_alone.h"
-#include "MemoryManager.h"
 
 IFile* g_OpenFile(const char* FileName, int ForceSingleFile/* = false*/, int ForWrite/* = false*/, int ForceCreate = false)
 {
