@@ -9,6 +9,7 @@
 #include <windows.h>
 #include <shlobj.h> // Dành cho SHGetKnownFolderPath
 #include <filesystem>
+namespace fs = std::filesystem;
 
 #define SAFE_FREE(a)	if (a) {free(a); (a)=NULL;}
 
@@ -26,6 +27,14 @@ inline std::streamsize GetFileStreamSize(std::ifstream& fileStream) {
 	fileStream.seekg(currentPos, std::ios::beg);
 
 	return fileSize;
+}
+
+inline size_t countRegualarFilesInFolder(const fs::path& inputPath) {
+	return std::count_if(
+		fs::recursive_directory_iterator(inputPath),
+		fs::recursive_directory_iterator{},
+		[](const auto& entry) { return fs::is_regular_file(entry); }
+	);
 }
 
 char* GetFileStreamBuffer(std::ifstream& fileStream);

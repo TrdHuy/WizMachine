@@ -1,10 +1,6 @@
 ﻿// dllmain.cpp : Defines the entry point for the DLL application.
 
 #include "pch.h"
-#include "MemoryManager.h"
-#include "PakWorkManager.h"
-#include "LogUtil.h"
-#include "base.h"
 
 #pragma comment (lib, "crypt32.lib")
 #pragma comment (lib, "wintrust.lib")
@@ -137,23 +133,46 @@ void FreePakInfo(PakInfo* pakInfo) {
 	}
 }
 
-
-bool ExtractPakFile(const char* pakFilePath, const char* pakInfoFilePath, const char* outputRootPath) {
+bool ExtractPakFile(const char* pakFilePath,
+	const char* pakInfoFilePath,
+	const char* outputRootPath,
+	ProgressCallback progressCallback) {
 	std::unique_ptr<PakHeader> header;
 	if (pakInfoFilePath != nullptr) {
 		PakInfoInternal pakInfo;
+		if (progressCallback != nullptr)
+			progressCallback(0, "Parsing pak info...");
+
 		if (ParsePakInfoFileInternal(pakInfoFilePath, pakInfo) == -1) {
 			return false;
 		}
-		return ExtractPakInternal(pakFilePath, outputRootPath, pakInfo, header) > 0;
+		double progress = 10;
+
+
+		return ExtractPakInternal(pakFilePath,
+			outputRootPath,
+			pakInfo,
+			header,
+			[progressCallback, &progress](int p, const char* m) {
+				progress += p * 0.9;
+				progressCallback(progress, m);
+			}) > 0;
 	}
 	else {
-		return ExtractPakInternal(pakFilePath, outputRootPath, header) > 0;
+		return ExtractPakInternal(pakFilePath,
+			outputRootPath,
+			header,
+			[progressCallback](int p, const char* m) {
+				progressCallback(p, m);
+			}) > 0;
 	}
 }
 
-void CompressFolderToPakFile(const char* inputFolderPath, const char* outputFolderPath, bool bExcludeOfCheckId) {
-	CompressFolderToPakFileInternal(inputFolderPath, outputFolderPath, bExcludeOfCheckId);
+void CompressFolderToPakFile(const char* inputFolderPath, const char* outputFolderPath, bool bExcludeOfCheckId, ProgressCallback progressCallback) {
+	CompressFolderToPakFileInternal(inputFolderPath, outputFolderPath, bExcludeOfCheckId, [progressCallback](int p, const char* m) {
+		if(progressCallback != nullptr)
+			progressCallback(p, m);
+		});
 }
 
 void ForceCheckCertPermission(CertInfo certinfo) {
@@ -177,13 +196,13 @@ void FreeCertInfo(CertInfo* certInfo) {
 	}
 }
 
-const char* LoadPakFileToWorkManager(const char* filePath, PakInfo* pakInfo) {
+const char* LoadPakFileToWorkManager(const char* filePath, PakInfo* pakInfo, ProgressCallback progressCallback) {
 	// Lấy instance duy nhất của PakWorkManager
 	PakWorkManager* manager = PakWorkManager::GetInstance();
 	PakInfoInternal pakInfoInternal;
 
 	// Gọi hàm LoadPakFile nội bộ và trả về token phiên
-	std::string sessionToken = manager->LoadPakFile(filePath, pakInfoInternal);
+	std::string sessionToken = manager->LoadPakFile(filePath, pakInfoInternal, progressCallback);
 
 	// Nếu không tạo được token, trả về null
 	if (sessionToken.empty()) {
@@ -199,7 +218,7 @@ const char* LoadPakFileToWorkManager(const char* filePath, PakInfo* pakInfo) {
 	return result;
 }
 
-void CloseSession(const char* sessionString) {
+void ClosePakFileSession(const char* sessionString) {
 	PakWorkManager* manager = PakWorkManager::GetInstance();
 	manager->CloseSession(sessionString);
 }

@@ -1,9 +1,6 @@
 ﻿#include "pch.h"
 
 #include "PakWorkManager.h"
-#include "BigAloneFile.h"
-#include <string>
-#include <format>
 
 const std::string PakWorkManager::TAG = "PakWorkManager";
 
@@ -66,7 +63,11 @@ void PakWorkManager::CloseSession(const std::string& sessionToken) {
 
 // Cập nhật hàm LoadPakFile để tạo 1 file tạm duy nhất
 std::string PakWorkManager::LoadPakFile(const std::string& filePath,
-	PakInfoInternal& pakInfoInternal) {
+	PakInfoInternal& pakInfoInternal, ProgressCallback progressCallback) {
+	double progress = 0;
+
+	if(progressCallback != nullptr)
+		progressCallback(progress, "Init session");
 
 	// Khởi tạo AloneFile để mở file .pak
 	BigAloneFile pakFile;
@@ -114,6 +115,13 @@ std::string PakWorkManager::LoadPakFile(const std::string& filePath,
 	pakInfoInternal.pakTime = formatTimeToString(header->PakTime);
 	pakInfoInternal.crc = intToHexString(header->CRC32);
 
+	std::this_thread::sleep_for(std::chrono::seconds(2));
+	progress = 2;
+	if (progressCallback != nullptr)
+		progressCallback(progress, "Loading block...");
+
+	double progressLeft = 100 - progress;
+	double progressEachBlockCount = progressLeft / blockCount;
 	// Vòng lặp đọc từng block và ghi vào file tạm
 	for (int block = 0; block < blockCount; ++block) {
 		int decompressLength;
@@ -149,6 +157,9 @@ std::string PakWorkManager::LoadPakFile(const std::string& filePath,
 
 			pakInfoInternal.addFile(compressFileInfo);
 			Log::D(TAG, "LoadPakFile: Block ", block, " saved to temporary file at offset: ", blockOffset);
+			progress += progressEachBlockCount;
+			if (progressCallback != nullptr)
+				progressCallback(progress, "Loaded block");
 		}
 	}
 
@@ -159,6 +170,10 @@ std::string PakWorkManager::LoadPakFile(const std::string& filePath,
 	sessionFiles[sessionToken] = sessionInfo;
 
 	Log::I(TAG, "LoadPakFile: Session created with token: ", sessionToken);
+	progress = 100;
+
+	if (progressCallback != nullptr)
+		progressCallback(progress, "Done");
 	return sessionToken;
 }
 
@@ -224,7 +239,7 @@ bool PakWorkManager::ReadSubFileData(const std::string& sessionToken, int subFil
 }
 
 
- //Triển khai hàm ExtractSubFile: Trích xuất file con ra file output
+//Triển khai hàm ExtractSubFile: Trích xuất file con ra file output
 bool PakWorkManager::ExtractSubFile(const std::string& sessionToken, int subFileIndex, const std::string& outputPath) {
 	size_t subFileSize;
 	unsigned char* buffer = nullptr; // Khai báo con trỏ buffer

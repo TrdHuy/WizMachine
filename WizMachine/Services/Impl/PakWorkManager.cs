@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using WizMachine.Data;
 using WizMachine.Services.Base;
 using WizMachine.Services.Utils;
@@ -37,14 +33,22 @@ namespace WizMachine.Services.Impl
         private Dictionary<string, PakInfo> mSessionToPakInfoMap = new Dictionary<string, PakInfo>();
         private Dictionary<string, string> mPakFilePathToSession = new Dictionary<string, string>();
         private Dictionary<ulong, (string, CompressedFileInfo)> mBlockIdToSessionAndCompressFileInfoMap = new Dictionary<ulong, (string, CompressedFileInfo)>();
-        bool IPakWorkManager.LoadPakFileToWorkManager(string pakFilePath)
+        bool IPakWorkManager.LoadPakFileToWorkManager(string pakFilePath, ProgressChangedCallback? progressChangedCallback)
         {
+
             if (mPakFilePathToSession.ContainsKey(pakFilePath))
             {
                 Logger.Raw.I($"{TAG}: Already exist this pak in work manager. pakFilePath={pakFilePath}");
                 return false;
             }
-            string sessionToken = NativeAPIAdapter.LoadPakFileToWorkManager(pakFilePath, out PakInfo pakFileInfo);
+            float loadPakToWMWorkLoad = 0.8f;
+            string sessionToken = NativeAPIAdapter.LoadPakFileToWorkManager(pakFilePath, out PakInfo pakFileInfo, (p, m) =>
+            {
+                progressChangedCallback?.Invoke((int)(p * loadPakToWMWorkLoad), m);
+            });
+
+            progressChangedCallback?.Invoke((int)(loadPakToWMWorkLoad * 100), "Mapping block...");
+
             if (!string.IsNullOrEmpty(sessionToken) && sessionToken.Length == 16)
             {
                 mSessionToPakInfoMap.Add(sessionToken, pakFileInfo);
@@ -57,6 +61,7 @@ namespace WizMachine.Services.Impl
                 }
                 Logger.Raw.I($"{TAG}: Added new pak to work manager. pakFilePath={pakFilePath}");
 
+                progressChangedCallback?.Invoke(100, "Done!");
                 return true;
             }
             return false;
@@ -64,7 +69,7 @@ namespace WizMachine.Services.Impl
 
         void IPakWorkManager.ResetPakWorkManager()
         {
-            foreach(var token in mSessionToPakInfoMap.Keys)
+            foreach (var token in mSessionToPakInfoMap.Keys)
             {
                 NativeAPIAdapter.CloseSession(token);
             }

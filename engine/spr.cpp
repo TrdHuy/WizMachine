@@ -1,7 +1,4 @@
 ﻿#include "pch.h"
-#include "LogUtil.h"
-#include "base.h"
-#include "ucl/ucl.h"
 
 UCHAR FindPaletteIndex(UCHAR B, UCHAR G, UCHAR R, Color palette[], int paletteSize) {
 	for (int i = 0; i < paletteSize; i++)

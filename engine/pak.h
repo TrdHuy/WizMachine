@@ -292,11 +292,11 @@ int ParsePakInfoFileInternal(const char* filename, PakInfoInternal& pakInfo);
 int ExtractPakInternal(const char* pakfilePath,
 	const char* outputRootPath,
 	PakInfoInternal pakInfo,
-	std::unique_ptr<PakHeader>& header);
+	std::unique_ptr<PakHeader>& header, ProgressCallbackInternal progressCallback);
 
 int ExtractPakInternal(const char* pakfilePath,
 	const char* outputRootPath,
-	std::unique_ptr<PakHeader>& header);
+	std::unique_ptr<PakHeader>& header, ProgressCallbackInternal progressCallback);
 
 bool AddFileToPak(PACK_ITEM& currentPackItem,
 	KPackFilePartner& partnerInfo,
@@ -305,7 +305,8 @@ bool AddFileToPak(PACK_ITEM& currentPackItem,
 	int packFileShellOptionSprSplitFrameBalance);
 void CompressFolderToPakFileInternal(const char* inputFolderPath,
 	const char* outputFolderPath,
-	bool bExcludeOfCheckId);
+	bool bExcludeOfCheckId,
+	ProgressCallbackInternal progressCallback);
 // TODO: Refactor ifstream -> BigAloneFile
 void ReadPakHeader(
 	std::unique_ptr<PakHeader>& header,

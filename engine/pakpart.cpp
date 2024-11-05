@@ -6,8 +6,6 @@
 *****************************************************************************************/
 #include "pch.h"
 #include "base.h"
-#include "MemoryManager.h"
-
 #include <time.h>
 
 #define LINE_FORMAT_FIRST	"TotalFile:%d\tPakTime:%d-%d-%d %d:%d:%d\tPakTimeSave:%x\tCRC:%x\r\n"

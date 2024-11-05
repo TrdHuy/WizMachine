@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "base.h"
-#include "MemoryManager.h"
+#include "utils.h"
 
 unsigned long long GetCurrentLocalTimeMillisecond() {
 	auto start = std::chrono::system_clock::now();

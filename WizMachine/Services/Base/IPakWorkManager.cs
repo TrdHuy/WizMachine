@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WizMachine.Data;
+using WizMachine.Services.Utils;
 
 namespace WizMachine.Services.Base
 {
@@ -23,7 +24,7 @@ namespace WizMachine.Services.Base
 
 
         #region WorkManager
-        public bool LoadPakFileToWorkManager(string pakFilePath);
+        public bool LoadPakFileToWorkManager(string pakFilePath, ProgressChangedCallback? progressChangedCallback = null);
         public void ResetPakWorkManager();
         public bool RemovePakFileFromWorkManager(string pakFilePath);
         public bool IsBlockExistByPath(string blockPath);
