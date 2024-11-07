@@ -124,9 +124,10 @@
 			<LibFilesToDelete Include="$(PublishDir)\*.lib" />
 		</ItemGroup>
 		<Delete Files="@(OldPublishFile)" />
-		<Delete Files="@(PdbFilesToDelete)" />
-		<Delete Files="@(ExpFilesToDelete)" />
-		<Delete Files="@(LibFilesToDelete)" />
+		<Delete Condition="'$(Configuration)' == 'Release'" Files="@(PdbFilesToDelete)" />
+		<Delete Condition="'$(Configuration)' == 'Release'" Files="@(ExpFilesToDelete)" />
+		<Delete Condition="'$(Configuration)' == 'Release'" Files="@(LibFilesToDelete)" />
+
 		<ZipDirectory SourceDirectory="$(PublishDir)" DestinationFile="$(PublishZipDir)\$(AssemblyName)_v$(Version)_$(Platform).zip" />
 	</Target>
 	<Target Name="PackTaskDependencies" BeforeTargets="GenerateNuspec">

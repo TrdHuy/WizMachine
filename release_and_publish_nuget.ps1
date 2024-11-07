@@ -5,7 +5,7 @@ $scriptRoot = (Get-Location).Path
 # In ra phiên bản PowerShell
 Write-Host "PowerShell Version: $($psVersion.Major).$($psVersion.Minor).$($psVersion.Build)"
 Write-Host "ScriptRoot: $scriptRoot"
-
+$ISDEBUG = $false
 $ISLOCAL = $env:ISLOCAL
 if (-not $ISLOCAL) {
 	$ISLOCAL = $true
@@ -279,6 +279,10 @@ function Publish-Nuget ($publishDir,
 			@{
 				extension = "json"
 				target    = "lib\net6.0-windows7.0"
+			},
+			@{
+				extension = "exp"
+				target    = "lib\net6.0-windows7.0"
 			}
 		)
 	}
@@ -395,32 +399,39 @@ if ($IS_FIRST_RELEASE -eq $true) {
 	
 }
 else {
-	#Lấy commit cuối cùng của bản latest release
-	$result = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/releases/latest" -Headers @{ Authorization = "token $TOKEN" }
-	$latestReleaseTagName = $result[0].tag_name
+	if (-not $ISDEBUG) {
+		#Lấy commit cuối cùng của bản latest release
+		$result = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/releases/latest" -Headers @{ Authorization = "token $TOKEN" }
+		$latestReleaseTagName = $result[0].tag_name
 
-	$tags = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/tags" -Method Get -Headers @{ "Authorization" = "token $TOKEN" }
-	# Lấy tag name của latest release từ danh sách các tags
-	$latestReleaseTagInfo = ($tags | Where-Object { $_.name -eq $latestReleaseTagName })
+		$tags = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/tags" -Method Get -Headers @{ "Authorization" = "token $TOKEN" }
+		# Lấy tag name của latest release từ danh sách các tags
+		$latestReleaseTagInfo = ($tags | Where-Object { $_.name -eq $latestReleaseTagName })
 
-	$lastReleasedCommitSha = $latestReleaseTagInfo.commit.sha
-	$commitInfoRes = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/commits/$lastReleasedCommitSha" -Headers @{ Authorization = "token $TOKEN" }
-	$lastReleasedCommitMes = $commitInfoRes.commit.message
-	Write-Host lastReleasedCommitMes=$lastReleasedCommitMes 
-	Write-Host lastReleasedCommitSha=$lastReleasedCommitSha 
+		$lastReleasedCommitSha = $latestReleaseTagInfo.commit.sha
+		$commitInfoRes = Invoke-RestMethod -Uri "https://api.github.com/repos/$OWNER/$REPO/commits/$lastReleasedCommitSha" -Headers @{ Authorization = "token $TOKEN" }
+		$lastReleasedCommitMes = $commitInfoRes.commit.message
+		Write-Host lastReleasedCommitMes=$lastReleasedCommitMes 
+		Write-Host lastReleasedCommitSha=$lastReleasedCommitSha 
 
-	# Trích xuất thông tin từ các chuỗi
-	$lastReleasedInfo = Extract-InfoFromMessage $lastReleasedCommitMes
-	$lastCommitOnBranchInfo = Extract-InfoFromMessage $lastCommitOnBranchMes
-	Write-Host lastReleasedInfo.IssueId=($lastReleasedInfo.IssueId)
-	Write-Host lastCommitOnBranchInfo=$lastCommitOnBranchInfo
+		# Trích xuất thông tin từ các chuỗi
+		$lastReleasedInfo = Extract-InfoFromMessage $lastReleasedCommitMes
+		$lastCommitOnBranchInfo = Extract-InfoFromMessage $lastCommitOnBranchMes
+		Write-Host lastReleasedInfo.IssueId=($lastReleasedInfo.IssueId)
+		Write-Host lastCommitOnBranchInfo=$lastCommitOnBranchInfo
 
-	$nupkgFileName = ""
+		$nupkgFileName = ""
+	}
+	
 	# So sánh các phiên bản và hiển thị kết quả
-	if ($lastReleasedInfo -and $lastCommitOnBranchInfo) {
+	if ($ISDEBUG -eq $true -or ($lastReleasedInfo -and $lastCommitOnBranchInfo)) {
 		$lastReleasedVersion = [version]$lastReleasedInfo.Version
 		$lastCommitOnBranchVersion = [version]$lastCommitOnBranchInfo.Version
-		if ($lastCommitOnBranchVersion -gt $lastReleasedVersion) {
+		if ($ISDEBUG -eq $true) {
+			$lastCommitOnBranchVersion = "100.100.100.100"
+		}
+
+		if ($ISDEBUG -eq $true -or ($lastCommitOnBranchVersion -gt $lastReleasedVersion)) {
 			#Clean NugetPublish folder
 			$nugetPublishFolderPath = $scriptRoot + "\" + $NUGET_PUBLISH_DIR
 			if (Test-Path -Path $nugetPublishFolderPath) {
