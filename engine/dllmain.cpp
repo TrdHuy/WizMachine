@@ -18,29 +18,34 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 
 		MemoryManager::getInstance();
 		wchar_t path[MAX_PATH];
+
 		if (GetModuleFileName(NULL, path, MAX_PATH) != 0)
 		{
 			CertInfo* certInfo = MemoryManager::getInstance()->allocate<CertInfo>();
 			char* pathChar = Wchar_t2CharPtr(path);
 			Log::I("MAIN", "Start verify cert for path: " + std::string(pathChar));
-			if (GetCertificateInfo(pathChar, certInfo) == 0) {
-				ForceCheckCertPermissionInternal(*certInfo);
-				MemoryManager::getInstance()->deallocate(static_cast<char*>(pathChar));
-				MemoryManager::getInstance()->deallocate(certInfo);
+			if (GetCertificateInfo(pathChar, certInfo).errorCode == ErrorCode::Success) {
+				if (ForceCheckCertPermissionInternal(*certInfo)) {
+					MemoryManager::getInstance()->deallocate(static_cast<char*>(pathChar));
+					MemoryManager::getInstance()->deallocate(certInfo);
+				}
+				else {
+					Log::E("MAIN", "Invalid cert permission!");
+					return FALSE;
+				}
 			}
 			else {
 				MemoryManager::getInstance()->deallocate(static_cast<char*>(pathChar));
 				MemoryManager::getInstance()->deallocate(certInfo);
 
-
 				Log::E("MAIN", "Security exception: Path" + std::string(pathChar) + " cert is invalid! Package: ");
-				throw std::exception("Security exception:Calling package's cert is invalid!");
+				return FALSE;
 			}
 		}
 		else
 		{
 			Log::E("MAIN", "Failed to get module file!");
-			throw std::exception("Security exception:Calling package's cert is invalid!");
+			return FALSE;
 		}
 		break;
 	}
@@ -56,14 +61,14 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 	return TRUE;
 }
 
-void LoadSPRFile(const char* filePath,
+APIResult LoadSPRFile(const char* filePath,
 	SPRFileHead* fileHead,
 	Color** palette,
 	int* paletteLength,
 	int* frameDataBeginPos,
 	FrameData** frame,
 	int* frameCount) {
-	LoadSPRFileInternal(filePath,
+	return LoadSPRFileInternal(filePath,
 		fileHead,
 		palette,
 		paletteLength,
@@ -72,7 +77,7 @@ void LoadSPRFile(const char* filePath,
 		frameCount);
 }
 
-void LoadSPRMemory(
+APIResult LoadSPRMemory(
 	const uint8_t* data,           // Mảng byte chứa dữ liệu SPR
 	size_t dataLength,             // Độ dài của mảng byte
 	SPRFileHead* fileHead,         // Con trỏ đến cấu trúc SPRFileHead để lưu thông tin
@@ -82,7 +87,7 @@ void LoadSPRMemory(
 	FrameData** frame,             // Con trỏ đến mảng chứa dữ liệu frame sẽ được khởi tạo
 	int* frameCount                // Con trỏ đến số lượng khung hình
 ) {
-	LoadSPRMemoryInternal(data,
+	return LoadSPRMemoryInternal(data,
 		dataLength,
 		fileHead,
 		palette,
@@ -92,7 +97,7 @@ void LoadSPRMemory(
 		frameCount);
 }
 
-void FreeSPRMemory(
+APIResult FreeSPRMemory(
 	Color* palette,
 	FrameData* frameData, int frameCount) {
 	MemoryManager::getInstance()->deallocate(palette);
@@ -102,38 +107,41 @@ void FreeSPRMemory(
 	}
 	MemoryManager::getInstance()->deallocate(frameData);
 	frameData = nullptr;
+	return APIResult();
 }
 
-void ExportToSPRFile(const char* filePath,
+APIResult ExportToSPRFile(const char* filePath,
 	SPRFileHead fileHead,
 	Color palette[],
 	int paletteSize,
 	FrameData frame[]) {
-	ExportToSPRFileInternal(filePath,
+	return ExportToSPRFileInternal(filePath,
 		fileHead,
 		palette,
 		paletteSize,
 		frame);
 }
 
-void ParsePakInfoFile(const char* pakInfoPath,
+APIResult ParsePakInfoFile(const char* pakInfoPath,
 	PakInfo* pakInfo) {
 	PakInfoInternal pakInfoInternal;
 	int result = ParsePakInfoFileInternal(pakInfoPath, pakInfoInternal);
 
 	if (result != 0) {
-		throw std::exception("Failed to parse pak info file!");
+		return APIResult(ErrorCode::InternalError, "Failed to parse pak info file!");
 	}
 	pakInfoInternal.ConvertToPakInfo(*pakInfo);
+	return APIResult();
 }
 
-void FreePakInfo(PakInfo* pakInfo) {
+APIResult FreePakInfo(PakInfo* pakInfo) {
 	if (pakInfo) {
 		pakInfo->freeMem();
 	}
+	return APIResult();
 }
 
-bool ExtractPakFile(const char* pakFilePath,
+APIResult ExtractPakFile(const char* pakFilePath,
 	const char* pakInfoFilePath,
 	const char* outputRootPath,
 	ProgressCallback progressCallback) {
@@ -144,7 +152,7 @@ bool ExtractPakFile(const char* pakFilePath,
 			progressCallback(0, "Parsing pak info...");
 
 		if (ParsePakInfoFileInternal(pakInfoFilePath, pakInfo) == -1) {
-			return false;
+			return APIResult(ErrorCode::InternalError, "Failed to parse pak file!");
 		}
 		double progress = 10;
 
@@ -156,7 +164,7 @@ bool ExtractPakFile(const char* pakFilePath,
 			[progressCallback, &progress](int p, const char* m) {
 				progress += p * 0.9;
 				progressCallback(progress, m);
-			}) > 0;
+			});
 	}
 	else {
 		return ExtractPakInternal(pakFilePath,
@@ -164,26 +172,33 @@ bool ExtractPakFile(const char* pakFilePath,
 			header,
 			[progressCallback](int p, const char* m) {
 				progressCallback(p, m);
-			}) > 0;
+			});
 	}
 }
 
-void CompressFolderToPakFile(const char* inputFolderPath, const char* outputFolderPath, bool bExcludeOfCheckId, ProgressCallback progressCallback) {
-	CompressFolderToPakFileInternal(inputFolderPath, outputFolderPath, bExcludeOfCheckId, [progressCallback](int p, const char* m) {
-		if(progressCallback != nullptr)
+APIResult CompressFolderToPakFile(const char* inputFolderPath, const char* outputFolderPath, bool bExcludeOfCheckId, ProgressCallback progressCallback) {
+	return CompressFolderToPakFileInternal(inputFolderPath, outputFolderPath, bExcludeOfCheckId, [progressCallback](int p, const char* m) {
+		if (progressCallback != nullptr)
 			progressCallback(p, m);
 		});
 }
 
-void ForceCheckCertPermission(CertInfo certinfo) {
-	ForceCheckCertPermissionInternal(certinfo);
+APIResult ForceCheckCertPermission(CertInfo certinfo) {
+	if (ForceCheckCertPermissionInternal(certinfo)) {
+		return APIResult();
+	}
+	return APIResult(ErrorCode::SecurityError, "Cert is invalid!");
 }
 
 int GetCertificateInfo(const char* filePath, CertInfo* certInfo) {
 	return GetCertificateInfoInternal(filePath, certInfo);
 }
 
-void FreeCertInfo(CertInfo* certInfo) {
+APIResult GetCertificateInfo2(const char* filePath, CertInfo* certInfo) {
+	return GetCertificateInfoInternal2(filePath, certInfo);
+}
+
+APIResult FreeCertInfo(CertInfo* certInfo) {
 	if (certInfo) {
 		free((void*)certInfo->Subject);
 		free((void*)certInfo->Issuer);
@@ -194,9 +209,13 @@ void FreeCertInfo(CertInfo* certInfo) {
 		certInfo->Thumbprint = nullptr;
 		certInfo->SerialNumber = nullptr;
 	}
+	return APIResult();
 }
 
-const char* LoadPakFileToWorkManager(const char* filePath, PakInfo* pakInfo, ProgressCallback progressCallback) {
+const APIResult LoadPakFileToWorkManager(const char* filePath,
+	PakInfo* pakInfo,
+	ProgressCallback progressCallback,
+	char** sessionTokenOut) {
 	// Lấy instance duy nhất của PakWorkManager
 	PakWorkManager* manager = PakWorkManager::GetInstance();
 	PakInfoInternal pakInfoInternal;
@@ -206,40 +225,50 @@ const char* LoadPakFileToWorkManager(const char* filePath, PakInfo* pakInfo, Pro
 
 	// Nếu không tạo được token, trả về null
 	if (sessionToken.empty()) {
-		return nullptr;
+		Log::E("MAIN", "LoadPakFileToWorkManager: Failed to create a session!");
+		return APIResult(ErrorCode::InternalError, "LoadPakFileToWorkManager: Failed to create a session!");
 	}
 
 	// Lấy instance của MemoryManager để cấp phát bộ nhớ cho chuỗi kết quả
 	MemoryManager* memManager = MemoryManager::getInstance();
-	char* result = memManager->allocateArray<char>(sessionToken.size() + 1);
-	strcpy_s(result, sessionToken.size() + 1, sessionToken.c_str());
+	*sessionTokenOut = memManager->allocateArray<char>(sessionToken.size() + 1);
+	strcpy_s(*sessionTokenOut, sessionToken.size() + 1, sessionToken.c_str());
 
 	pakInfoInternal.ConvertToPakInfo(*pakInfo);
-	return result;
+	return APIResult();
 }
 
-void ClosePakFileSession(const char* sessionString) {
+APIResult ClosePakFileSession(const char* sessionString) {
 	PakWorkManager* manager = PakWorkManager::GetInstance();
-	manager->CloseSession(sessionString);
+	return manager->CloseSession(sessionString);
 }
 
-bool ExtractBlockFromPakFile(const char* sessionString, int subFileIndex, const char* outputPath) {
+APIResult ExtractBlockFromPakFile(const char* sessionString, int subFileIndex, const char* outputPath) {
 	PakWorkManager* manager = PakWorkManager::GetInstance();
 	return manager->ExtractSubFile(sessionString, subFileIndex, outputPath);
 }
 
-bool FreeBuffer(void* buffer) {
+APIResult FreeBuffer(void* buffer) {
 	MemoryManager* memManager = MemoryManager::getInstance();
-	return memManager->deallocate(buffer);
+	memManager->deallocate(buffer);
+	return APIResult();
 }
 
-unsigned char* ReadBlockFromPakFile(const char* sessionToken, int subFileIndex, size_t* subFileSize) {
+APIResult ReadBlockFromPakFile(const char* sessionToken,
+	int subFileIndex,
+	size_t* subFileSize,
+	char** blockData) {
 	unsigned char* buffer = nullptr;
 	PakWorkManager* manager = PakWorkManager::GetInstance();
-	manager->ReadSubFileData(sessionToken, subFileIndex, buffer, subFileSize);
-	return buffer;
+	auto result = manager->ReadSubFileData(sessionToken, subFileIndex, buffer, subFileSize);
+	*blockData = reinterpret_cast<char*>(buffer);
+	if (result.errorCode != ErrorCode::Success && buffer != nullptr) {
+		MemoryManager::getInstance()->deallocate(buffer);
+	}
+	return result;
 }
 
-unsigned int GetBlockIdFromPath(const char* blockPath) {
-	return g_FileNameHash(blockPath);
+APIResult GetBlockIdFromPath(const char* blockPath, unsigned int* blockId) {
+	*blockId = g_FileNameHash(blockPath);
+	return APIResult(); 
 }

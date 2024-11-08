@@ -265,10 +265,10 @@ std::unique_ptr<BYTE[]> ReadBlock(int block,
 	return decompressedBuffer;
 }
 
-int ExtractPakInternal(const char* pakfilePath,
+APIResult ExtractPakInternal(const char* pakfilePath,
 	const char* outputRootPath,
 	PakInfoInternal pakInfo,
-	std::unique_ptr<PakHeader>& header, 
+	std::unique_ptr<PakHeader>& header,
 	ProgressCallbackInternal progressCallback) {
 
 	double progress = 0;
@@ -277,7 +277,7 @@ int ExtractPakInternal(const char* pakfilePath,
 
 	std::ifstream file(pakfilePath, std::ios::binary | std::ios::ate);
 	if (!file.is_open()) {
-		return 0;
+		return APIResult(ErrorCode::InternalError, "Failed to open pakFile " + std::string(pakfilePath));
 	}
 
 	file.seekg(0, std::ios::beg);
@@ -286,7 +286,7 @@ int ExtractPakInternal(const char* pakfilePath,
 	header.reset(reinterpret_cast<PakHeader*>(headerBuffer.release()));
 
 	if (!file) {
-		return 0;
+		return APIResult(ErrorCode::InternalError, "Failed to read pakFile " + std::string(pakfilePath));
 	}
 
 	int blockCount = header->Count;
@@ -338,7 +338,7 @@ int ExtractPakInternal(const char* pakfilePath,
 	}
 
 	file.close();
-	return blockCount;
+	return APIResult();
 }
 
 void ReadPakHeader(
@@ -363,9 +363,9 @@ void ReadPakHeader(
 }
 
 
-int ExtractPakInternal(const char* pakfilePath,
+APIResult ExtractPakInternal(const char* pakfilePath,
 	const char* outputRootPath,
-	std::unique_ptr<PakHeader>& header, 
+	std::unique_ptr<PakHeader>& header,
 	ProgressCallbackInternal progressCallback) {
 
 	double progress = 0;
@@ -374,13 +374,13 @@ int ExtractPakInternal(const char* pakfilePath,
 
 	std::ifstream file(pakfilePath, std::ios::binary | std::ios::ate);
 	if (!file.is_open()) {
-		return 0;
+		return APIResult(ErrorCode::InternalError, "Failed to open pakFile " + std::string(pakfilePath));
 	}
 
 	ReadPakHeader(header, file);
 
 	if (!file) {
-		return 0;
+		return APIResult(ErrorCode::InternalError, "Failed to read pakFile " + std::string(pakfilePath));
 	}
 
 	int blockCount = header->Count;
@@ -426,7 +426,7 @@ int ExtractPakInternal(const char* pakfilePath,
 	}
 
 	file.close();
-	return blockCount;
+	return APIResult();
 }
 
 std::unique_ptr<std::unique_ptr<unsigned char[]>[]> ExtractPakInternalToMemory(

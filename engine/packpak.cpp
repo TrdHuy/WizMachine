@@ -369,7 +369,7 @@ bool AddFileToPak(PACK_ITEM& currentPackItem,
 }
 
 
-void CompressFolderToPakFileInternal(const char* inputFolderPath,
+APIResult CompressFolderToPakFileInternal(const char* inputFolderPath,
 	const char* outputFolderPath, 
 	bool bExcludeOfCheckId, 
 	ProgressCallbackInternal progressCallback) {
@@ -379,7 +379,7 @@ void CompressFolderToPakFileInternal(const char* inputFolderPath,
 	fs::path outputPath = fs::absolute(outputFolderPath);
 
 	if (!fs::exists(inputPath) && !fs::is_directory(inputPath)) {
-		throw std::runtime_error("Not found folder: " + inputPath.string());
+		return APIResult(ErrorCode::InternalError, "Not found folder: " + inputPath.string());
 	}
 	std::string folderName = inputPath.filename().string();
 
@@ -394,7 +394,8 @@ void CompressFolderToPakFileInternal(const char* inputFolderPath,
 	currentPakItem.pIOFile = g_OpenFile(outputFileName.c_str(), false, true, true);
 	currentPakItem.pIndexList = (XPackIndexInfo*)malloc(sizeof(XPackIndexInfo) * PACK_FILE_SHELL_MAX_SUPPORT_ELEM_FILE_NUM);
 	if (currentPakItem.pIOFile->write(&(currentPakItem.Header), sizeof(currentPakItem.Header)) != sizeof(currentPakItem.Header))
-		throw std::runtime_error("Failed to write pak header!");
+		return APIResult(ErrorCode::InternalError, "Failed to write pak header!");
+
 	currentPakItem.Header.Data = sizeof(currentPakItem.Header);
 	currentPakItem.nDataEndOffset = sizeof(currentPakItem.Header);
 	currentPakItem.bModified = true;
@@ -403,16 +404,16 @@ void CompressFolderToPakFileInternal(const char* inputFolderPath,
 	// Create pak part info
 	KPackFilePartner filePartner;
 	if (!filePartner.Init()) {
-		throw std::runtime_error("Can not init KPackFilePartner");
+		return APIResult(ErrorCode::InternalError, "Can not init KPackFilePartner");
 	}
 
 	if (currentPakItem.pIOFile != nullptr) {
 		if (!currentPakItem.pIOFile->isOpen()) {
-			throw std::runtime_error("Can not open file: '" + outputFileName + "' for writing objects!");
+			return APIResult(ErrorCode::InternalError, "Can not open file: '" + outputFileName + "' for writing objects!");
 		}
 	}
 	else {
-		throw std::runtime_error("Can not open file: '" + outputFileName + "' for writing objects!");
+		return APIResult(ErrorCode::InternalError, "Can not open file: '" + outputFileName + "' for writing objects!");
 	}
 
 	progress = 5;
@@ -463,4 +464,5 @@ void CompressFolderToPakFileInternal(const char* inputFolderPath,
 	progressCallback(progress, "Done");
 
 	Log::I("Hoàn thành việc ghi danh sách file vào ", outputFileName);
+	return APIResult();
 }

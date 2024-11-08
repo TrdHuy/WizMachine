@@ -1,20 +1,21 @@
 ﻿#include "pch.h"
 
-UCHAR FindPaletteIndex(UCHAR B, UCHAR G, UCHAR R, Color palette[], int paletteSize) {
+UCHAR FindPaletteIndex(UCHAR B, UCHAR G, UCHAR R, Color palette[], int paletteSize, ErrorCode& error) {
 	for (int i = 0; i < paletteSize; i++)
 	{
 		if (R == palette[i].R &&
 			G == palette[i].G &&
 			B == palette[i].B)
 		{
+			error = ErrorCode::Success;
 			return i;
 		}
 	}
-	throw std::exception("Color not found in palette!");
+	error = ErrorCode::ShouldNeverHappen;
 }
 
 
-std::vector<UCHAR> EncryptFrameData(
+std::pair<APIResult, std::vector<UCHAR>> EncryptFrameData(
 	Color palette[],
 	int paletteSize,
 	FrameData frame)
@@ -41,29 +42,39 @@ std::vector<UCHAR> EncryptFrameData(
 		else {
 			std::vector<UCHAR> temp;
 			while (i < frame.DecodedLength && frame.DecodedFrameData[i + 3] == alpha && size < 255) {
+				ErrorCode code = ErrorCode::Success;
 				UCHAR index = FindPaletteIndex(
 					frame.DecodedFrameData[i],
 					frame.DecodedFrameData[i + 1],
 					frame.DecodedFrameData[i + 2],
 					palette,
-					paletteSize);
+					paletteSize,
+					code);
+
+				if (code != ErrorCode::Success) {
+					// Tạo thông báo lỗi
+					std::string errorMessage = "Failed to find palette index for pixel at position: " + std::to_string(i);
+					// Trả về sớm với mã lỗi và dữ liệu hiện tại
+					return { APIResult(code, errorMessage.c_str()), encryptedFrameData };
+				}
+
 				temp.push_back(index);
 				i += 4;
 				size++;
 				if ((i / 4) % frame.FrameInfo.Width == 0) {
 					break;
 				}
-
 			}
 			encryptedFrameData.push_back(size);
 			encryptedFrameData.push_back(alpha);
 			encryptedFrameData.insert(encryptedFrameData.end(), temp.begin(), temp.end());
 		}
 	}
-	return encryptedFrameData;
+	// Trả về thành công
+	return { APIResult(ErrorCode::Success, "Operation completed successfully."), encryptedFrameData };
 }
 
-void ExportToSPRFileInternal(const char* filePath,
+APIResult ExportToSPRFileInternal(const char* filePath,
 	SPRFileHead fileHead,
 	Color palette[],
 	int paletteSize,
@@ -88,11 +99,16 @@ void ExportToSPRFileInternal(const char* filePath,
 		// Encrypt frames
 		std::vector<std::vector<UCHAR>> encryptedFramesData;
 		for (int i = 0; i < fileHead.FrameCounts; i++) {
-			encryptedFramesData.push_back(EncryptFrameData(
+
+			auto encryptRes = EncryptFrameData(
 				palette,
 				paletteSize,
 				frame[i]
-			));
+			);
+			if (encryptRes.first.errorCode != ErrorCode::Success) {
+				return encryptRes.first;
+			}
+			encryptedFramesData.push_back(encryptRes.second);
 		}
 
 		// Export frame offset info
@@ -125,10 +141,15 @@ void ExportToSPRFileInternal(const char* filePath,
 
 		file.write(reinterpret_cast<char*>(exportedFileData.data()), exportedFileData.size());
 		file.close();
+		return APIResult();
+	}
+	else {
+		std::string message = "Failed to open file: " + std::string(filePath);
+		return APIResult(ErrorCode::InternalError, message.c_str());
 	}
 }
 
-void LoadSPRMemoryInternal(
+APIResult LoadSPRMemoryInternal(
 	const uint8_t* data,           // Mảng byte chứa dữ liệu SPR
 	size_t dataLength,             // Độ dài của mảng byte
 	SPRFileHead* fileHead,         // Con trỏ đến cấu trúc SPRFileHead để lưu thông tin
@@ -136,14 +157,14 @@ void LoadSPRMemoryInternal(
 	int* paletteLength,            // Con trỏ đến độ dài bảng màu
 	int* frameDataBeginPos,        // Con trỏ đến vị trí bắt đầu dữ liệu frame
 	FrameData** frame,             // Con trỏ đến mảng chứa dữ liệu frame sẽ được khởi tạo
-	int* frameCount                // Con trỏ đến số lượng khung hình
+	int* frameCount				// Con trỏ đến số lượng khung hình
 ) {
 	Log::I("SPR", "Start LoadSPRMemoryInternal");
 
 	// Kiểm tra dữ liệu truyền vào để đảm bảo không có giá trị null
 	if (!data || !palette || !paletteLength || !frameDataBeginPos || !frame || !frameCount) {
 		Log::E("Invalid arguments passed to LoadSPRMemoryInternal.");
-		return;
+		return APIResult(ErrorCode::InvalidArgument, "Invalid arguments passed to LoadSPRMemoryInternal.");
 	}
 
 	// Đọc thông tin file header từ bộ nhớ
@@ -194,13 +215,15 @@ void LoadSPRMemoryInternal(
 		long curDecPos = 0;
 		for (int i = 0; i < dataLength - 8;) {
 			if (curDecPos > decDataLength) {
-				throw std::runtime_error("Failed to decrypt, something's wrong!");
+				Log::E("Failed to decrypt, something's wrong!");
+				return APIResult(ErrorCode::InternalError, "Failed to decrypt, something's wrong!");
 			}
 			int size = data[frameDataPos + i];
 			int alpha = data[frameDataPos + i + 1];
 
 			if (size == -1 || alpha == -1) {
-				throw std::runtime_error("Failed to decrypt, something's wrong!");
+				Log::E("Failed to decrypt, something's wrong!");
+				return APIResult(ErrorCode::InternalError, "Failed to decrypt, something's wrong!");
 			}
 
 			if (alpha == 0x00) {
@@ -217,7 +240,8 @@ void LoadSPRMemoryInternal(
 				for (int j = 0; j < size; j++) {
 					int colorIndex = data[frameDataPos + i + 2 + j];
 					if (colorIndex == -1) {
-						throw std::runtime_error("Failed to decrypt, colorIndex must be greater than -1!");
+						Log::E("Failed to decrypt, colorIndex must be greater than -1!");
+						return APIResult(ErrorCode::InternalError, "Failed to decrypt, colorIndex must be greater than -1!");
 					}
 
 					(*frame)[frameIndex].DecodedFrameData[curDecPos * 4] = (*palette)[colorIndex].B;
@@ -231,9 +255,11 @@ void LoadSPRMemoryInternal(
 			i += 2 + size;
 		}
 	}
+
+	return APIResult();
 }
 
-void LoadSPRFileInternal(const char* filePath,
+APIResult LoadSPRFileInternal(const char* filePath,
 	SPRFileHead* fileHead,
 	Color** palette,
 	int* paletteLength,
@@ -246,16 +272,16 @@ void LoadSPRFileInternal(const char* filePath,
 	// Mở file và kiểm tra xem có mở thành công không
 	std::ifstream file(filePath, std::ios::binary | std::ios::ate);
 	if (!file.is_open()) {
-		std::cerr << "Failed to open file." << std::endl;
+		Log::E("LoadSPRFileInternal: Failed to open file");
 		*palette = nullptr;
-		return;
+		return APIResult(ErrorCode::InternalError, "LoadSPRFileInternal: Failed to open file");
 	}
 	std::streamsize fileSize = GetFileStreamSize(file);
 	char* fileData = GetFileStreamBuffer(file);
 	file.close();
 
 	// Gọi hàm LoadSPRMemoryInternal để xử lý dữ liệu từ mảng byte trong bộ nhớ
-	LoadSPRMemoryInternal(
+	APIResult result = LoadSPRMemoryInternal(
 		reinterpret_cast<uint8_t*>(fileData),
 		fileSize,
 		fileHead,
@@ -267,6 +293,7 @@ void LoadSPRFileInternal(const char* filePath,
 	);
 
 	MemoryManager::getInstance()->deallocate(fileData);
+	return result;
 }
 
 static void intToHexString(int value, char* output)
