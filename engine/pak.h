@@ -289,12 +289,12 @@ struct PACK_ITEM
 
 int ParsePakInfoFileInternal(const char* filename, PakInfoInternal& pakInfo);
 
-int ExtractPakInternal(const char* pakfilePath,
+APIResult ExtractPakInternal(const char* pakfilePath,
 	const char* outputRootPath,
 	PakInfoInternal pakInfo,
 	std::unique_ptr<PakHeader>& header, ProgressCallbackInternal progressCallback);
 
-int ExtractPakInternal(const char* pakfilePath,
+APIResult ExtractPakInternal(const char* pakfilePath,
 	const char* outputRootPath,
 	std::unique_ptr<PakHeader>& header, ProgressCallbackInternal progressCallback);
 
@@ -303,7 +303,7 @@ bool AddFileToPak(PACK_ITEM& currentPackItem,
 	const char* fullFolderFilePath,
 	int elementFileRootPathNotEnderLen,
 	int packFileShellOptionSprSplitFrameBalance);
-void CompressFolderToPakFileInternal(const char* inputFolderPath,
+APIResult CompressFolderToPakFileInternal(const char* inputFolderPath,
 	const char* outputFolderPath,
 	bool bExcludeOfCheckId,
 	ProgressCallbackInternal progressCallback);

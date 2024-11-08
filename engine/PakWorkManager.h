@@ -20,13 +20,13 @@ public:
     std::string LoadPakFile(const std::string& filePath, PakInfoInternal& pakInfoInternal, ProgressCallback progressCallback);
 
     // API: Đọc một đoạn byte từ file con
-    bool ReadSubFileData(const std::string& sessionToken, int subFileIndex, unsigned char*& buffer, size_t* subFileSize);
+    APIResult ReadSubFileData(const std::string& sessionToken, int subFileIndex, unsigned char*& buffer, size_t* subFileSize);
 
     // API: Trích xuất file con ra file output
-    bool ExtractSubFile(const std::string& sessionToken, int subFileIndex, const std::string& outputPath);
+    APIResult ExtractSubFile(const std::string& sessionToken, int subFileIndex, const std::string& outputPath);
 
     // API: Hủy phiên và xóa file tạm
-    void CloseSession(const std::string& sessionToken);
+    APIResult CloseSession(const std::string& sessionToken);
 
 private:
     static const std::string TAG;

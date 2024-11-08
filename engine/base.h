@@ -2,6 +2,7 @@
 #ifndef _ENGINE_BASE_H_
 #define _ENGINE_BASE_H_
 
+#include "ApiErrorCode.h"
 #include "Callback_ForSharp.h"
 #include "Callback_Internal.h"
 #include "MemoryManager.h"

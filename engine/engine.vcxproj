@@ -178,6 +178,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ApiErrorCode.h" />
     <ClInclude Include="base.h" />
     <ClInclude Include="BigAloneFile.h" />
     <ClInclude Include="Callback_Internal.h" />
