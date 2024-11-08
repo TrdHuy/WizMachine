@@ -248,6 +248,7 @@ namespace WizMachine.Services.Utils
             {
                 throw new Exception("Certificate has no permission!");
             }
+
         }
 
         public static WizMachine.Data.CertInfo GetSignedCertInfoFromFile(string filePath)
