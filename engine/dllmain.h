@@ -302,7 +302,7 @@ extern "C" {
 	 *     printf("Error: %s\n", result.errorMessage);
 	 * }
 	 */
-	DLL_API APIResult	GetCertificateInfo2(const char* filePath, CertInfo* certInfo);
+	//DLL_API APIResult	GetCertificateInfo2(const char* filePath, CertInfo* certInfo);
 	DLL_API int		GetCertificateInfo(const char* filePath, CertInfo* certInfo);
 
 	/**

@@ -24,7 +24,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 			CertInfo* certInfo = MemoryManager::getInstance()->allocate<CertInfo>();
 			char* pathChar = Wchar_t2CharPtr(path);
 			Log::I("MAIN", "Start verify cert for path: " + std::string(pathChar));
-			if (GetCertificateInfo2(pathChar, certInfo).errorCode == ErrorCode::Success) {
+			if (GetCertificateInfo(pathChar, certInfo) == 0) {
 				if (ForceCheckCertPermissionInternal(*certInfo)) {
 					MemoryManager::getInstance()->deallocate(static_cast<char*>(pathChar));
 					MemoryManager::getInstance()->deallocate(certInfo);
@@ -194,6 +194,7 @@ int GetCertificateInfo(const char* filePath, CertInfo* certInfo) {
 	return GetCertificateInfoInternal(filePath, certInfo);
 }
 
+// TODO: Gộp GetCertificateInfo -> GetCertificateInfo2
 APIResult GetCertificateInfo2(const char* filePath, CertInfo* certInfo) {
 	return GetCertificateInfoInternal2(filePath, certInfo);
 }
@@ -270,5 +271,5 @@ APIResult ReadBlockFromPakFile(const char* sessionToken,
 
 APIResult GetBlockIdFromPath(const char* blockPath, unsigned int* blockId) {
 	*blockId = g_FileNameHash(blockPath);
-	return APIResult(); 
+	return APIResult();
 }
