@@ -24,7 +24,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 			CertInfo* certInfo = MemoryManager::getInstance()->allocate<CertInfo>();
 			char* pathChar = Wchar_t2CharPtr(path);
 			Log::I("MAIN", "Start verify cert for path: " + std::string(pathChar));
-			if (GetCertificateInfo(pathChar, certInfo).errorCode == ErrorCode::Success) {
+			if (GetCertificateInfo2(pathChar, certInfo).errorCode == ErrorCode::Success) {
 				if (ForceCheckCertPermissionInternal(*certInfo)) {
 					MemoryManager::getInstance()->deallocate(static_cast<char*>(pathChar));
 					MemoryManager::getInstance()->deallocate(certInfo);
