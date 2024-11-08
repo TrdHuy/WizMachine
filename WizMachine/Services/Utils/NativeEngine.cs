@@ -270,7 +270,7 @@ namespace WizMachine.Services.Utils
             }
             else
             {
-                throw new Exception("Failed to retrieve certificate information. Error code: " + result.errorCode);
+                throw new Exception("Failed to retrieve certificate information. Error code: " + result.errorCode + "; message: " + result.errorMessage);
             }
             return cert;
         }
