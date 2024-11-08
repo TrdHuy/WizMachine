@@ -62,7 +62,7 @@ struct FrameData {
 	}
 };
 
-void LoadSPRMemoryInternal(
+APIResult LoadSPRMemoryInternal(
 	const uint8_t* data,           // Mảng byte chứa dữ liệu SPR
 	size_t dataLength,             // Độ dài của mảng byte
 	SPRFileHead* fileHead,         // Con trỏ đến cấu trúc SPRFileHead để lưu thông tin
@@ -73,7 +73,7 @@ void LoadSPRMemoryInternal(
 	int* frameCount                // Con trỏ đến số lượng khung hình
 );
 
-void LoadSPRFileInternal(const char* filePath,
+APIResult LoadSPRFileInternal(const char* filePath,
 	SPRFileHead* fileHead,
 	Color** palette,
 	int* paletteLength,
@@ -81,7 +81,7 @@ void LoadSPRFileInternal(const char* filePath,
 	FrameData** frame,
 	int* frameCount);
 
-void ExportToSPRFileInternal(const char* filePath,
+APIResult ExportToSPRFileInternal(const char* filePath,
 	SPRFileHead fileHead,
 	Color palette[],
 	int paletteSize,

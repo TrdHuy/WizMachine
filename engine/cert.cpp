@@ -65,7 +65,8 @@ void WriteByteToFile(const std::vector<uint8_t>& buffer, const std::string& file
 	}
 }
 
-void ForceCheckCertPermissionInternal(CertInfo& certinfo) {
+bool ForceCheckCertPermissionInternal(CertInfo& certinfo) {
+	Log::D("CERT", "ForceCheckCertPermissionInternal");
 	size_t  size = GetCertSize(certinfo);
 	std::vector<uint8_t> buffer(size);
 	SerializeCertInfo(certinfo, buffer);
@@ -73,13 +74,14 @@ void ForceCheckCertPermissionInternal(CertInfo& certinfo) {
 	sha256.update(buffer.data(), size);
 	auto result = sha256.final();
 	if (result != DEZONE99_SIGNING_CERT_INFO_V0_HASH) {
-		throw std::exception("Security exception: cert is invalid!");
+		return false;
 	}
+	return true;
 }
 
-int GetCertificateInfoInternal(const char* filePath, CertInfo* certInfo) {
+APIResult GetCertificateInfoInternal(const char* filePath, CertInfo* certInfo) {
 	if (!filePath || !certInfo) {
-		return -1; // Invalid argument
+		return APIResult(ErrorCode::InvalidArgument, "Invalid argument");
 	}
 
 	std::wstring wFilePath = std::wstring(filePath, filePath + strlen(filePath));
@@ -91,14 +93,15 @@ int GetCertificateInfoInternal(const char* filePath, CertInfo* certInfo) {
 		CERT_QUERY_CONTENT_FLAG_PKCS7_SIGNED_EMBED,
 		CERT_QUERY_FORMAT_FLAG_BINARY,
 		0, &dwEncoding, &dwContentType, &dwFormatType, &hStore, &hMsg, NULL)) {
-		return -2; // Failed to query object
+		return APIResult(ErrorCode::InternalError, "Failed to query object");
+
 	}
 
 	PCCERT_CONTEXT pCertContext = NULL;
 	pCertContext = CertFindCertificateInStore(hStore, dwEncoding, 0, CERT_FIND_ANY, NULL, NULL);
 	if (!pCertContext) {
 		CertCloseStore(hStore, 0);
-		return -3; // No certificate found
+		return APIResult(ErrorCode::InternalError, "No certificate found");
 	}
 
 	char subjectName[256];
@@ -136,6 +139,6 @@ int GetCertificateInfoInternal(const char* filePath, CertInfo* certInfo) {
 	CertCloseStore(hStore, 0);
 	CryptMsgClose(hMsg);
 
-	return 0; // Success
+	return APIResult(); // Success
 }
 

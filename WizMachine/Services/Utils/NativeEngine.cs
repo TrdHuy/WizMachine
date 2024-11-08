@@ -19,6 +19,26 @@ namespace WizMachine.Services.Utils
 
         private class NativeEngine
         {
+            public enum ErrorCode
+            {
+                Success = 0,        // Không có lỗi
+                InvalidArgument,    // Tham số không hợp lệ
+                OutOfMemory,        // Không đủ bộ nhớ
+                NotFound,           // Không tìm thấy
+                InternalError,      // Lỗi nội bộ
+                UnknownError,        // Lỗi không xác định
+                SecurityError,
+                ShouldNeverHappen
+            };
+            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+            public struct APIResult
+            {
+                public ErrorCode errorCode;
+
+                [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+                public string errorMessage;
+            }
+
             private const string ENGINE_DLL = "engine.dll";
 
             public struct NFrameInfo
@@ -62,8 +82,9 @@ namespace WizMachine.Services.Utils
                 public byte B;
             };
 
+            #region SPR
             [DllImport(ENGINE_DLL)]
-            public static extern void ExportToSPRFile(string filePath,
+            public static extern APIResult ExportToSPRFile(string filePath,
                 NSPRFileHead fileHead,
                 NColor[] palette,
                 int paletteSize,
@@ -84,7 +105,7 @@ namespace WizMachine.Services.Utils
             /// Đảm bảo giải phóng bộ nhớ đã cấp phát cho <paramref name="palette"/> và <paramref name="frame"/> sau khi sử dụng để tránh rò rỉ bộ nhớ.
             /// </remarks>
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
-            public static extern void LoadSPRFile(string filePath,
+            public static extern APIResult LoadSPRFile(string filePath,
                 ref NSPRFileHead fileHead,
                 out IntPtr palette,
                 out int paletteLength,
@@ -108,7 +129,7 @@ namespace WizMachine.Services.Utils
             /// Đảm bảo giải phóng bộ nhớ đã cấp phát cho <paramref name="palette"/> và <paramref name="frame"/> sau khi sử dụng để tránh rò rỉ bộ nhớ.
             /// </remarks>
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
-            public static extern void LoadSPRMemory(
+            public static extern APIResult LoadSPRMemory(
                 byte[] data,
                 int dataLength,
                 ref NSPRFileHead fileHead,
@@ -120,11 +141,11 @@ namespace WizMachine.Services.Utils
             );
 
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
-            public static extern void FreeSPRMemory(
+            public static extern APIResult FreeSPRMemory(
             IntPtr palette,
                 IntPtr frameData, int frameCount);
 
-
+            #endregion
 
             #region PAK
 
@@ -171,20 +192,20 @@ namespace WizMachine.Services.Utils
             public static extern IntPtr ReadBlockFromPakFile(string sessionToken, int subFileIndex, out ulong subFileSize);
 
             [DllImport(ENGINE_DLL, CharSet = CharSet.Ansi)]
-            public static extern void FreePakInfo(ref PakInfo pakInfo);
+            public static extern APIResult FreePakInfo(ref PakInfo pakInfo);
 
-            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.StdCall)]
-            public static extern void ParsePakInfoFile(string pakInfoPath,
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
+            public static extern APIResult ParsePakInfoFile(string pakInfoPath,
                 ref PakInfo pakInfo);
 
-            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.StdCall)]
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
             public static extern bool ExtractPakFile(string pakFilePath,
                 string? pakInfoPath,
                 string outputRootPath,
                 ProgressChangedCallback progressChangedCallback);
 
-            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.StdCall)]
-            public static extern void CompressFolderToPakFile(string pakFilePath,
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
+            public static extern APIResult CompressFolderToPakFile(string pakFilePath,
                 string outputRootPath,
                 bool bExcludeOfCheckId,
                 ProgressChangedCallback progressChangedCallback);
@@ -192,7 +213,7 @@ namespace WizMachine.Services.Utils
 
             #region CERT
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
-            public static extern void ForceCheckCertPermission(WizMachine.Data.CertInfo certinfo);
+            public static extern APIResult ForceCheckCertPermission(WizMachine.Data.CertInfo certinfo);
 
             [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
             public struct CertInfo
@@ -206,26 +227,30 @@ namespace WizMachine.Services.Utils
             }
 
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int GetCertificateInfo(string filePath, ref CertInfo certInfo);
+            public static extern APIResult GetCertificateInfo(string filePath, ref CertInfo certInfo);
 
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
-            public static extern void FreeCertInfo(ref CertInfo certInfo);
+            public static extern APIResult FreeCertInfo(ref CertInfo certInfo);
             #endregion
         }
 
         #region CERT
         public static void ForceCheckCertPermission(WizMachine.Data.CertInfo certinfo)
         {
-            NativeEngine.ForceCheckCertPermission(certinfo);
+            var apiRes = NativeEngine.ForceCheckCertPermission(certinfo);
+            if (apiRes.errorCode == NativeEngine.ErrorCode.SecurityError)
+            {
+                throw new Exception("Certificate has no permission!");
+            }
         }
 
         public static WizMachine.Data.CertInfo GetSignedCertInfoFromFile(string filePath)
         {
             WizMachine.Data.CertInfo cert = new WizMachine.Data.CertInfo();
             NativeEngine.CertInfo unsafeCertInfo = new NativeEngine.CertInfo();
-            int result = NativeEngine.GetCertificateInfo(filePath, ref unsafeCertInfo);
+            var result = NativeEngine.GetCertificateInfo(filePath, ref unsafeCertInfo);
 
-            if (result == 0)
+            if (result.errorCode == NativeEngine.ErrorCode.Success)
             {
                 cert.Subject = Marshal.PtrToStringAnsi(unsafeCertInfo.Subject) ?? "";
                 cert.Issuer = Marshal.PtrToStringAnsi(unsafeCertInfo.Issuer) ?? "";
@@ -239,7 +264,7 @@ namespace WizMachine.Services.Utils
             }
             else
             {
-                Console.WriteLine("Failed to retrieve certificate information. Error code: " + result);
+                throw new Exception("Failed to retrieve certificate information. Error code: " + result.errorCode);
             }
             return cert;
         }
@@ -318,14 +343,22 @@ namespace WizMachine.Services.Utils
         public static PakInfo ParsePakInfoFile(string pakInfoPath)
         {
             NativeEngine.PakInfo nPakInfo = new NativeEngine.PakInfo();
-            NativeEngine.ParsePakInfoFile(pakInfoPath, ref nPakInfo);
-            PakInfo appLayerPakInfo = ConvertNativePakInfo(nPakInfo);
+            var apiRes = NativeEngine.ParsePakInfoFile(pakInfoPath, ref nPakInfo);
+            if (apiRes.errorCode == NativeEngine.ErrorCode.Success)
+            {
+                PakInfo appLayerPakInfo = ConvertNativePakInfo(nPakInfo);
+                NativeEngine.FreePakInfo(ref nPakInfo);
+                // Mặc dù nPakInfo được khai báo trên C# (bộ nhớ của nPakInfo do C# quản lý)
+                // nhưng các element trong nPakInfo lại được khai báo và khởi tạo dưới C++
+                // vì vậy vẫn cần phải giải phóng bộ nhớ để tránh memory leak
+                return appLayerPakInfo;
 
-            // Mặc dù nPakInfo được khai báo trên C# (bộ nhớ của nPakInfo do C# quản lý)
-            // nhưng các element trong nPakInfo lại được khai báo và khởi tạo dưới C++
-            // vì vậy vẫn cần phải giải phóng bộ nhớ để tránh memory leak
-            NativeEngine.FreePakInfo(ref nPakInfo);
-            return appLayerPakInfo;
+            }
+            else
+            {
+                NativeEngine.FreePakInfo(ref nPakInfo);
+                throw new Exception(apiRes.errorMessage);
+            }
         }
 
         public static bool ExtractPakFile(string pakFilePath,
@@ -354,11 +387,18 @@ namespace WizMachine.Services.Utils
            string outputRootPath,
            ProgressChangedCallback? progressChangedCallback = null)
         {
-            NativeEngine.CompressFolderToPakFile(pakFilePath, outputRootPath, false,  (p, m) =>
+            var apiRes = NativeEngine.CompressFolderToPakFile(pakFilePath, outputRootPath, false, (p, m) =>
             {
                 progressChangedCallback?.Invoke(p, m);
             });
-            return true;
+            if (apiRes.errorCode == NativeEngine.ErrorCode.Success)
+            {
+                return true;
+            }
+            else
+            {
+                throw new Exception(apiRes.errorMessage);
+            }
         }
 
         private static PakInfo ConvertNativePakInfo(NativeEngine.PakInfo pakInfo)
@@ -412,38 +452,42 @@ namespace WizMachine.Services.Utils
             int nativePaletteLength, frameCount;
 
 
-            NativeEngine.LoadSPRFile(filePath,
-                ref nFileHead,
-                out palettePtr,
-                out nativePaletteLength,
-                out frameDataBeginPos,
-                out framePtr,
-                out frameCount);
-
-            NativeEngine.NColor[] nPalette = new NativeEngine.NColor[nativePaletteLength];
-            int structSize = Marshal.SizeOf(typeof(NativeEngine.NColor));
-            for (int i = 0; i < nativePaletteLength; i++)
+            var apiResult = NativeEngine.LoadSPRFile(filePath,
+                 ref nFileHead,
+                 out palettePtr,
+                 out nativePaletteLength,
+                 out frameDataBeginPos,
+                 out framePtr,
+                 out frameCount);
+            if (apiResult.errorCode == NativeEngine.ErrorCode.Success)
             {
-                IntPtr colorPtr = IntPtr.Add(palettePtr, i * structSize);
-                nPalette[i] = Marshal.PtrToStructure<NativeEngine.NColor>(colorPtr);
-            }
-            palette = ConvertNativeColorPaletteToAppData(nPalette, nativePaletteLength);
-            sprFileHead = ConvertNativeSprFileHeadToAppData(nFileHead);
+                NativeEngine.NColor[] nPalette = new NativeEngine.NColor[nativePaletteLength];
+                int structSize = Marshal.SizeOf(typeof(NativeEngine.NColor));
+                for (int i = 0; i < nativePaletteLength; i++)
+                {
+                    IntPtr colorPtr = IntPtr.Add(palettePtr, i * structSize);
+                    nPalette[i] = Marshal.PtrToStructure<NativeEngine.NColor>(colorPtr);
+                }
+                palette = ConvertNativeColorPaletteToAppData(nPalette, nativePaletteLength);
+                sprFileHead = ConvertNativeSprFileHeadToAppData(nFileHead);
 
-            NativeEngine.NFrameData[] nFrameData = new NativeEngine.NFrameData[frameCount];
-            structSize = Marshal.SizeOf(typeof(NativeEngine.NFrameData));
-            frameRGBA = new FrameRGBA[frameCount];
-            for (int i = 0; i < frameCount; i++)
+                NativeEngine.NFrameData[] nFrameData = new NativeEngine.NFrameData[frameCount];
+                structSize = Marshal.SizeOf(typeof(NativeEngine.NFrameData));
+                frameRGBA = new FrameRGBA[frameCount];
+                for (int i = 0; i < frameCount; i++)
+                {
+                    IntPtr framDataPtr = IntPtr.Add(framePtr, i * structSize);
+                    nFrameData[i] = Marshal.PtrToStructure<NativeEngine.NFrameData>(framDataPtr);
+                    frameRGBA[i] = ConvertFrameDataToAppData(nFrameData[i]);
+                }
+                NativeEngine.FreeSPRMemory(palettePtr, framePtr, frameCount);
+                return true;
+            }
+            else
             {
-                IntPtr framDataPtr = IntPtr.Add(framePtr, i * structSize);
-                nFrameData[i] = Marshal.PtrToStructure<NativeEngine.NFrameData>(framDataPtr);
-                frameRGBA[i] = ConvertFrameDataToAppData(nFrameData[i]);
+                throw new Exception($"Failed to load SPR file in native: {apiResult.errorMessage}");
             }
 
-
-            NativeEngine.FreeSPRMemory(palettePtr, framePtr, frameCount);
-
-            return true;
         }
 
         public static bool LoadSPRFromMemory(byte[] sprData,

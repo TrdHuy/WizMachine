@@ -14,7 +14,7 @@ struct CertInfo {
 	const char* SerialNumber;
 };
 
-void ForceCheckCertPermissionInternal(CertInfo& certinfo);
+bool ForceCheckCertPermissionInternal(CertInfo& certinfo);
 
-int GetCertificateInfoInternal(const char* filePath, CertInfo* certInfo);
+APIResult GetCertificateInfoInternal(const char* filePath, CertInfo* certInfo);
 #endif
