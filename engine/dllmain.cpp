@@ -208,7 +208,10 @@ APIResult FreeCertInfo(CertInfo* certInfo) {
 	return APIResult();
 }
 
-const char* LoadPakFileToWorkManager(const char* filePath, PakInfo* pakInfo, ProgressCallback progressCallback) {
+const APIResult LoadPakFileToWorkManager(const char* filePath,
+	PakInfo* pakInfo,
+	ProgressCallback progressCallback,
+	char** sessionTokenOut) {
 	// Lấy instance duy nhất của PakWorkManager
 	PakWorkManager* manager = PakWorkManager::GetInstance();
 	PakInfoInternal pakInfoInternal;
@@ -218,40 +221,50 @@ const char* LoadPakFileToWorkManager(const char* filePath, PakInfo* pakInfo, Pro
 
 	// Nếu không tạo được token, trả về null
 	if (sessionToken.empty()) {
-		return nullptr;
+		Log::E("MAIN", "LoadPakFileToWorkManager: Failed to create a session!");
+		return APIResult(ErrorCode::InternalError, "LoadPakFileToWorkManager: Failed to create a session!");
 	}
 
 	// Lấy instance của MemoryManager để cấp phát bộ nhớ cho chuỗi kết quả
 	MemoryManager* memManager = MemoryManager::getInstance();
-	char* result = memManager->allocateArray<char>(sessionToken.size() + 1);
-	strcpy_s(result, sessionToken.size() + 1, sessionToken.c_str());
+	*sessionTokenOut = memManager->allocateArray<char>(sessionToken.size() + 1);
+	strcpy_s(*sessionTokenOut, sessionToken.size() + 1, sessionToken.c_str());
 
 	pakInfoInternal.ConvertToPakInfo(*pakInfo);
-	return result;
+	return APIResult();
 }
 
-void ClosePakFileSession(const char* sessionString) {
+APIResult ClosePakFileSession(const char* sessionString) {
 	PakWorkManager* manager = PakWorkManager::GetInstance();
-	manager->CloseSession(sessionString);
+	return manager->CloseSession(sessionString);
 }
 
-bool ExtractBlockFromPakFile(const char* sessionString, int subFileIndex, const char* outputPath) {
+APIResult ExtractBlockFromPakFile(const char* sessionString, int subFileIndex, const char* outputPath) {
 	PakWorkManager* manager = PakWorkManager::GetInstance();
 	return manager->ExtractSubFile(sessionString, subFileIndex, outputPath);
 }
 
-bool FreeBuffer(void* buffer) {
+APIResult FreeBuffer(void* buffer) {
 	MemoryManager* memManager = MemoryManager::getInstance();
-	return memManager->deallocate(buffer);
+	memManager->deallocate(buffer);
+	return APIResult();
 }
 
-unsigned char* ReadBlockFromPakFile(const char* sessionToken, int subFileIndex, size_t* subFileSize) {
+APIResult ReadBlockFromPakFile(const char* sessionToken,
+	int subFileIndex,
+	size_t* subFileSize,
+	char** blockData) {
 	unsigned char* buffer = nullptr;
 	PakWorkManager* manager = PakWorkManager::GetInstance();
-	manager->ReadSubFileData(sessionToken, subFileIndex, buffer, subFileSize);
-	return buffer;
+	auto result = manager->ReadSubFileData(sessionToken, subFileIndex, buffer, subFileSize);
+	*blockData = reinterpret_cast<char*>(buffer);
+	if (result.errorCode != ErrorCode::Success && buffer != nullptr) {
+		MemoryManager::getInstance()->deallocate(buffer);
+	}
+	return result;
 }
 
-unsigned int GetBlockIdFromPath(const char* blockPath) {
-	return g_FileNameHash(blockPath);
+APIResult GetBlockIdFromPath(const char* blockPath, unsigned int* blockId) {
+	*blockId = g_FileNameHash(blockPath);
+	return APIResult(); 
 }

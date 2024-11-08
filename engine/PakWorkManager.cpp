@@ -42,11 +42,11 @@ bool PakWorkManager::ValidateSessionToken(const std::string& sessionToken, const
 	return sessionToken == std::string(tokenBuffer, sessionToken.size());
 }
 
-void PakWorkManager::CloseSession(const std::string& sessionToken) {
+APIResult PakWorkManager::CloseSession(const std::string& sessionToken) {
 	auto sessionIt = sessionFiles.find(sessionToken);
 	if (sessionIt == sessionFiles.end()) {
 		Log::E(TAG, "Invalid session token: ", sessionToken);
-		throw std::runtime_error("Invalid session token!");
+		return APIResult(ErrorCode::InternalError, "PakWorkManager::CloseSession Invalid session token!");
 	}
 	auto tempFile = sessionIt->second.tempFile;
 	const std::string& tempFilePath = tempFile->getFullPath();
@@ -59,6 +59,7 @@ void PakWorkManager::CloseSession(const std::string& sessionToken) {
 	}
 
 	sessionFiles.erase(sessionIt);
+	return APIResult();
 }
 
 // Cập nhật hàm LoadPakFile để tạo 1 file tạm duy nhất
@@ -66,7 +67,7 @@ std::string PakWorkManager::LoadPakFile(const std::string& filePath,
 	PakInfoInternal& pakInfoInternal, ProgressCallback progressCallback) {
 	double progress = 0;
 
-	if(progressCallback != nullptr)
+	if (progressCallback != nullptr)
 		progressCallback(progress, "Init session");
 
 	// Khởi tạo AloneFile để mở file .pak
@@ -202,11 +203,11 @@ std::pair<std::streampos, std::streampos> PakWorkManager::GetSubFilePosition(
 }
 
 
-bool PakWorkManager::ReadSubFileData(const std::string& sessionToken, int subFileIndex, unsigned char*& buffer, size_t* subFileSize) {
+APIResult PakWorkManager::ReadSubFileData(const std::string& sessionToken, int subFileIndex, unsigned char*& buffer, size_t* subFileSize) {
 	auto sessionIt = sessionFiles.find(sessionToken);
 	if (sessionIt == sessionFiles.end()) {
 		Log::E(TAG, "Invalid session token: ", sessionToken);
-		throw std::runtime_error("Invalid session token!");
+		return APIResult(ErrorCode::InternalError, "Invalid session token " + sessionToken);
 	}
 
 	auto tempFile = sessionIt->second.tempFile;
@@ -214,13 +215,14 @@ bool PakWorkManager::ReadSubFileData(const std::string& sessionToken, int subFil
 
 	if (!tempFile->isOpen()) {
 		Log::E(TAG, "Failed to open temporary file: ", tempFilePath);
-		throw std::runtime_error("Failed to open temporary file!");
+		return APIResult(ErrorCode::InternalError, "Failed to open temporary file: " + tempFilePath);
+
 	}
 
 	auto subFilePos = GetSubFilePosition(sessionIt->second, subFileIndex);
 	if (subFilePos.first == -1) {
 		Log::E(TAG, "Invalid sub-file index: ", subFileIndex);
-		throw std::runtime_error("Invalid sub-file index!");
+		return APIResult(ErrorCode::InternalError, "Invalid sub-file index!" + subFileIndex);
 	}
 
 	// Tính toán kích thước của sub-file
@@ -229,18 +231,18 @@ bool PakWorkManager::ReadSubFileData(const std::string& sessionToken, int subFil
 	// Đảm bảo buffer đủ lớn để chứa dữ liệu
 	if (buffer == nullptr) {
 		Log::E(TAG, "Buffer is null");
-		throw std::runtime_error("Buffer is null!");
+		return APIResult(ErrorCode::InternalError, "Buffer is null!");
 	}
 
 	// Đọc dữ liệu từ file tạm
 	tempFile->readFrom(subFilePos.first, buffer, *subFileSize);
 
-	return true; // Trả về true nếu đọc thành công
+	return APIResult(); // Trả về true nếu đọc thành công
 }
 
 
 //Triển khai hàm ExtractSubFile: Trích xuất file con ra file output
-bool PakWorkManager::ExtractSubFile(const std::string& sessionToken, int subFileIndex, const std::string& outputPath) {
+APIResult PakWorkManager::ExtractSubFile(const std::string& sessionToken, int subFileIndex, const std::string& outputPath) {
 	size_t subFileSize;
 	unsigned char* buffer = nullptr; // Khai báo con trỏ buffer
 	ReadSubFileData(sessionToken, subFileIndex, buffer, &subFileSize);
@@ -250,17 +252,17 @@ bool PakWorkManager::ExtractSubFile(const std::string& sessionToken, int subFile
 	std::ofstream outputFile(outputPath, std::ios::binary);
 	if (!outputFile.is_open()) {
 		Log::E(TAG, "Failed to create output file: ", outputPath);
-		throw std::runtime_error("Failed to create output file!");
+		return APIResult(ErrorCode::InternalError, "PakWorkManager::ExtractSubFile Failed to create output file: " + outputPath);
 	}
 
 	if (buffer == nullptr) {
 		Log::E(TAG, "Buffer is null");
-		throw std::runtime_error("Buffer is null!");
+		return APIResult(ErrorCode::InternalError, "PakWorkManager::ExtractSubFile Buffer is null!");
 	}
 
 	outputFile.write(reinterpret_cast<const char*>(buffer), subFileSize);
 	outputFile.close();
 	MemoryManager::getInstance()->deallocate(buffer);
-	return true;
+	return APIResult();
 }
 

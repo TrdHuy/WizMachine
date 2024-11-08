@@ -174,22 +174,28 @@ namespace WizMachine.Services.Utils
                 public int fileCount;
             }
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
-            public static extern uint GetBlockIdFromPath(string blockPath);
+            public static extern APIResult GetBlockIdFromPath(string blockPath, out uint blockId);
 
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
-            public static extern bool ExtractBlockFromPakFile(string sessionString, int subFileIndex, string outputPath);
+            public static extern APIResult ExtractBlockFromPakFile(string sessionString, int subFileIndex, string outputPath);
 
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
-            public static extern IntPtr LoadPakFileToWorkManager(string filePath, ref PakInfo pakInfo, ProgressChangedCallback progressChangedCallback);
+            public static extern APIResult LoadPakFileToWorkManager(string filePath,
+                ref PakInfo pakInfo,
+                ProgressChangedCallback progressChangedCallback,
+                out IntPtr sessionTokenPtr);
 
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
-            public static extern void ClosePakFileSession(string sessionString);
+            public static extern APIResult ClosePakFileSession(string sessionString);
 
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
-            public static extern bool FreeBuffer(IntPtr buffer);
+            public static extern APIResult FreeBuffer(IntPtr buffer);
 
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
-            public static extern IntPtr ReadBlockFromPakFile(string sessionToken, int subFileIndex, out ulong subFileSize);
+            public static extern APIResult ReadBlockFromPakFile(string sessionToken,
+                int subFileIndex,
+                out ulong subFileSize,
+                out IntPtr blockData);
 
             [DllImport(ENGINE_DLL, CharSet = CharSet.Ansi)]
             public static extern APIResult FreePakInfo(ref PakInfo pakInfo);
@@ -199,7 +205,7 @@ namespace WizMachine.Services.Utils
                 ref PakInfo pakInfo);
 
             [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
-            public static extern bool ExtractPakFile(string pakFilePath,
+            public static extern APIResult ExtractPakFile(string pakFilePath,
                 string? pakInfoPath,
                 string outputRootPath,
                 ProgressChangedCallback progressChangedCallback);
@@ -275,7 +281,15 @@ namespace WizMachine.Services.Utils
         public static byte[] ReadBlockFromPak(string sessionToken, int blockIndex)
         {
             ulong blockSize;
-            IntPtr bufferPtr = NativeEngine.ReadBlockFromPakFile(sessionToken, blockIndex, out blockSize);
+            var apiResult = NativeEngine.ReadBlockFromPakFile(sessionToken,
+                blockIndex,
+                out blockSize,
+                out IntPtr bufferPtr);
+
+            if (apiResult.errorCode != NativeEngine.ErrorCode.Success)
+            {
+                throw new Exception(apiResult.errorMessage);
+            }
 
             if (bufferPtr == IntPtr.Zero)
             {
@@ -296,7 +310,12 @@ namespace WizMachine.Services.Utils
 
         public static uint GetBlockIdFromPath(string blockPath)
         {
-            return NativeEngine.GetBlockIdFromPath(blockPath);
+            var apiRes = NativeEngine.GetBlockIdFromPath(blockPath, out uint blockId);
+            if (apiRes.errorCode != NativeEngine.ErrorCode.Success)
+            {
+                throw new Exception(apiRes.errorMessage);
+            }
+            return blockId;
         }
 
         public static string LoadPakFileToWorkManager(string filePath,
@@ -304,10 +323,15 @@ namespace WizMachine.Services.Utils
             ProgressChangedCallback? progressChangedCallback = null)
         {
             NativeEngine.PakInfo nPakInfo = new NativeEngine.PakInfo();
-            IntPtr sessionPtr = NativeEngine.LoadPakFileToWorkManager(filePath, ref nPakInfo, progressChangedCallback: (progress, message) =>
+            var apiRes = NativeEngine.LoadPakFileToWorkManager(filePath, ref nPakInfo, progressChangedCallback: (progress, message) =>
             {
                 progressChangedCallback?.Invoke(progress, message);
-            });
+            }, out IntPtr sessionPtr);
+
+            if (apiRes.errorCode != NativeEngine.ErrorCode.Success)
+            {
+                throw new Exception(apiRes.errorMessage);
+            }
             if (sessionPtr == IntPtr.Zero)
             {
                 throw new InvalidOperationException("Failed to load .pak file.");
@@ -322,21 +346,26 @@ namespace WizMachine.Services.Utils
 
         public static bool ExtractFileFromPak(string sessionToken, int subFileIndex, string outputPath)
         {
-            return NativeEngine.ExtractBlockFromPakFile(sessionToken, subFileIndex, outputPath);
+            NativeEngine.ExtractBlockFromPakFile(sessionToken, subFileIndex, outputPath).Apply(it =>
+            {
+                if (it.errorCode != NativeEngine.ErrorCode.Success)
+                {
+                    throw new Exception(it.errorMessage);
+                }
+            });
+            return true;
         }
 
         public static bool CloseSession(string sessionString)
         {
-            try
+            return NativeEngine.ClosePakFileSession(sessionString).Let(it =>
             {
-                NativeEngine.ClosePakFileSession(sessionString);
+                if (it.errorCode != NativeEngine.ErrorCode.Success)
+                {
+                    return false;
+                }
                 return true;
-            }
-            catch
-            {
-                Logger.Raw.E($"{TAG}: Failed to close session!");
-                return false;
-            }
+            });
         }
 
 
@@ -366,20 +395,31 @@ namespace WizMachine.Services.Utils
             string outputRootPath,
             ProgressChangedCallback? progressChangedCallback = null)
         {
-            return NativeEngine.ExtractPakFile(pakFilePath, pakInfoPath, outputRootPath, (p, m) =>
+            var apiRes = NativeEngine.ExtractPakFile(pakFilePath, pakInfoPath, outputRootPath, (p, m) =>
             {
                 progressChangedCallback?.Invoke(p, m);
             });
+
+            if (apiRes.errorCode != NativeEngine.ErrorCode.Success)
+            {
+                throw new Exception(apiRes.errorMessage);
+            }
+
+            return true;
         }
 
         public static bool ExtractPakFile(string pakFilePath,
            string outputRootPath,
            ProgressChangedCallback? progressChangedCallback = null)
         {
-            NativeEngine.ExtractPakFile(pakFilePath, null, outputRootPath, (p, m) =>
+            var apiRes = NativeEngine.ExtractPakFile(pakFilePath, null, outputRootPath, (p, m) =>
             {
                 progressChangedCallback?.Invoke(p, m);
             });
+            if (apiRes.errorCode != NativeEngine.ErrorCode.Success)
+            {
+                throw new Exception(apiRes.errorMessage);
+            }
             return true;
         }
 
