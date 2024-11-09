@@ -7,8 +7,13 @@
     <DllPathDir>$(WizSolutionDirectory)\bin\$(Configuration)\$(Platform)</DllPathDir>
     <DllPathFile>$(DllPathDir)\cpp_output_path.txt</DllPathFile>
     <GetSignToolPath>$(WizSolutionDirectory)\GetSignToolPath.ps1</GetSignToolPath>
+	<GenerateVersionRcPath>$(WizSolutionDirectory)\GenerateVersionRc.ps1</GenerateVersionRcPath>
     <SignToolPathResuleCachePath>$(WizSolutionDirectory)\bin\signtoolpath.txt</SignToolPathResuleCachePath>
     <BuildTag>ENGINE_BUILD_TAG</BuildTag>
+	<VersionMajor>1</VersionMajor>
+	<VersionMinor>0</VersionMinor>
+	<VersionPatch>6</VersionPatch>
+	<VersionBuild>0</VersionBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(EngineProjectDir)\bin\publish\$(Platform)\$(Configuration)\</OutDir>
@@ -189,6 +194,7 @@
     <ClInclude Include="LogUtil.h" />
     <ClInclude Include="MemoryManager.h" />
     <ClInclude Include="PakWorkManager.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="sha256.h" />
     <ClInclude Include="Callback_ForSharp.h" />
     <ClInclude Include="spr.h" />
@@ -237,6 +243,9 @@
   <ItemGroup>
     <None Include="crc64 explain" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="version.rc" />
+  </ItemGroup>
   <ItemDefinitionGroup>
     <PreBuildEvent>
       <Command>
@@ -254,6 +263,9 @@
       <Command Condition="'$(Platform)'=='Win32'">
 				powershell -ExecutionPolicy Bypass -File "$(GetSignToolPath)" -platform x86 -resCacheFilePath "$(SignToolPathResuleCachePath)"
 			</Command>
+		<Command>
+		  powershell -ExecutionPolicy Bypass -File "$(GenerateVersionRcPath)" -ProjectDir $(EngineProjectDir) -VersionMajor $(VersionMajor) -VersionMinor $(VersionMinor) -VersionPatch $(VersionPatch) -VersionBuild $(VersionBuild)
+		</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>

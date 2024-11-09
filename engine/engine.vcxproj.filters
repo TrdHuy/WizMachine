@@ -108,6 +108,9 @@
     <ClInclude Include="CertManager.h">
       <Filter>Header Files\Domain</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -156,5 +159,10 @@
     <CustomBuild Include="crc64.asm">
       <Filter>Source Files\Common\Crypto</Filter>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="version.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
