@@ -81,6 +81,10 @@ void Log::LogToFile(const std::string& logLevel, const std::string& tag, const s
 
     std::string timestamp = GetCurrentTimestamp();
     logFile << timestamp << "\t" << logLevel << "\t" << tag << "\t" << message << std::endl;
+
+    // Gửi log tới Output Window của Visual Studio
+    std::string debugMessage = "[" + GetCurrentTimestamp() + "] [" + logLevel + "] [" + tag + "] " + message + "\n";
+    OutputDebugStringA(debugMessage.c_str());
 }
 
 //// Ghi log thông tin (INFO) với TAG
