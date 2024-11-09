@@ -67,6 +67,7 @@ public:
 				isCertChecked = true;
 				MemoryManager::getInstance()->deallocate(static_cast<char*>(pathChar));
 				MemoryManager::getInstance()->deallocate(certInfo);
+				Log::I("CertManager", "Verified certificate!");
 				return CertCheckResult::Success;
 			}
 			else {
