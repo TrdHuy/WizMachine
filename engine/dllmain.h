@@ -68,7 +68,7 @@ extern "C" {
 	 *     printf("Error loading SPR file: %s\n", result.errorMessage);
 	 * }
 	 */
-	DLL_API APIResult LoadSPRFile(const char* filePath,
+	DLL_API APIResult __cdecl LoadSPRFile(const char* filePath,
 		SPRFileHead* fileHead,
 		Color** palette,
 		int* paletteLength,
@@ -136,7 +136,7 @@ extern "C" {
 	 * if (palette) MemoryManager::getInstance()->deallocate(palette);
 	 * if (frame) MemoryManager::getInstance()->deallocate(frame);
 	 */
-	DLL_API APIResult LoadSPRMemory(
+	DLL_API APIResult __cdecl LoadSPRMemory(
 		const uint8_t* data,
 		size_t dataLength,
 		SPRFileHead* fileHead,
@@ -180,7 +180,7 @@ extern "C" {
 	 *     frameData = nullptr;
 	 * }
 	 */
-	DLL_API APIResult FreeSPRMemory(
+	DLL_API APIResult __cdecl  FreeSPRMemory(
 		Color* palette,
 		FrameData* frame, int frameCount);
 	/**
@@ -226,7 +226,7 @@ extern "C" {
 	 *     printf("Error exporting SPR file: %s\n", result.errorMessage);
 	 * }
 	 */
-	DLL_API APIResult ExportToSPRFile(const char* filePath,
+	DLL_API APIResult __cdecl  ExportToSPRFile(const char* filePath,
 		SPRFileHead fileHead,
 		Color palette[],
 		int paletteSize,
@@ -259,7 +259,7 @@ extern "C" {
 	 *     printf("Error checking certificate: %s\n", result.errorMessage);
 	 * }
 	 */
-	DLL_API APIResult	ForceCheckCertPermission(CertInfo certinfo);
+	DLL_API APIResult __cdecl 	ForceCheckCertPermission(CertInfo certinfo);
 	/**
 	 * @brief Lấy thông tin từ chứng chỉ được lưu trong tệp.
 	 *
@@ -302,7 +302,7 @@ extern "C" {
 	 *     printf("Error: %s\n", result.errorMessage);
 	 * }
 	 */
-	//DLL_API APIResult	GetCertificateInfo2(const char* filePath, CertInfo* certInfo);
+	 //DLL_API APIResult	GetCertificateInfo2(const char* filePath, CertInfo* certInfo);
 	DLL_API int		GetCertificateInfo(const char* filePath, CertInfo* certInfo);
 
 	/**
@@ -333,7 +333,7 @@ extern "C" {
 	 *     printf("Error freeing certificate info memory: %s\n", result.errorMessage);
 	 * }
 	 */
-	DLL_API APIResult	FreeCertInfo(CertInfo* certInfo);
+	DLL_API APIResult __cdecl 	FreeCertInfo(CertInfo* certInfo);
 
 	/**
 	 * @brief Nén một thư mục thành tệp .pak.
@@ -378,7 +378,7 @@ extern "C" {
 	 *     printf("Error compressing folder: %s\n", result.errorMessage);
 	 * }
 	 */
-	DLL_API APIResult	CompressFolderToPakFile(const char* folderPath,
+	DLL_API APIResult __cdecl 	CompressFolderToPakFile(const char* folderPath,
 		const char* outputPath,
 		bool bExcludeOfCheckId,
 		ProgressCallback progressCallback);
@@ -419,7 +419,7 @@ extern "C" {
 	 *     printf("Error: %s\n", result.errorMessage);
 	 * }
 	 */
-	DLL_API const APIResult LoadPakFileToWorkManager(const char* filePath,
+	DLL_API const APIResult __cdecl  LoadPakFileToWorkManager(const char* filePath,
 		PakInfo* pakInfo,
 		ProgressCallback progressCallback,
 		char** sessionToken);
@@ -451,7 +451,7 @@ extern "C" {
 	 *     printf("Error freeing PakInfo: %s\n", result.errorMessage);
 	 * }
 	 */
-	DLL_API APIResult FreePakInfo(PakInfo* pakInfo);
+	DLL_API APIResult __cdecl  FreePakInfo(PakInfo* pakInfo);
 	/**
 	 * @brief Phân tích và trích xuất thông tin từ tệp tin pak info.
 	 *
@@ -482,7 +482,7 @@ extern "C" {
 	 *     printf("Error parsing pak info: %s\n", result.errorMessage);
 	 * }
 	 */
-	DLL_API APIResult ParsePakInfoFile(const char* pakInfoPath, PakInfo* pakInfo);
+	DLL_API APIResult __cdecl ParsePakInfoFile(const char* pakInfoPath, PakInfo* pakInfo);
 	/**
 	 * @brief Trích xuất nội dung của tệp .pak và lưu trữ tại thư mục đích.
 	 *
@@ -525,7 +525,7 @@ extern "C" {
 	 *     printf("Error extracting pak file: %s\n", result.errorMessage);
 	 * }
 	 */
-	DLL_API APIResult ExtractPakFile(const char* pakFilePath,
+	DLL_API APIResult __cdecl  ExtractPakFile(const char* pakFilePath,
 		const char* pakInfoPath,
 		const char* outputRootPath,
 		ProgressCallback progressCallback);
@@ -558,13 +558,13 @@ extern "C" {
 	 *     printf("Error closing session: %s\n", result.errorMessage);
 	 * }
 	 */
-	DLL_API APIResult ClosePakFileSession(const char* sessionString);
-	DLL_API APIResult ExtractBlockFromPakFile(const char* sessionString, int subFileIndex, const char* outputPath);
-	DLL_API APIResult FreeBuffer(void* buffer);
-	DLL_API APIResult ReadBlockFromPakFile(const char* sessionToken,
+	DLL_API APIResult __cdecl ClosePakFileSession(const char* sessionString);
+	DLL_API APIResult __cdecl ExtractBlockFromPakFile(const char* sessionString, int subFileIndex, const char* outputPath);
+	DLL_API APIResult __cdecl FreeBuffer(void* buffer);
+	DLL_API APIResult __cdecl ReadBlockFromPakFile(const char* sessionToken,
 		int subFileIndex,
 		size_t* subFileSize,
 		char** blockData);
-	DLL_API APIResult  GetBlockIdFromPath(const char* blockPath, unsigned int* blockId);
+	DLL_API APIResult  __cdecl GetBlockIdFromPath(const char* blockPath, unsigned int* blockId);
 
 }

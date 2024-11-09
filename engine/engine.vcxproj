@@ -183,6 +183,7 @@
     <ClInclude Include="BigAloneFile.h" />
     <ClInclude Include="Callback_Internal.h" />
     <ClInclude Include="cert.h" />
+    <ClInclude Include="CertManager.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="file_alone.h" />
     <ClInclude Include="LogUtil.h" />
