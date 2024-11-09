@@ -6,6 +6,7 @@
 #include "Callback_ForSharp.h"
 #include "Callback_Internal.h"
 #include "MemoryManager.h"
+#include "CertManager.h"
 #include "LogUtil.h"
 #include "framework.h"
 #include "dllmain.h"

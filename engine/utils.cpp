@@ -53,6 +53,33 @@ char* Wchar_t2CharPtr(wchar_t* str) {
 	return charString;
 }
 
+char* Wchar_t2CharPtr(const wchar_t* str) { // Sửa thành const wchar_t*
+	if (str == nullptr) {
+		return nullptr; // Trả về nullptr nếu đầu vào không hợp lệ
+	}
+
+	// Tính chiều dài chuỗi wchar_t (không bao gồm null terminator)
+	const size_t length = wcslen(str);
+
+	// Cấp phát bộ nhớ cho chuỗi ký tự char* với null terminator
+	char* charString = MemoryManager::getInstance()->allocateArray<char>(length + 1);
+	if (charString == nullptr) {
+		return nullptr; // Trả về nullptr nếu cấp phát bộ nhớ thất bại
+	}
+
+	// Chuyển đổi từ wchar_t* sang char*
+	size_t numConverted = 0;
+	errno_t result = wcstombs_s(&numConverted, charString, length + 1, str, length);
+	if (result != 0) {
+		// Xử lý lỗi nếu chuyển đổi thất bại
+		MemoryManager::getInstance()->deallocate(charString);
+		return nullptr;
+	}
+
+	return charString;
+}
+
+
 char* GetFileStreamBuffer(std::ifstream& fileStream) {
 	if (!fileStream.is_open()) {
 		return nullptr;

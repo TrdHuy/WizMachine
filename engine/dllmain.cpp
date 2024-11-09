@@ -24,29 +24,8 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 			CertInfo* certInfo = MemoryManager::getInstance()->allocate<CertInfo>();
 			char* pathChar = Wchar_t2CharPtr(path);
 			Log::I("MAIN", "Start verify cert for path: " + std::string(pathChar));
-			if (GetCertificateInfo(pathChar, certInfo) == 0) {
-				if (ForceCheckCertPermissionInternal(*certInfo)) {
-					MemoryManager::getInstance()->deallocate(static_cast<char*>(pathChar));
-					MemoryManager::getInstance()->deallocate(certInfo);
-				}
-				else {
-					Log::E("MAIN", "Invalid cert permission!");
-					return FALSE;
-				}
-			}
-			else {
-				MemoryManager::getInstance()->deallocate(static_cast<char*>(pathChar));
-				MemoryManager::getInstance()->deallocate(certInfo);
-
-				Log::E("MAIN", "Security exception: Path" + std::string(pathChar) + " cert is invalid! Package: ");
-				return FALSE;
-			}
 		}
-		else
-		{
-			Log::E("MAIN", "Failed to get module file!");
-			return FALSE;
-		}
+		CertManager::getInstance().initialize(path);
 		break;
 	}
 	case DLL_THREAD_ATTACH:
@@ -68,13 +47,18 @@ APIResult LoadSPRFile(const char* filePath,
 	int* frameDataBeginPos,
 	FrameData** frame,
 	int* frameCount) {
-	return LoadSPRFileInternal(filePath,
-		fileHead,
-		palette,
-		paletteLength,
-		frameDataBeginPos,
-		frame,
-		frameCount);
+	if (CertManager::getInstance().checkCertificate() == CertCheckResult::Success) {
+		return LoadSPRFileInternal(filePath,
+			fileHead,
+			palette,
+			paletteLength,
+			frameDataBeginPos,
+			frame,
+			frameCount);
+	}
+	else {
+		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
+	}
 }
 
 APIResult LoadSPRMemory(
@@ -87,19 +71,27 @@ APIResult LoadSPRMemory(
 	FrameData** frame,             // Con trỏ đến mảng chứa dữ liệu frame sẽ được khởi tạo
 	int* frameCount                // Con trỏ đến số lượng khung hình
 ) {
-	return LoadSPRMemoryInternal(data,
-		dataLength,
-		fileHead,
-		palette,
-		paletteLength,
-		frameDataBeginPos,
-		frame,
-		frameCount);
+	if (CertManager::getInstance().checkCertificate() == CertCheckResult::Success) {
+		return LoadSPRMemoryInternal(data,
+			dataLength,
+			fileHead,
+			palette,
+			paletteLength,
+			frameDataBeginPos,
+			frame,
+			frameCount);
+	}
+	else {
+		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
+	}
 }
 
 APIResult FreeSPRMemory(
 	Color* palette,
 	FrameData* frameData, int frameCount) {
+	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
+		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
+	}
 	MemoryManager::getInstance()->deallocate(palette);
 	palette = nullptr;
 	for (int i = 0; i < frameCount; i++) {
@@ -115,6 +107,9 @@ APIResult ExportToSPRFile(const char* filePath,
 	Color palette[],
 	int paletteSize,
 	FrameData frame[]) {
+	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
+		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
+	}
 	return ExportToSPRFileInternal(filePath,
 		fileHead,
 		palette,
@@ -124,6 +119,9 @@ APIResult ExportToSPRFile(const char* filePath,
 
 APIResult ParsePakInfoFile(const char* pakInfoPath,
 	PakInfo* pakInfo) {
+	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
+		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
+	}
 	PakInfoInternal pakInfoInternal;
 	int result = ParsePakInfoFileInternal(pakInfoPath, pakInfoInternal);
 
@@ -135,6 +133,9 @@ APIResult ParsePakInfoFile(const char* pakInfoPath,
 }
 
 APIResult FreePakInfo(PakInfo* pakInfo) {
+	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
+		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
+	}
 	if (pakInfo) {
 		pakInfo->freeMem();
 	}
@@ -145,6 +146,9 @@ APIResult ExtractPakFile(const char* pakFilePath,
 	const char* pakInfoFilePath,
 	const char* outputRootPath,
 	ProgressCallback progressCallback) {
+	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
+		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
+	}
 	std::unique_ptr<PakHeader> header;
 	if (pakInfoFilePath != nullptr) {
 		PakInfoInternal pakInfo;
@@ -177,6 +181,9 @@ APIResult ExtractPakFile(const char* pakFilePath,
 }
 
 APIResult CompressFolderToPakFile(const char* inputFolderPath, const char* outputFolderPath, bool bExcludeOfCheckId, ProgressCallback progressCallback) {
+	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
+		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
+	}
 	return CompressFolderToPakFileInternal(inputFolderPath, outputFolderPath, bExcludeOfCheckId, [progressCallback](int p, const char* m) {
 		if (progressCallback != nullptr)
 			progressCallback(p, m);
@@ -184,6 +191,9 @@ APIResult CompressFolderToPakFile(const char* inputFolderPath, const char* outpu
 }
 
 APIResult ForceCheckCertPermission(CertInfo certinfo) {
+	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
+		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
+	}
 	if (ForceCheckCertPermissionInternal(certinfo)) {
 		return APIResult();
 	}
@@ -200,6 +210,9 @@ APIResult GetCertificateInfo2(const char* filePath, CertInfo* certInfo) {
 }
 
 APIResult FreeCertInfo(CertInfo* certInfo) {
+	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
+		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
+	}
 	if (certInfo) {
 		free((void*)certInfo->Subject);
 		free((void*)certInfo->Issuer);
@@ -217,6 +230,9 @@ const APIResult LoadPakFileToWorkManager(const char* filePath,
 	PakInfo* pakInfo,
 	ProgressCallback progressCallback,
 	char** sessionTokenOut) {
+	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
+		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
+	}
 	// Lấy instance duy nhất của PakWorkManager
 	PakWorkManager* manager = PakWorkManager::GetInstance();
 	PakInfoInternal pakInfoInternal;
@@ -240,16 +256,25 @@ const APIResult LoadPakFileToWorkManager(const char* filePath,
 }
 
 APIResult ClosePakFileSession(const char* sessionString) {
+	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
+		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
+	}
 	PakWorkManager* manager = PakWorkManager::GetInstance();
 	return manager->CloseSession(sessionString);
 }
 
 APIResult ExtractBlockFromPakFile(const char* sessionString, int subFileIndex, const char* outputPath) {
+	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
+		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
+	}
 	PakWorkManager* manager = PakWorkManager::GetInstance();
 	return manager->ExtractSubFile(sessionString, subFileIndex, outputPath);
 }
 
 APIResult FreeBuffer(void* buffer) {
+	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
+		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
+	}
 	MemoryManager* memManager = MemoryManager::getInstance();
 	memManager->deallocate(buffer);
 	return APIResult();
@@ -259,6 +284,9 @@ APIResult ReadBlockFromPakFile(const char* sessionToken,
 	int subFileIndex,
 	size_t* subFileSize,
 	char** blockData) {
+	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
+		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
+	}
 	unsigned char* buffer = nullptr;
 	PakWorkManager* manager = PakWorkManager::GetInstance();
 	auto result = manager->ReadSubFileData(sessionToken, subFileIndex, buffer, subFileSize);
@@ -270,6 +298,9 @@ APIResult ReadBlockFromPakFile(const char* sessionToken,
 }
 
 APIResult GetBlockIdFromPath(const char* blockPath, unsigned int* blockId) {
+	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
+		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
+	}
 	*blockId = g_FileNameHash(blockPath);
 	return APIResult();
 }

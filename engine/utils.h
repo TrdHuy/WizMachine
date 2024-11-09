@@ -46,6 +46,7 @@ void GetLTimeFromSecond(tm* pFormatTime, unsigned int seconds);
 void GetLTimeFromMillisecond(tm* pFormatTime, unsigned long long millisec);
 
 char* Wchar_t2CharPtr(wchar_t* str);
+char* Wchar_t2CharPtr(const wchar_t* str);
 std::string GetTempFilePath(const std::string& fileName, bool useAppData);
 std::string intToHexString(int number);
 std::string formatTimeToString(int time);
