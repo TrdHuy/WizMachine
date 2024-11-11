@@ -75,6 +75,14 @@ extern "C" {
 		int* frameDataBeginPos,
 		FrameData** frameData,
 		int* frameCount);
+
+	DLL_API APIResult __cdecl LoadSPRFileForTestOnly(const char* filePath,
+		SPRFileHead* fileHead,
+		Color** palette,
+		int* paletteLength,
+		int* frameDataBeginPos,
+		FrameData** frameData,
+		int* frameCount);
 	/**
 	 * @brief Tải dữ liệu SPR từ bộ nhớ và trích xuất thông tin chi tiết.
 	 *

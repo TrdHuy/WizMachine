@@ -185,6 +185,7 @@ APIResult LoadSPRMemoryInternal(
 	// Khởi tạo và đọc dữ liệu frame
 	*frame = MemoryManager::getInstance()->allocateArray<FrameData>(fileHead->FrameCounts);
 	*frameCount = fileHead->FrameCounts;
+
 	for (int frameIndex = 0; frameIndex < fileHead->FrameCounts; frameIndex++) {
 		// Đọc thông tin offset cho từng frame
 		FrameOffsetInfo offsetInfo;
@@ -213,11 +214,13 @@ APIResult LoadSPRMemoryInternal(
 		// Đọc dữ liệu giải mã cho frame
 		long frameDataPos = frameBeginPos + sizeof(FrameInfo);
 		long curDecPos = 0;
+
 		for (int i = 0; i < dataLength - 8;) {
 			if (curDecPos > decDataLength) {
 				Log::E("Failed to decrypt, something's wrong!");
 				return APIResult(ErrorCode::InternalError, "Failed to decrypt, something's wrong!");
 			}
+
 			int size = data[frameDataPos + i];
 			int alpha = data[frameDataPos + i + 1];
 
@@ -251,14 +254,14 @@ APIResult LoadSPRMemoryInternal(
 					(*frame)[frameIndex].ColorMap[curDecPos] = colorIndex;
 					curDecPos++;
 				}
+				i += size;
 			}
-			i += 2 + size;
+			i += 2;
 		}
 	}
 
 	return APIResult();
 }
-
 APIResult LoadSPRFileInternal(const char* filePath,
 	SPRFileHead* fileHead,
 	Color** palette,
@@ -293,6 +296,122 @@ APIResult LoadSPRFileInternal(const char* filePath,
 	);
 
 	MemoryManager::getInstance()->deallocate(fileData);
+	return result;
+}
+
+APIResult LoadSPRFileForTestOnlyInternal(const char* filePath,
+	SPRFileHead* fileHead,
+	Color** palette,
+	int* paletteLength,
+	int* frameDataBeginPos,
+	FrameData** frame,
+	int* frameCount)
+{
+
+	APIResult result;
+
+	Log::I("SPR", "Start LoadSPRFileInternal");
+	std::ifstream file(filePath, std::ios::binary);
+	if (!file.is_open()) {
+		Log::E("Failed to open file.");
+		palette = nullptr;
+		return APIResult(ErrorCode::InvalidArgument, "Invalid arguments passed to LoadSPRMemoryInternal.");
+	}
+
+	file.read(reinterpret_cast<char*>(fileHead), sizeof(SPRFileHead));
+
+
+	*palette = MemoryManager::getInstance()->allocateArray<Color>(fileHead->ColorCounts);
+	::memset(*palette, 0, sizeof(Color) * fileHead->ColorCounts);
+	for (int i = 0; i < fileHead->ColorCounts; i++) {
+		(*palette)[i].R = file.get();
+		(*palette)[i].G = file.get();
+		(*palette)[i].B = file.get();
+	}
+	*paletteLength = fileHead->ColorCounts;
+	*frameDataBeginPos = sizeof(SPRFileHead) + fileHead->ColorCounts * sizeof(Color);
+
+	//*frame = (FrameData*)::CoTaskMemAlloc(sizeof(FrameData) * fileHead->FrameCounts);
+	*frame = MemoryManager::getInstance()->allocateArray<FrameData>(fileHead->FrameCounts);
+	*frameCount = fileHead->FrameCounts;
+
+	for (int frameIndex = 0; frameIndex < fileHead->FrameCounts; frameIndex++) {
+		// Frame offset
+		file.seekg(*frameDataBeginPos + sizeof(FrameOffsetInfo) * frameIndex, std::ios::beg);
+		FrameOffsetInfo* offsetInfo = MemoryManager::getInstance()->allocate<FrameOffsetInfo>();
+		file.read(reinterpret_cast<char*>(offsetInfo), sizeof(FrameOffsetInfo));
+
+		unsigned int frameBeginPos = *frameDataBeginPos +
+			sizeof(FrameOffsetInfo) * fileHead->FrameCounts +
+			offsetInfo->FrameOffset;
+		unsigned int dataLength = offsetInfo->DataLength;
+		(*frame)[frameIndex].EncryptedFrameDataOffset = offsetInfo->FrameOffset;
+		(*frame)[frameIndex].EncryptedLength = offsetInfo->DataLength;
+		if (dataLength == 0)
+		{
+			continue;
+		}
+
+		file.seekg(frameBeginPos, std::ios::beg);
+		file.read(reinterpret_cast<char*>(&(*frame)[frameIndex].FrameInfo),
+			sizeof(FrameInfo));
+		long decDataLength = (*frame)[frameIndex].FrameInfo.Height * (*frame)[frameIndex].FrameInfo.Width;
+		if (decDataLength == 0)
+		{
+			continue;
+		}
+		(*frame)[frameIndex].initMemory(decDataLength * 4);
+
+		long frameDataPos = frameBeginPos + sizeof(FrameInfo);
+		file.seekg(frameDataPos, std::ios::beg);
+		long curDecPos = 0;
+
+		for (int i = 0; i < dataLength - 8;) {
+			if (curDecPos > decDataLength) {
+				throw std::exception("Failed to decrypt, somethings wrong!");
+			}
+			int size = file.get();
+			int alpha = file.get();
+
+			if (size == -1 || alpha == -1) {
+				throw std::exception("Failed to decrypt, somethings wrong!");
+			}
+
+			if (alpha == 0x00) {
+				for (int j = 0; j < size; j++)
+				{
+					(*frame)[frameIndex].DecodedFrameData[curDecPos * 4] = 0;
+					(*frame)[frameIndex].DecodedFrameData[curDecPos * 4 + 1] = 0;
+					(*frame)[frameIndex].DecodedFrameData[curDecPos * 4 + 2] = 0;
+					(*frame)[frameIndex].DecodedFrameData[curDecPos * 4 + 3] = 0;
+					(*frame)[frameIndex].ColorMap[curDecPos] = -1;
+					curDecPos++;
+				}
+			}
+			else {
+				for (int j = 0; j < size; j++)
+				{
+					int colorIndex = (int)file.get();
+					if (colorIndex == -1)
+					{
+						throw std::exception("Failed to decrypt, colorIndex must greater than -1!");
+					}
+					i++;
+
+					(*frame)[frameIndex].DecodedFrameData[curDecPos * 4] = (*palette)[colorIndex].B;
+					(*frame)[frameIndex].DecodedFrameData[curDecPos * 4 + 1] = (*palette)[colorIndex].G;
+					(*frame)[frameIndex].DecodedFrameData[curDecPos * 4 + 2] = (*palette)[colorIndex].R;
+					(*frame)[frameIndex].DecodedFrameData[curDecPos * 4 + 3] = alpha;
+					(*frame)[frameIndex].ColorMap[curDecPos] = colorIndex;
+					curDecPos++;
+				}
+			}
+			i += 2;
+		}
+		MemoryManager::getInstance()->deallocate(offsetInfo);
+	}
+
+	file.close();
 	return result;
 }
 

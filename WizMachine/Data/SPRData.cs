@@ -149,6 +149,29 @@ namespace WizMachine.Data
             return VersionInfo != null && VersionInfo.Length != 0;
         }
 
+        public override bool Equals(object obj)
+        {
+            if (obj is not SprFileHead other) return false;
+
+            return GlobalWidth == other.GlobalWidth &&
+                   GlobalHeight == other.GlobalHeight &&
+                   OffX == other.OffX &&
+                   OffY == other.OffY &&
+                   FrameCounts == other.FrameCounts &&
+                   ColorCounts == other.ColorCounts &&
+                   DirectionCount == other.DirectionCount &&
+                   Interval == other.Interval &&
+                   (VersionInfo == null && other.VersionInfo == null ||
+                    VersionInfo != null && other.VersionInfo != null && VersionInfo.SequenceEqual(other.VersionInfo)) &&
+                   (Reserved == null && other.Reserved == null ||
+                    Reserved != null && other.Reserved != null && Reserved.SequenceEqual(other.Reserved));
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(GlobalWidth, GlobalHeight, OffX, OffY, FrameCounts, ColorCounts, DirectionCount, Interval);
+        }
+
         public static SprFileHead CreateSprFileHead()
         {
             return new SprFileHead(versionInfo: new byte[] { (byte)'S', (byte)'P', (byte)'R', (byte)'\0' },
@@ -507,6 +530,25 @@ namespace WizMachine.Data
         public bool IsFrameSizeChanged()
         {
             return modifiedFrameRGBACache.frameWidth != frameWidth || modifiedFrameRGBACache.frameHeight != frameHeight;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is not FrameRGBA other) return false;
+
+            return frameWidth == other.frameWidth &&
+                   frameHeight == other.frameHeight &&
+                   frameOffX == other.frameOffX &&
+                   frameOffY == other.frameOffY &&
+                   isInsertedFrame == other.isInsertedFrame &&
+                   (originDecodedBGRAData == null && other.originDecodedBGRAData == null ||
+                    originDecodedBGRAData != null && other.originDecodedBGRAData != null &&
+                    originDecodedBGRAData.SequenceEqual(other.originDecodedBGRAData));
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(frameWidth, frameHeight, frameOffX, frameOffY, isInsertedFrame, originDecodedBGRAData?.GetHashCode());
         }
 
         public class FrameRGBACache
