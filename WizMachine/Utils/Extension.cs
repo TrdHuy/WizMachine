@@ -1,13 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace WizMachine.Utils
 {
     internal static class Extension
     {
+        public static string GetCallingExecutablePathByStackTrace()
+        {
+            StackTrace stackTrace = new StackTrace();
+            StackFrame[] frames = stackTrace.GetFrames();
+
+            foreach (var frame in frames)
+            {
+                var method = frame.GetMethod();
+                if (method != null)
+                {
+                    var assembly = method.DeclaringType?.Assembly;
+
+                    if (assembly != null && assembly != Assembly.GetExecutingAssembly()) // Bỏ qua assembly của chính thư viện B
+                    {
+                        return assembly.Location; // Trả về đường dẫn đầy đủ của file EXE hoặc DLL
+                    }
+                }
+            }
+
+            return "Unknown";
+        }
+
         public static IEnumerable<T> ReduceSameItem<T>(this IEnumerable<T> @in)
         {
             return @in.GroupBy(i => i).Select(i => i.First());
@@ -67,7 +91,7 @@ namespace WizMachine.Utils
             Marshal.FreeHGlobal(structPtr);
         }
 
-        
+
     }
 
     internal static class SharpExtension

@@ -1,4 +1,5 @@
 using System;
+using System.Dynamic;
 using System.IO;
 using System.Reflection;
 using WizMachine.Services.Base;
@@ -38,7 +39,7 @@ namespace WizMachine
         {
             if (_engineInstance == null) throw new Exception("Engine was not inited yet");
 
-            var calling = Assembly.GetCallingAssembly().Location;
+            var calling = (Assembly.GetEntryAssembly() ?? Assembly.GetCallingAssembly()).Location;
             Logger.Raw.I($"EngineKeeper: Force check calling {calling}");
 
             CertManagerUtil.ForceCheckCert(calling);
@@ -50,6 +51,8 @@ namespace WizMachine
             _engineInstance = new EngineKeeper();
             _engineInstance.LogWriter = logWriter;
             Logger.Init(logWriter);
+
+            ForceCheckCallingSignatureByStackTrace();
         }
 
         private ISprWorkManagerAdvance? sprWorkManagerAdvanceInstance = null;
@@ -57,6 +60,14 @@ namespace WizMachine
 
         private EngineKeeper()
         {
+        }
+
+        private static void ForceCheckCallingSignatureByStackTrace()
+        {
+            var callingPath = Extension.GetCallingExecutablePathByStackTrace();
+            Logger.Raw.I($"EngineKeeper: ForceCheckCallingByStackTrace {callingPath}");
+
+            CertManagerUtil.ForceCheckCert(callingPath);
         }
     }
 }
