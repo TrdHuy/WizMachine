@@ -182,14 +182,5 @@ namespace SPRNetToolTest.Domain
             FileLockManager.ReleaseFiles(SprFile);
 
         }
-
-        //[Test]
-        //public void test_InitWorkManagerSpr()
-        //{
-
-        //    var initResult = sprWorkManager.InitWorkManagerFromSprFile("D:\\Workspace\\Temp\\ArtWiz\\SPRNetTool\\bin\\x64\\Debug\\net6.0-windows\\Resources\\cuukiem.spr");
-           
-        //}
-
     }
 }

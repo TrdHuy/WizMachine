@@ -112,6 +112,14 @@ namespace WizMachine.Services.Utils
                 out int frameDataBeginPos,
                 out IntPtr frame,
                 out int frameCount);
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
+            public static extern APIResult LoadSPRFileForTestOnly(string filePath,
+                ref NSPRFileHead fileHead,
+                out IntPtr palette,
+                out int paletteLength,
+                out int frameDataBeginPos,
+                out IntPtr frame,
+                out int frameCount);
 
             /// <summary>
             /// Tải dữ liệu SPR (sprite) từ bộ nhớ và khởi tạo thông tin metadata cùng dữ liệu khung hình liên quan.
@@ -494,6 +502,54 @@ namespace WizMachine.Services.Utils
 
 
             var apiResult = NativeEngine.LoadSPRFile(filePath,
+                 ref nFileHead,
+                 out palettePtr,
+                 out nativePaletteLength,
+                 out frameDataBeginPos,
+                 out framePtr,
+                 out frameCount);
+            if (apiResult.errorCode == NativeEngine.ErrorCode.Success)
+            {
+                NativeEngine.NColor[] nPalette = new NativeEngine.NColor[nativePaletteLength];
+                int structSize = Marshal.SizeOf(typeof(NativeEngine.NColor));
+                for (int i = 0; i < nativePaletteLength; i++)
+                {
+                    IntPtr colorPtr = IntPtr.Add(palettePtr, i * structSize);
+                    nPalette[i] = Marshal.PtrToStructure<NativeEngine.NColor>(colorPtr);
+                }
+                palette = ConvertNativeColorPaletteToAppData(nPalette, nativePaletteLength);
+                sprFileHead = ConvertNativeSprFileHeadToAppData(nFileHead);
+
+                NativeEngine.NFrameData[] nFrameData = new NativeEngine.NFrameData[frameCount];
+                structSize = Marshal.SizeOf(typeof(NativeEngine.NFrameData));
+                frameRGBA = new FrameRGBA[frameCount];
+                for (int i = 0; i < frameCount; i++)
+                {
+                    IntPtr framDataPtr = IntPtr.Add(framePtr, i * structSize);
+                    nFrameData[i] = Marshal.PtrToStructure<NativeEngine.NFrameData>(framDataPtr);
+                    frameRGBA[i] = ConvertFrameDataToAppData(nFrameData[i]);
+                }
+                NativeEngine.FreeSPRMemory(palettePtr, framePtr, frameCount);
+                return true;
+            }
+            else
+            {
+                throw new Exception($"Failed to load SPR file in native: {apiResult.errorMessage}");
+            }
+
+        }
+        public static bool LoadSPRFile_ForTestOnly(string filePath,
+            out SprFileHead sprFileHead,
+            out Palette palette,
+            out int frameDataBeginPos,
+            out FrameRGBA[] frameRGBA)
+        {
+            var nFileHead = new NativeEngine.NSPRFileHead();
+            IntPtr palettePtr, framePtr;
+            int nativePaletteLength, frameCount;
+
+
+            var apiResult = NativeEngine.LoadSPRFileForTestOnly(filePath,
                  ref nFileHead,
                  out palettePtr,
                  out nativePaletteLength,

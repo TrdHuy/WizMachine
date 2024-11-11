@@ -73,6 +73,14 @@ APIResult LoadSPRMemoryInternal(
 	int* frameCount                // Con trỏ đến số lượng khung hình
 );
 
+APIResult LoadSPRFileForTestOnlyInternal(const char* filePath,
+	SPRFileHead* fileHead,
+	Color** palette,
+	int* paletteLength,
+	int* frameDataBeginPos,
+	FrameData** frame,
+	int* frameCount);
+
 APIResult LoadSPRFileInternal(const char* filePath,
 	SPRFileHead* fileHead,
 	Color** palette,

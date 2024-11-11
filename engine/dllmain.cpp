@@ -61,6 +61,27 @@ APIResult LoadSPRFile(const char* filePath,
 	}
 }
 
+APIResult LoadSPRFileForTestOnly(const char* filePath,
+	SPRFileHead* fileHead,
+	Color** palette,
+	int* paletteLength,
+	int* frameDataBeginPos,
+	FrameData** frame,
+	int* frameCount) {
+	if (CertManager::getInstance().checkCertificate() == CertCheckResult::Success) {
+		return LoadSPRFileForTestOnlyInternal(filePath,
+			fileHead,
+			palette,
+			paletteLength,
+			frameDataBeginPos,
+			frame,
+			frameCount);
+	}
+	else {
+		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
+	}
+}
+
 APIResult LoadSPRMemory(
 	const uint8_t* data,           // Mảng byte chứa dữ liệu SPR
 	size_t dataLength,             // Độ dài của mảng byte

@@ -36,6 +36,7 @@ public static class FileLockManager
         public static readonly TestAsset InputDaPak = new TestAsset("Resources\\dataWithSpr.pak");
         public static readonly TestAsset InputDaPakTxt = new TestAsset("Resources\\dataWithSpr.pak.txt");
         public static readonly TestAsset InputDataFolderForCompress = new TestAsset("Resources\\dataForCompressTest\\data");
+        public static readonly TestAsset i127_TestFile = new TestAsset("Resources\\i127_testfile.spr");
     }
 
     // ConcurrentDictionary để quản lý lock của từng file path

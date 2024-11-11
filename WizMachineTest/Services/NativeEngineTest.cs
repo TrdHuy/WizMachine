@@ -222,6 +222,42 @@ namespace WizMachineTest.Services
             FileLockManager.ReleaseFiles(_12345SprFile, BinFile1, BinFile2, BinFile3, BinFile4, BinFile5);
         }
 
+
+        [Test]
+        public void Test_I127GithubIssue()
+        {
+            FileLockManager.ReleaseFiles(i127_TestFile);
+
+            // Load từ bộ nhớ
+            var loadSprFromMemoryResult = NativeAPIAdapter.LoadSPRFile(i127_TestFile.AssetPath,
+                out SprFileHead dataFromMemory_sprFileHead,
+                out Palette dataFromMemory_palette,
+                out int dataFromMemory_rameDataBeginPos,
+                out FrameRGBA[] dataFromMemory_frameData);
+
+            // Load từ file
+            var loadSprFromMemoryFile = NativeAPIAdapter.LoadSPRFile_ForTestOnly(i127_TestFile.AssetPath,
+                out SprFileHead dataFromFile_sprFileHead,
+                out Palette dataFromFile_palette,
+                out int dataFromFile_rameDataBeginPos,
+                out FrameRGBA[] dataFromFile_frameData);
+
+            // So sánh SprFileHead
+            Assert.That(dataFromMemory_sprFileHead.Equals(dataFromFile_sprFileHead), Is.True, "SprFileHead không khớp!");
+
+            // So sánh Palette
+            Assert.That(dataFromMemory_palette.Equals(dataFromFile_palette), Is.True, "Palette không khớp!");
+
+            // So sánh FrameData
+            Assert.That(dataFromMemory_frameData.Length, Is.EqualTo(dataFromFile_frameData.Length), "Số lượng frame không khớp!");
+            for (int i = 0; i < dataFromMemory_frameData.Length; i++)
+            {
+                Assert.That(dataFromMemory_frameData[i].Equals(dataFromFile_frameData[i]), Is.True, $"FrameData tại index {i} không khớp!");
+            }
+
+            FileLockManager.AcquireFiles(i127_TestFile);
+        }
+
         //TODO: Add unittest for MemoryManager native code
     }
 }

@@ -53,6 +53,7 @@
 		<None Remove="Resources\dataForCompressTest\data\test.xml" />
 		<None Remove="Resources\dataWithSpr.pak" />
 		<None Remove="Resources\dataWithSpr.pak.txt" />
+		<None Remove="Resources\i127_testfile.spr" />
 		<None Remove="Resources\test.bin" />
 		<None Remove="Resources\test.png" />
 		<None Remove="Resources\test.spr" />
@@ -105,6 +106,9 @@
 		</Content>
 		<Content Include="Resources\dataWithSpr.pak.txt">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Resources\i127_testfile.spr">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Resources\test.bin">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
