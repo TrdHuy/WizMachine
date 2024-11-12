@@ -1,5 +1,4 @@
 using System;
-using System.Dynamic;
 using System.IO;
 using System.Reflection;
 using WizMachine.Services.Base;
@@ -52,7 +51,7 @@ namespace WizMachine
             _engineInstance.LogWriter = logWriter;
             Logger.Init(logWriter);
 
-            ForceCheckCallingSignatureByStackTrace();
+            ForceCheckCallingSignature();
         }
 
         private ISprWorkManagerAdvance? sprWorkManagerAdvanceInstance = null;
@@ -60,14 +59,6 @@ namespace WizMachine
 
         private EngineKeeper()
         {
-        }
-
-        private static void ForceCheckCallingSignatureByStackTrace()
-        {
-            var callingPath = Extension.GetCallingExecutablePathByStackTrace();
-            Logger.Raw.I($"EngineKeeper: ForceCheckCallingByStackTrace {callingPath}");
-
-            CertManagerUtil.ForceCheckCert(callingPath);
         }
     }
 }
