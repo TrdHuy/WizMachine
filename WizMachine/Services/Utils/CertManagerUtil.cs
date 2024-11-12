@@ -16,6 +16,7 @@ namespace WizMachine.Utils
         public static CertInfo AssemblySignedCert { get; private set; }
         static CertManagerUtil()
         {
+            //wengie assembly
             var assemblyPath = Assembly.GetExecutingAssembly().Location;
             Logger.Raw.I($"CertManagerUtil:: assemblyPath={assemblyPath}");
             AssemblySignedCert = NativeAPIAdapter.GetSignedCertInfoFromFile(assemblyPath);
