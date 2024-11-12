@@ -30,7 +30,7 @@ jobs:
      REPO_NAME: WizMachine  # Github event ko có giá trị này :((
      TARGET_RELEASED_BRANCH: ${{ github.event.inputs.branch || 'dev' }}
      VERSION_UP_TYPE: ${{ github.event.inputs.type || 'patch' }}
-     CS_VERSION_UP_FILE_PATH: WizMachine/WizMachine.csproj
+     VERSION_UP_FILE_PATH_LST: WizMachine/WizMachine.csproj;engine/engine.vcxproj
     steps:
       - name: verify build permission
         shell: powershell
@@ -47,6 +47,6 @@ jobs:
             $Headers = @{
                     Authorization = "token ${{ secrets.WORK_FLOW_ACCESS_TOKEN_CLASSIC }}"
             }
-            $Uri = "https://raw.githubusercontent.com/TrdHuy/_TrdBuildPlugin/master/DotNet/UpdateVersionForDotnetPlatform.ps1"
-            Invoke-RestMethod -Uri $Uri -Headers $Headers -OutFile UpdateVersionForDotnetPlatform.ps1
-            & .\UpdateVersionForDotnetPlatform.ps1
+            $Uri = "https://raw.githubusercontent.com/TrdHuy/_TrdBuildPlugin/master/DotNet/UpdateVersion_Dotnet_Cpp_Platform.ps1"
+            Invoke-RestMethod -Uri $Uri -Headers $Headers -OutFile UpdateVersion_Dotnet_Cpp_Platform.ps1
+            & .\UpdateVersion_Dotnet_Cpp_Platform.ps1
