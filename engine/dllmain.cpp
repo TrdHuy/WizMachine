@@ -1,4 +1,4 @@
-﻿// dllmain.cpp : Defines the entry point for the DLL application.
+// dllmain.cpp : Defines the entry point for the DLL application.
 
 #include "pch.h"
 
@@ -21,9 +21,9 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 
 		if (GetModuleFileName(NULL, path, MAX_PATH) != 0)
 		{
-			CertInfo* certInfo = MemoryManager::getInstance()->allocate<CertInfo>();
 			char* pathChar = Wchar_t2CharPtr(path);
 			Log::I("MAIN", "Start verify cert for path: " + std::string(pathChar));
+			MemoryManager::getInstance()->deallocate(pathChar);
 		}
 		CertManager::getInstance().initialize(path);
 		break;
