@@ -575,4 +575,5 @@ extern "C" {
 		char** blockData);
 	DLL_API APIResult  __cdecl GetBlockIdFromPath(const char* blockPath, unsigned int* blockId);
 
+	DLL_API APIResult	__cdecl Initialize();
 }

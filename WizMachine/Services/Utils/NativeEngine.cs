@@ -82,6 +82,10 @@ namespace WizMachine.Services.Utils
                 public byte B;
             };
 
+            [DllImport(ENGINE_DLL, CallingConvention = CallingConvention.Cdecl)]
+            public static extern APIResult Initialize();
+
+
             #region SPR
             [DllImport(ENGINE_DLL)]
             public static extern APIResult ExportToSPRFile(string filePath,
@@ -247,6 +251,12 @@ namespace WizMachine.Services.Utils
             public static extern APIResult FreeCertInfo(ref CertInfo certInfo);
             #endregion
         }
+
+        public static void Initialize()
+        {
+            NativeEngine.Initialize();
+        }
+
 
         #region CERT
         public static void ForceCheckCertPermission(WizMachine.Data.CertInfo certinfo)
