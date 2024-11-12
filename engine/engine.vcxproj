@@ -12,7 +12,7 @@
     <BuildTag>ENGINE_BUILD_TAG</BuildTag>
 	<VersionMajor>1</VersionMajor>
 	<VersionMinor>0</VersionMinor>
-	<VersionPatch>7</VersionPatch>
+	<VersionPatch>8</VersionPatch>
 	<VersionBuild>0</VersionBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
