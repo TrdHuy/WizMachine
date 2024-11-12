@@ -1,9 +1,11 @@
 // dllmain.cpp : Defines the entry point for the DLL application.
 
 #include "pch.h"
-
+#include <atomic>
 #pragma comment (lib, "crypt32.lib")
 #pragma comment (lib, "wintrust.lib")
+
+static std::atomic<bool> isInitialized = false;
 
 BOOL APIENTRY DllMain(HMODULE hModule,
 	DWORD  ul_reason_for_call,
@@ -13,19 +15,7 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 	{
 	case DLL_PROCESS_ATTACH:
 	{
-		Log::Init();
 
-
-		MemoryManager::getInstance();
-		wchar_t path[MAX_PATH];
-
-		if (GetModuleFileName(NULL, path, MAX_PATH) != 0)
-		{
-			char* pathChar = Wchar_t2CharPtr(path);
-			Log::I("MAIN", "Start verify cert for path: " + std::string(pathChar));
-			MemoryManager::getInstance()->deallocate(pathChar);
-		}
-		CertManager::getInstance().initialize(path);
 		break;
 	}
 	case DLL_THREAD_ATTACH:
@@ -40,6 +30,24 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 	return TRUE;
 }
 
+APIResult Initialize() {
+	Log::Init();
+
+	MemoryManager::getInstance();
+	wchar_t path[MAX_PATH];
+
+	if (GetModuleFileName(NULL, path, MAX_PATH) != 0)
+	{
+		char* pathChar = Wchar_t2CharPtr(path);
+		Log::I("MAIN", "Start verify cert for path: " + std::string(pathChar));
+		MemoryManager::getInstance()->deallocate(pathChar);
+	}
+	CertManager::getInstance().initialize(path);
+
+	isInitialized = true;
+	return APIResult();
+}
+
 APIResult LoadSPRFile(const char* filePath,
 	SPRFileHead* fileHead,
 	Color** palette,
@@ -47,6 +55,9 @@ APIResult LoadSPRFile(const char* filePath,
 	int* frameDataBeginPos,
 	FrameData** frame,
 	int* frameCount) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	if (CertManager::getInstance().checkCertificate() == CertCheckResult::Success) {
 		return LoadSPRFileInternal(filePath,
 			fileHead,
@@ -68,6 +79,9 @@ APIResult LoadSPRFileForTestOnly(const char* filePath,
 	int* frameDataBeginPos,
 	FrameData** frame,
 	int* frameCount) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	if (CertManager::getInstance().checkCertificate() == CertCheckResult::Success) {
 		return LoadSPRFileForTestOnlyInternal(filePath,
 			fileHead,
@@ -92,6 +106,9 @@ APIResult LoadSPRMemory(
 	FrameData** frame,             // Con trỏ đến mảng chứa dữ liệu frame sẽ được khởi tạo
 	int* frameCount                // Con trỏ đến số lượng khung hình
 ) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	if (CertManager::getInstance().checkCertificate() == CertCheckResult::Success) {
 		return LoadSPRMemoryInternal(data,
 			dataLength,
@@ -110,6 +127,9 @@ APIResult LoadSPRMemory(
 APIResult FreeSPRMemory(
 	Color* palette,
 	FrameData* frameData, int frameCount) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
 		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
 	}
@@ -128,6 +148,9 @@ APIResult ExportToSPRFile(const char* filePath,
 	Color palette[],
 	int paletteSize,
 	FrameData frame[]) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
 		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
 	}
@@ -140,6 +163,9 @@ APIResult ExportToSPRFile(const char* filePath,
 
 APIResult ParsePakInfoFile(const char* pakInfoPath,
 	PakInfo* pakInfo) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
 		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
 	}
@@ -154,6 +180,9 @@ APIResult ParsePakInfoFile(const char* pakInfoPath,
 }
 
 APIResult FreePakInfo(PakInfo* pakInfo) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
 		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
 	}
@@ -167,6 +196,9 @@ APIResult ExtractPakFile(const char* pakFilePath,
 	const char* pakInfoFilePath,
 	const char* outputRootPath,
 	ProgressCallback progressCallback) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
 		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
 	}
@@ -202,6 +234,9 @@ APIResult ExtractPakFile(const char* pakFilePath,
 }
 
 APIResult CompressFolderToPakFile(const char* inputFolderPath, const char* outputFolderPath, bool bExcludeOfCheckId, ProgressCallback progressCallback) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
 		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
 	}
@@ -212,6 +247,9 @@ APIResult CompressFolderToPakFile(const char* inputFolderPath, const char* outpu
 }
 
 APIResult ForceCheckCertPermission(CertInfo certinfo) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
 		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
 	}
@@ -222,15 +260,22 @@ APIResult ForceCheckCertPermission(CertInfo certinfo) {
 }
 
 int GetCertificateInfo(const char* filePath, CertInfo* certInfo) {
+
 	return GetCertificateInfoInternal(filePath, certInfo);
 }
 
 // TODO: Gộp GetCertificateInfo -> GetCertificateInfo2
 APIResult GetCertificateInfo2(const char* filePath, CertInfo* certInfo) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	return GetCertificateInfoInternal2(filePath, certInfo);
 }
 
 APIResult FreeCertInfo(CertInfo* certInfo) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
 		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
 	}
@@ -251,6 +296,9 @@ const APIResult LoadPakFileToWorkManager(const char* filePath,
 	PakInfo* pakInfo,
 	ProgressCallback progressCallback,
 	char** sessionTokenOut) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
 		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
 	}
@@ -277,6 +325,9 @@ const APIResult LoadPakFileToWorkManager(const char* filePath,
 }
 
 APIResult ClosePakFileSession(const char* sessionString) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
 		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
 	}
@@ -285,6 +336,9 @@ APIResult ClosePakFileSession(const char* sessionString) {
 }
 
 APIResult ExtractBlockFromPakFile(const char* sessionString, int subFileIndex, const char* outputPath) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
 		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
 	}
@@ -293,6 +347,9 @@ APIResult ExtractBlockFromPakFile(const char* sessionString, int subFileIndex, c
 }
 
 APIResult FreeBuffer(void* buffer) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
 		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
 	}
@@ -305,6 +362,9 @@ APIResult ReadBlockFromPakFile(const char* sessionToken,
 	int subFileIndex,
 	size_t* subFileSize,
 	char** blockData) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
 		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
 	}
@@ -319,6 +379,9 @@ APIResult ReadBlockFromPakFile(const char* sessionToken,
 }
 
 APIResult GetBlockIdFromPath(const char* blockPath, unsigned int* blockId) {
+	if (!isInitialized) {
+		return APIResult(ErrorCode::SecurityError, "DLL has not been initialized.");
+	}
 	if (CertManager::getInstance().checkCertificate() != CertCheckResult::Success) {
 		return APIResult(ErrorCode::SecurityError, "Caller is not allowed!");
 	}

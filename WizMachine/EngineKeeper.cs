@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using WizMachine.Services.Base;
 using WizMachine.Services.Impl;
+using WizMachine.Services.Utils;
 using WizMachine.Utils;
 
 namespace WizMachine
@@ -50,7 +51,7 @@ namespace WizMachine
             _engineInstance = new EngineKeeper();
             _engineInstance.LogWriter = logWriter;
             Logger.Init(logWriter);
-
+            NativeAPIAdapter.Initialize();
             ForceCheckCallingSignature();
         }
 
