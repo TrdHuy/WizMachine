@@ -22,7 +22,11 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 	case DLL_THREAD_DETACH:
 		break;
 	case DLL_PROCESS_DETACH: {
+		Log::EnableDirectMode(true);
+		MemoryManager::getInstance()->deallocateAll();
 		delete MemoryManager::getInstance();
+
+		Log::EnableDirectMode(false);
 		Log::Close();
 		break;
 	}

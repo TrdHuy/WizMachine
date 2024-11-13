@@ -39,5 +39,4 @@ void MemoryManager::deallocateAll() {
 
 // Destructor
 MemoryManager::~MemoryManager() {
-	deallocateAll();
 }
