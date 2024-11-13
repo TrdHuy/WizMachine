@@ -7,13 +7,13 @@
     <DllPathDir>$(WizSolutionDirectory)\bin\$(Configuration)\$(Platform)</DllPathDir>
     <DllPathFile>$(DllPathDir)\cpp_output_path.txt</DllPathFile>
     <GetSignToolPath>$(WizSolutionDirectory)\GetSignToolPath.ps1</GetSignToolPath>
-	<GenerateVersionRcPath>$(WizSolutionDirectory)\GenerateVersionRc.ps1</GenerateVersionRcPath>
+    <GenerateVersionRcPath>$(WizSolutionDirectory)\GenerateVersionRc.ps1</GenerateVersionRcPath>
     <SignToolPathResuleCachePath>$(WizSolutionDirectory)\bin\signtoolpath.txt</SignToolPathResuleCachePath>
     <BuildTag>ENGINE_BUILD_TAG</BuildTag>
-	<VersionMajor>1</VersionMajor>
-	<VersionMinor>0</VersionMinor>
-	<VersionPatch>9</VersionPatch>
-	<VersionBuild>0</VersionBuild>
+    <VersionMajor>1</VersionMajor>
+    <VersionMinor>0</VersionMinor>
+    <VersionPatch>10</VersionPatch>
+    <VersionBuild>1</VersionBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(EngineProjectDir)\bin\publish\$(Platform)\$(Configuration)\</OutDir>
@@ -101,7 +101,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;x32;_DEBUG;ENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;x32;_DEBUG;ENGINE_EXPORTS;_WINDOWS;_USRDLL;_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -123,7 +123,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;ENGINE_EXPORTS;x32;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;ENGINE_EXPORTS;x32;_WINDOWS;_USRDLL;_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -144,7 +144,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN64;x64;_DEBUG;ENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN64;x64;_DEBUG;ENGINE_EXPORTS;_WINDOWS;_USRDLL;_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -165,7 +165,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN64;x64;_RELEASE;NDEBUG;ENGINE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN64;x64;_RELEASE;NDEBUG;ENGINE_EXPORTS;_WINDOWS;_USRDLL;_DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -263,7 +263,7 @@
       <Command Condition="'$(Platform)'=='Win32'">
 				powershell -ExecutionPolicy Bypass -File "$(GetSignToolPath)" -platform x86 -resCacheFilePath "$(SignToolPathResuleCachePath)"
 			</Command>
-		<Command>
+      <Command>
 		  powershell -ExecutionPolicy Bypass -File "$(GenerateVersionRcPath)" -ProjectDir $(EngineProjectDir) -VersionMajor $(VersionMajor) -VersionMinor $(VersionMinor) -VersionPatch $(VersionPatch) -VersionBuild $(VersionBuild)
 		</Command>
     </PreBuildEvent>
