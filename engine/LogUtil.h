@@ -2,53 +2,53 @@
 #define LOGGER_H
 
 #include <string>
-#include <fstream>
+#include <queue>
+#include <mutex>
+#include <condition_variable>
+#include <thread>
+#include <atomic>
 
 class Log {
 public:
-    //// Hàm log cho INFO với TAG
-    //static void I(const std::string& tag, const std::string& message);
-
-    //// Hàm log cho ERROR với TAG
-    //static void E(const std::string& tag, const std::string& message);
-
-    //// Hàm log cho DEBUG với TAG
-    //static void D(const std::string& tag, const std::string& message);
-
-    // Hàm khởi tạo và đóng file log
     static void Init();
     static void Close();
 
     template<typename... Args>
-    static void E(const std::string& tag, Args&&... args) {
-        LogToFile("E", tag, BuildLogMessage(std::forward<Args>(args)...));
+    static void I(const std::string& tag, Args&&... args) {
+        EnqueueLog("INFO", tag, BuildLogMessage(std::forward<Args>(args)...));
     }
 
     template<typename... Args>
-    static void I(const std::string& tag, Args&&... args) {
-        LogToFile("I", tag, BuildLogMessage(std::forward<Args>(args)...));
+    static void E(const std::string& tag, Args&&... args) {
+        EnqueueLog("ERROR", tag, BuildLogMessage(std::forward<Args>(args)...));
     }
 
     template<typename... Args>
     static void D(const std::string& tag, Args&&... args) {
-#if _DEBUG
-        LogToFile("D", tag, BuildLogMessage(std::forward<Args>(args)...));
+#ifdef _DEBUG
+        EnqueueLog("DEBUG", tag, BuildLogMessage(std::forward<Args>(args)...));
 #endif
     }
-private:
-    // Hàm dùng để thực hiện ghi log chung với TAG
-    static void LogToFile(const std::string& logLevel, const std::string& tag, const std::string& message);
 
-    // Hàm lấy thời gian hiện tại
+private:
+    static void LogThreadFunction();
+
+    static void EnqueueLog(const std::string& level, const std::string& tag, const std::string& message);
+
     static std::string GetCurrentTimestamp();
 
-    // Luồng file log (mở một lần và sử dụng xuyên suốt)
+    static std::atomic<bool> isRunning;
+    static std::thread logThread;
+    static std::queue<std::string> logQueue;
+    static std::mutex queueMutex;
+    static std::condition_variable logCondition;
+
     static std::ofstream logFile;
 
     template<typename... Args>
     static std::string BuildLogMessage(Args&&... args) {
         std::ostringstream oss;
-        (oss << ... << std::forward<Args>(args));  // Fold expression để nối tất cả các tham số
+        (oss << ... << std::forward<Args>(args));
         return oss.str();
     }
 };
