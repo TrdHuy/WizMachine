@@ -12,8 +12,8 @@
     <BuildTag>ENGINE_BUILD_TAG</BuildTag>
     <VersionMajor>1</VersionMajor>
     <VersionMinor>0</VersionMinor>
-    <VersionPatch>10</VersionPatch>
-    <VersionBuild>1</VersionBuild>
+    <VersionPatch>12</VersionPatch>
+    <VersionBuild>0</VersionBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(EngineProjectDir)\bin\publish\$(Platform)\$(Configuration)\</OutDir>
