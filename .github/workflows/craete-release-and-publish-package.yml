@@ -1,6 +1,11 @@
 name: ReleaseAndPublishNuget
 on:
   workflow_dispatch:
+    inputs:
+      publish_title:
+        description: 'Title of published version'
+        default: 'Update and fix minor bugs'
+        required: false
 jobs:
 
   ReleaseAndPublishNuget:
@@ -12,6 +17,7 @@ jobs:
      BUILD_HEAVY_PUBLISH: false
      PROJECT_PATH: WizMachine\WizMachine.csproj
      GITHUB_TOKEN: ${{ secrets.WORK_FLOW_ACCESS_TOKEN_CLASSIC }}
+     NUGET_PUBLISH_DESCRIPTION_TITLE: ${{ github.event.inputs.publish_title }}
      PUBLISH_DIR: light_publish
      PUBLISH_NAME_CONTAINER_FILE_PATH: bin\publishedZipPath
      RAW_NUSPEC_FILE_PATH: WizMachine\WizMachine_RELEASE.nuspec
