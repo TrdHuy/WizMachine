@@ -13,9 +13,9 @@
 		<GetSignToolPath>$(SolutionDirectory)\GetSignToolPath.ps1</GetSignToolPath>
 		<SignToolPathResuleCachePath>$(SolutionDirectory)\bin\signtoolpath.txt</SignToolPathResuleCachePath>
 		<IsFromDotnet>false</IsFromDotnet>
-		<AssemblyVersion>1.0.12.1</AssemblyVersion>
-		<FileVersion>1.0.12.1</FileVersion>
-		<Version>1.0.12.1</Version>
+		<AssemblyVersion>1.0.12.2</AssemblyVersion>
+		<FileVersion>1.0.12.2</FileVersion>
+		<Version>1.0.12.2</Version>
 		<Platforms>x64;x86</Platforms>
 		<BuildTag>WIZMACHINE_BUILD_TAG</BuildTag>
 </PropertyGroup>
